@@ -2,32 +2,32 @@
 
 This is a Lua script hosting library for Flecs.
 
-# Lua API
+## Lua API
 
-## `ecs.new([id])`
+#### `ecs.new([id])`
 
 Create a new entity with a unique id or `id` if given.
 
 Returns the entity id.
 
-## `ecs.delete(id)`
+#### `ecs.delete(id)`
 
 Delete an entity and all of its components.
 
-## `ecs.name(id)`
+#### `ecs.name(id)`
 
 Get the name of an entity.
 
 This will return the name as specified in the `EcsName` component.
 
-## `ecs.lookup(name)`
+#### `ecs.lookup(name)`
 
 Look an entity by name
 
 
-# Build
+## Build
 
-## Meson
+### Meson
 
 Meson 0.55.0 or later is required.
 
