@@ -49,12 +49,12 @@ endif
 
 test_exe = executable('e', files('test/main.c'), dependencies : flecs_lua_dep)
 
-test_scripts = files(
-    'test/entity.lua',
-    #'test/meta.lua',
-)
+tests = [
+    'entity',
+    #'meta'
+]
 
-foreach s : test_scripts
-    test('flecs-lua-test', test_exe, args : s)
+foreach name : tests
+    script = files('test' / name + '.lua')
+    test(name, test_exe, args : script)
 endforeach
-
