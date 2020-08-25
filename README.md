@@ -1,6 +1,6 @@
 # flecs.lua
 
-This is a Lua script hosting library for Flecs.
+This is a Lua script host library for Flecs.
 
 ## Lua API
 
