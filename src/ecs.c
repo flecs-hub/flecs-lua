@@ -23,6 +23,10 @@ static int new_entity(lua_State *L)
         case 0:
         {
             e = ecs_new(w, 0);
+            char num[32];
+            snprintf(num, sizeof(num), "Lua.%llu", e);
+            ecs_set(w, e, EcsName, {.alloc_value = num});
+            // ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
             break;
         }
         case 1:
@@ -32,8 +36,6 @@ static int new_entity(lua_State *L)
         }
         default: break;
     }
-    
-    ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
 
     lua_pushinteger(L, e);
 
