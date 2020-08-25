@@ -22,7 +22,7 @@ This will return the name as specified in the `EcsName` component.
 
 #### `ecs.lookup(name)`
 
-Look an entity by name
+Look up an entity by name
 
 
 ## Build
