@@ -1,0 +1,6 @@
+[wrap-git]
+directory = flecs-meta
+url = https://github.com/flecs-hub/flecs-meta.git
+revision=head
+
+patch_directory = flecs-meta
