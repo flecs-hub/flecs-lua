@@ -37,5 +37,7 @@ pip install 'meson==0.55.0' #--force-reinstall
 
 ```bash
 meson build # -Dtests=enabled
-ninja -C build
+cd build
+ninja
+ninja test
 ```
