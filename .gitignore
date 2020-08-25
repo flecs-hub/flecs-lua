@@ -3,3 +3,4 @@
 /subprojects/lua-5.3.5
 /subprojects/packagecache
 /build/
+.vscode
