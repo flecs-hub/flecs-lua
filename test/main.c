@@ -87,11 +87,18 @@ int luaopen_test(lua_State *L)
     return 1;
 }
 
+static void fake_abort(void){}
+
 int main(int argc, char **argv)
 {
     if(argc < 2) return 1;
 
     ecs_world_t *w = ecs_init();
+
+    ecs_os_set_api_defaults();
+    ecs_os_api_t os_api = ecs_os_api;
+    os_api._abort = fake_abort;
+    ecs_os_set_api(&os_api);
     
     ECS_IMPORT(w, FlecsMeta);
 
