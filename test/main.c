@@ -20,8 +20,13 @@ ECS_STRUCT(lua_test_struct,
     double f64;
 });
 
-ECS_DECLARE_COMPONENT(lua_test_struct);
+ECS_STRUCT(lua_test_comp,
+{
+    float blah;
+});
 
+ECS_DECLARE_COMPONENT(lua_test_struct);
+ECS_DECLARE_COMPONENT(lua_test_comp);
 
 struct vars
 {
@@ -91,6 +96,7 @@ int main(int argc, char **argv)
     ECS_IMPORT(w, FlecsMeta);
 
     ECS_META(w, lua_test_struct);
+    ECS_META(w, lua_test_comp);
 
     lua_State *L = luaL_newstate();
 

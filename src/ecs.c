@@ -18,8 +18,8 @@ static int new_entity(lua_State *L)
 
     ecs_entity_t e = 0;
 
-    
     const char *name = NULL;
+    const char *components = NULL;
     int args = lua_gettop(L);
 
     if(args)
@@ -27,11 +27,10 @@ static int new_entity(lua_State *L)
         if(lua_isinteger(L, 1)) e = luaL_checkinteger(L, 1);
         else name = luaL_checkstring(L, 1);
 
-        e = ecs_new_entity(w, e, NULL, NULL);
-
         if(args > 1) name = luaL_checkstring(L, 2);
+        if(args == 3) components = luaL_checkstring(L, 3);
 
-        if(name) ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+        if(name) e = ecs_new_entity(w, e, name, components);
     }
     else e = ecs_new(w, 0);
 
