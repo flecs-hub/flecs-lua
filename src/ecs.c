@@ -18,23 +18,32 @@ static int new_entity(lua_State *L)
 
     ecs_entity_t e = 0;
 
-    switch(lua_gettop(L))
+    
+    const char *name = NULL;
+    int args = lua_gettop(L);
+
+    if(args)
     {
-        case 0:
-        {
-            e = ecs_new(w, 0);
-            char num[32];
-            snprintf(num, sizeof(num), "Lua.%llu", e);
-            ecs_set(w, e, EcsName, {.alloc_value = num});
-            // ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
-            break;
-        }
-        case 1:
-        {
-            //e = luaL_checkinteger(L, 1);
-            break;
-        }
-        default: break;
+        if(lua_isinteger(L, 1)) e = luaL_checkinteger(L, 1);
+        else name = luaL_checkstring(L, 1);
+
+        e = ecs_new_entity(w, e, NULL, NULL);
+
+        if(args > 1) name = luaL_checkstring(L, 2);
+
+        if(name) ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+    }
+    else e = ecs_new(w, 0);
+
+    if(!name)
+    {
+#ifdef NDEBUG
+        char str[32];
+        snprintf(str, sizeof(str), "Lua.%llu", e);
+        ecs_set(w, e, EcsName, {.alloc_value = str});
+#else
+        ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
+#endif
     }
 
     lua_pushinteger(L, e);

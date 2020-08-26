@@ -101,6 +101,8 @@ int main(int argc, char **argv)
     luaL_requiref(L, "test", luaopen_test, 1);
     lua_pop(L, 1);
 
+    ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
+
     int ret = luaL_dofile(L, argv[1]);
 
     if(ret)
