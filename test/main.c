@@ -103,6 +103,12 @@ int main(int argc, char **argv)
 
     int ret = luaL_dofile(L, argv[1]);
 
+    if(ret)
+    {
+        const char *err = lua_tostring(L, 1);
+        printf("script error: %s", err);
+    }
+
     lua_close(L);
 
     ecs_fini(w);
