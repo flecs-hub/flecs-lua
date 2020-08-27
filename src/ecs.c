@@ -68,7 +68,7 @@ static int entity_name(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
     const char *name = ecs_get_name(w, e);
-    
+
     lua_pushstring(L, name);
 
     return 1;
@@ -87,20 +87,86 @@ static int lookup_entity(lua_State *L)
     return 1;
 }
 
-int new_array(lua_State *L)
+static int entity_has(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t type_entity = 0;
+    ecs_type_t type = NULL;
+
+    if(lua_isinteger(L, 2)) type_entity = luaL_checkinteger(L, 2);
+    else
+    {
+        const char *name = luaL_checkstring(L, 2);
+        type_entity = ecs_lookup_fullpath(w, name);
+    }
+
+    type = ecs_type_from_entity(w, type_entity);
+
+    if(ecs_has_type(w, e, type)) lua_pushboolean(L, 1);
+    else lua_pushboolean(L, 0);
+
+    return 1;
+}
+
+
+static int add_type(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t type_entity = 0;
+
+    if(lua_isinteger(L, 2)) type_entity = luaL_checkinteger(L, 2);
+    else
+    {
+        const char *name = luaL_checkstring(L, 2);
+        type_entity = ecs_lookup_fullpath(w, name);
+    }
+
+    ecs_type_t type = ecs_type_from_entity(w, type_entity);
+
+    ecs_add_type(w, e, type);
+
+    return 0;
+}
+
+static int remove_type(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t type_entity = 0;
+
+    if(lua_isinteger(L, 2)) type_entity = luaL_checkinteger(L, 2);
+    else
+    {
+        const char *name = luaL_checkstring(L, 2);
+        type_entity = ecs_lookup_fullpath(w, name);
+    }
+
+    ecs_type_t type = ecs_type_from_entity(w, type_entity);
+
+    ecs_remove_type(w, e, type);
+
+    return 0;
+}
+
+static int new_array(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
 
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
-    
+
     ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
 
     ecs_entity_t e = 0;
 
     e = ecs_set(w, 0, EcsMetaType,
     {
-        .kind = EcsArrayType, 
+        .kind = EcsArrayType,
         .size = 0,
         .alignment = 0,
         .descriptor = desc
@@ -113,7 +179,7 @@ int new_array(lua_State *L)
     return 1;
 }
 
-int new_struct(lua_State *L)
+static int new_struct(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
 
@@ -126,7 +192,7 @@ int new_struct(lua_State *L)
 
     e = ecs_set(w, 0, EcsMetaType,
     {
-        .kind = EcsStructType, 
+        .kind = EcsStructType,
         .size = 0,
         .alignment = 0,
         .descriptor = desc
@@ -151,6 +217,9 @@ static const luaL_Reg ecs_lib[] =
     { "delete", delete_entity },
     { "name", entity_name },
     { "lookup", lookup_entity },
+    { "has", entity_has },
+    { "add", add_type },
+    { "remove", remove_type },
     { "array", new_array },
     { "struct", new_struct },
     { NULL, NULL }

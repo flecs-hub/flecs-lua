@@ -30,6 +30,7 @@ assert(not pcall(function () ecs.new(nil) end))
 assert(not pcall(function () ecs.new(0, nil) end))
 assert(ecs.lookup("ecs_lua_test_c_ent") == 8192)
 
+assert(ecs.has(id_name_comps, "lua_test_comp"))
 assert(ecs.name(id_name_comp) == "with_comp")
 assert(ecs.name(id_name_comps) == "multiple_comps")
 --assert(not pcall(function () ecs.new("missing_id", "lua_test_comp") end))
@@ -39,3 +40,16 @@ ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")
 local arr = ecs.array("LuaArray", "(LuaStruct,4)")
 assert(ecs.name(arr) == "LuaArray")
 
+assert(not ecs.has(id_name_comp, "LuaArray"))
+
+ecs.add(id_name_comp, arr)
+assert(ecs.has(id_name_comp, arr))
+
+ecs.remove(id_name_comp, arr)
+assert(not ecs.has(id_name_comp, arr))
+
+ecs.add(id_name_comp, "LuaArray")
+assert(ecs.has(id_name_comp, "LuaArray"))
+
+ecs.remove(id_name_comp, "LuaArray")
+assert(not ecs.has(id_name_comp, "LuaArray"))

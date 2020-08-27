@@ -27,11 +27,29 @@ This will return the name as specified in the `EcsName` component.
 
 Look up an entity by name
 
+#### `ecs.has(id, type)`
+
+Test if an entity has a component, type or tag.
+
+`type` can be an integer or string
+
+#### `ecs.add(name, desc)`
+
+Add a component, type or tag to an entity.
+
+`type` can be an integer or string
+
+#### `ecs.remove(name, desc)`
+
+Remove a component, type or tag from an entity.
+
+`type` can be an integer or string
+
 #### `ecs.array(name, desc)`
 
 Create an array component.
 
-format for `desc`: `(type,X)`
+`desc` format: `(type,X)`
 
 Returns the component entity
 
@@ -39,7 +57,7 @@ Returns the component entity
 
 Create a struct component.
 
-format for `desc`: `{type member; ...}`
+`desc` format: `{type member; ...}`
 
 Returns the component entity
 
