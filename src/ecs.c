@@ -22,17 +22,35 @@ static int new_entity(lua_State *L)
     const char *components = NULL;
     int args = lua_gettop(L);
 
-    if(args)
+    if(!args)
+    {
+        e = ecs_new(w, 0);
+    }
+    else if(args == 1)
     {
         if(lua_isinteger(L, 1)) e = luaL_checkinteger(L, 1);
         else name = luaL_checkstring(L, 1);
-
-        if(args > 1) name = luaL_checkstring(L, 2);
-        if(args == 3) components = luaL_checkstring(L, 3);
-
-        if(name) e = ecs_new_entity(w, e, name, components);
     }
-    else e = ecs_new(w, 0);
+    else if(args == 2)
+    {
+        if(lua_isinteger(L, 1))
+        {
+            e = luaL_checkinteger(L, 1);
+            name = luaL_checkstring(L, 2);
+        }
+        else
+        {
+            name = luaL_checkstring(L, 1);
+            components = luaL_checkstring(L, 2);
+        }
+    }
+    else if(args == 3)
+    {
+        e = luaL_checkinteger(L, 1);
+        name = luaL_checkstring(L, 2);
+        components = luaL_checkstring(L, 3);
+    }
+    else luaL_error(L, "too many arguments");
 
     if(!name)
     {
@@ -44,6 +62,7 @@ static int new_entity(lua_State *L)
         ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
 #endif
     }
+    else e = ecs_new_entity(w, e, name, components);
 
     lua_pushinteger(L, e);
 

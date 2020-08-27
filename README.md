@@ -4,7 +4,7 @@ This is a Lua script host library for Flecs.
 
 ## Lua API
 
-#### `ecs.new([[[id : 0], name : string], components : string])`
+#### `ecs.new([id], [[name : string], components : string])`
 
 Create a new entity with `id` or a unique id,
 if `name` is given a named entity will be created.
