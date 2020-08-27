@@ -33,3 +33,9 @@ assert(ecs.lookup("ecs_lua_test_c_ent") == 8192)
 assert(ecs.name(id_name_comp) == "with_comp")
 assert(ecs.name(id_name_comps) == "multiple_comps")
 --assert(not pcall(function () ecs.new("missing_id", "lua_test_comp") end))
+
+ecs.struct("LuaPosition", "{float x; float y; float z;}")
+ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")
+local arr = ecs.array("LuaArray", "(LuaStruct,4)")
+assert(ecs.name(arr) == "LuaArray")
+

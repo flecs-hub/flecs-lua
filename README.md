@@ -27,6 +27,22 @@ This will return the name as specified in the `EcsName` component.
 
 Look up an entity by name
 
+#### `ecs.array(name, desc)`
+
+Create an array component.
+
+format for `desc`: `(type,X)`
+
+Returns the component entity
+
+#### `ecs.struct(name, desc)`
+
+Create a struct component.
+
+format for `desc`: `{type member; ...}`
+
+Returns the component entity
+
 
 ## Build
 
