@@ -33,13 +33,13 @@ Test if an entity has a component, type or tag.
 
 `type` can be an integer or string
 
-#### `ecs.add(id, desc)`
+#### `ecs.add(id, type)`
 
 Add a component, type or tag to an entity.
 
 `type` can be an integer or string
 
-#### `ecs.remove(id, desc)`
+#### `ecs.remove(id, type)`
 
 Remove a component, type or tag from an entity.
 
