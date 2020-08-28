@@ -7,7 +7,7 @@ ECS_STRUCT(lua_test_struct,
 {
     char c;
     char a[4];
-    
+
     uint8_t u8;
     uint16_t u16;
     uint32_t u32;
@@ -69,7 +69,7 @@ int lpush_test_struct(lua_State *L)
 int lset_test_struct(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
-    
+
     return 1;
 }
 
@@ -101,9 +101,9 @@ int main(int argc, char **argv)
 
     ecs_os_set_api_defaults();
     ecs_os_api_t os_api = ecs_os_api;
-    os_api._abort = test_abort;
+    os_api.abort_ = test_abort;
     ecs_os_set_api(&os_api);
-    
+
     ECS_IMPORT(w, FlecsMeta);
 
     ECS_META(w, lua_test_struct);
