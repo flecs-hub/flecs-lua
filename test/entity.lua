@@ -2,8 +2,6 @@ local ecs = require "ecs"
 local t = require "test"
 
 local entity = ecs.new()
-local name = ecs.name(entity)
-
 local only_id = ecs.new(4096)
 local only_name = ecs.new("name_only")
 local id_n_name = ecs.new(5120, "id_and_name")
