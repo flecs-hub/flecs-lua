@@ -81,7 +81,7 @@ static int bulk_new(lua_State *L)
     const char *name = NULL;
     const ecs_entity_t* entities = NULL;
 
-    if(lua_gettop(L) == 2) 
+    if(lua_gettop(L) == 2)
     {
         name = luaL_checkstring(L, 1);
         count = luaL_checkinteger(L, 2);
@@ -95,7 +95,7 @@ static int bulk_new(lua_State *L)
     {
         count = luaL_checkinteger(L, 1);
         entities = ecs_bulk_new(w, 0, count);
-    } 
+    }
 
     lua_newtable(L);
 
@@ -104,7 +104,7 @@ static int bulk_new(lua_State *L)
     {
         lua_pushinteger(L, entities[i]);
         lua_rawseti(L, -2, i+1);
-        
+
         set_default_name(w, entities[i]);
     }
 
