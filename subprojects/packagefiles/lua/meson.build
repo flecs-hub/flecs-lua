@@ -102,8 +102,6 @@ lua_compiler = executable('luac',
     dependencies : lua_deps
 )
 
-test('lua', lua_interpreter, args : '-v')
-
 if meson.version().version_compare('>= 0.54.0')
     meson.override_dependency('lua', lua_dep)
     meson.override_find_program('lua', lua_interpreter)
