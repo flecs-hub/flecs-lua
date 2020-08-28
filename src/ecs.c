@@ -179,17 +179,17 @@ static int new_array(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
 
-    ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
+    ecs_entity_t e = ecs_new(w, 0);
 
-    ecs_entity_t e = 0;
-
-    e = ecs_set(w, 0, EcsMetaType,
+    EcsMetaType meta =
     {
         .kind = EcsArrayType,
         .size = 0,
         .alignment = 0,
         .descriptor = desc
-    });
+    };
+
+    ecs_new_meta(w, e, &meta);
 
     ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
 
@@ -205,17 +205,17 @@ static int new_struct(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
 
-    ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
+    ecs_entity_t e = ecs_new(w, 0);
 
-    ecs_entity_t e = 0;
-
-    e = ecs_set(w, 0, EcsMetaType,
+    EcsMetaType meta =
     {
         .kind = EcsStructType,
         .size = 0,
         .alignment = 0,
         .descriptor = desc
-    });
+    };
+
+    ecs_new_meta(w, e, &meta);
 
     ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
 
