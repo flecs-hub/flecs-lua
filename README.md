@@ -15,7 +15,7 @@ Returns the entity id.
 
 #### `ecs.bulk_new([type], n)`
 
-Create `n` new entities with an optional component.
+Create `n` new entities with components.
 
 Returns an array of entities
 
