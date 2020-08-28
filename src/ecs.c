@@ -284,7 +284,8 @@ static const luaL_Reg ecs_lib[] =
     { "array", new_array },
     { "struct", new_struct },
 #define XX(const) {#const, NULL },
-    ECS_LUA_CONSTANTS(XX)
+    ECS_LUA_ENUMS(XX)
+    ECS_LUA_MACROS(XX)
 #undef XX
     { NULL, NULL }
 };
@@ -293,8 +294,13 @@ int luaopen_ecs(lua_State *L)
 {
     luaL_newlib(L, ecs_lib);
 
-#define XX(const) lua_pushnumber(L, Ecs##const); lua_setfield(L, -2, #const);
-    ECS_LUA_CONSTANTS(XX)
+#define ECS_LUA_PFX() Ecs
+#define XX(const) lua_pushnumber(L, ECS_LUA_PFX()##const); lua_setfield(L, -2, #const);
+    ECS_LUA_ENUMS(XX)
+
+#undef ECS_LUA_PFX
+#define ECS_LUA_PFX() ECS_
+    ECS_LUA_MACROS(XX)
 #undef XX
 
     return 1;

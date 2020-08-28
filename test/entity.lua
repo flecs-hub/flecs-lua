@@ -12,7 +12,12 @@ function string.starts(str, start)
     return str:sub(1, #start) ==start
 end
 
-assert(ecs.MatchAll == 1)
+print("Constants:")
+
+assert(pcall(function () print("ecs.MatchAll: ", ecs.MatchAll) end))
+assert(pcall(function () print("ecs.Module: ", ecs.Module) end))
+assert(pcall(function () print("ecs.XOR: ", ecs.XOR) end))
+
 
 local entity = ecs.new()
 local only_id = ecs.new(4096)
