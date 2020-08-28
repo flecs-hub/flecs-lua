@@ -1,5 +1,7 @@
 #include <flecs_lua.h>
 
+#include "constants.h"
+
 #include <lualib.h>
 #include <lauxlib.h>
 
@@ -281,12 +283,20 @@ static const luaL_Reg ecs_lib[] =
     { "remove", remove_type },
     { "array", new_array },
     { "struct", new_struct },
+#define XX(const) {#const, NULL },
+    ECS_LUA_CONSTANTS(XX)
+#undef XX
     { NULL, NULL }
 };
 
 int luaopen_ecs(lua_State *L)
 {
     luaL_newlib(L, ecs_lib);
+
+#define XX(const) lua_pushnumber(L, Ecs##const); lua_setfield(L, -2, #const);
+    ECS_LUA_CONSTANTS(XX)
+#undef XX
+
     return 1;
 }
 

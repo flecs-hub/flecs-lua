@@ -1,7 +1,6 @@
 local ecs = require "ecs"
 local t = require "test"
 
-
 local function print_entity(...)
     local args = {...}
     for i,v in ipairs(args) do
@@ -12,6 +11,8 @@ end
 function string.starts(str, start)
     return str:sub(1, #start) ==start
 end
+
+assert(ecs.MatchAll == 1)
 
 local entity = ecs.new()
 local only_id = ecs.new(4096)
