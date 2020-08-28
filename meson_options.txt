@@ -1,1 +1,2 @@
 option('tests', type : 'feature', value : 'disabled', description : 'Build tests')
+option('lua54', type : 'boolean', value : false, description : 'Compile with Lua 5.4')

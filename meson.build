@@ -4,6 +4,10 @@ project('flecs-lua', 'c',
     default_options : 'c_std=c99'
 )
 
+if get_option('lua54') == true
+    subproject('lua-5.4')
+endif
+
 flecs_lua_deps = [
     dependency('lua'),
     dependency('flecs'),
@@ -58,3 +62,13 @@ foreach name : tests
     script = files('test' / name + '.lua')
     test(name, test_exe, args : script)
 endforeach
+
+luac = find_program('luac')
+
+run_target('dec',
+    command: [
+        luac,
+        '-l', '-l',
+        files('test/cglm.lua')
+    ]
+)
