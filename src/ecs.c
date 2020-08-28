@@ -12,6 +12,17 @@ ecs_world_t *ecs_lua_get_world(lua_State *L)
     return p;
 }
 
+static void set_default_name(ecs_world_t *w, ecs_entity_t e)
+{
+#ifdef NDEBUG
+    char str[32];
+    snprintf(str, sizeof(str), "Lua.%llu", e);
+    ecs_set(w, e, EcsName, {.alloc_value = str});
+    #else
+    ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
+#endif
+}
+
 static int new_entity(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -52,17 +63,8 @@ static int new_entity(lua_State *L)
     }
     else luaL_error(L, "too many arguments");
 
-    if(!name)
-    {
-#ifdef NDEBUG
-        char str[32];
-        snprintf(str, sizeof(str), "Lua.%llu", e);
-        ecs_set(w, e, EcsName, {.alloc_value = str});
-#else
-        ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
-#endif
-    }
-    else e = ecs_new_entity(w, e, name, components);
+    if(name) e = ecs_new_entity(w, e, name, components);
+    else set_default_name(w, e);
 
     lua_pushinteger(L, e);
 
@@ -128,7 +130,6 @@ static int entity_has(lua_State *L)
 
     return 1;
 }
-
 
 static int add_type(lua_State *L)
 {
