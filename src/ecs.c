@@ -295,7 +295,7 @@ int luaopen_ecs(lua_State *L)
     luaL_newlib(L, ecs_lib);
 
 #define ECS_LUA_PFX() Ecs
-#define XX(const) lua_pushnumber(L, ECS_LUA_PFX()##const); lua_setfield(L, -2, #const);
+#define XX(const) lua_pushinteger(L, ECS_LUA_PFX()##const); lua_setfield(L, -2, #const);
     ECS_LUA_ENUMS(XX)
 
 #undef ECS_LUA_PFX
