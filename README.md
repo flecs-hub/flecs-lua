@@ -13,6 +13,12 @@ set of `components`.
 
 Returns the entity id.
 
+#### `ecs.bulk_new([type], n)`
+
+Create `n` new entities with an optional component.
+
+Returns an array of entities
+
 #### `ecs.delete(id)`
 
 Delete an entity and all of its components.
