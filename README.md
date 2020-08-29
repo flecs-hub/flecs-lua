@@ -63,7 +63,7 @@ Remove a component, type or tag from an entity.
 
 Create an array component.
 
-`desc` format: `(type,X)`
+`desc` format: `"(type,N)"`
 
 Returns the component entity
 
@@ -71,7 +71,7 @@ Returns the component entity
 
 Create a struct component.
 
-`desc` format: `{type member; ...}`
+`desc` format: `"{type member; ...}"`
 
 Returns the component entity
 
