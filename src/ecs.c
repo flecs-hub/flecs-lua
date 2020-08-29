@@ -16,11 +16,11 @@ ecs_world_t *ecs_lua_get_world(lua_State *L)
 
 static void set_default_name(ecs_world_t *w, ecs_entity_t e)
 {
-#ifdef NDEBUG
+#ifndef NDEBUG
     char str[32];
     snprintf(str, sizeof(str), "Lua.%llu", e);
     ecs_set(w, e, EcsName, {.alloc_value = str});
-    #else
+#else
     ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
 #endif
 }
