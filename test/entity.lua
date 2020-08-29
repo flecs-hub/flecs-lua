@@ -85,4 +85,9 @@ assert(not ecs.has(only_name, "LuaTag"))
 assert(ecs.has(id_name_comp, "LuaTag"))
 
 ecs.delete(tag2)
+assert(pcall(function () ecs.delete(tag2) end)) -- is this normal?
 assert(not pcall(function () ecs.has(only_name, "LuaTag2") end))
+
+assert(pcall(function () ecs.delete("LuaTag") end))
+assert(not pcall(function () ecs.delete("LuaTag") end))
+assert(not pcall(function () ecs.delete("LuaTag2") end))

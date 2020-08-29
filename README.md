@@ -19,9 +19,11 @@ Create `n` new entities with components.
 
 Returns an array of entities
 
-#### `ecs.delete(id)`
+#### `ecs.delete(entity)`
 
 Delete an entity and all of its components.
+
+`entity` should be a name or id.
 
 #### `ecs.tag(name)`
 

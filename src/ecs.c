@@ -118,7 +118,16 @@ static int delete_entity(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
 
-    ecs_entity_t entity = luaL_checkinteger(L, 1);
+    ecs_entity_t entity;
+
+    if(lua_isinteger(L, 1)) entity = luaL_checkinteger(L, 1);
+    else
+    {
+        const char *name = luaL_checkstring(L, 1);
+        entity = ecs_lookup_fullpath(w, name);
+
+        if(!entity) luaL_argerror(L, 1, "could not find entity");
+    }
 
     ecs_delete(w, entity);
 
