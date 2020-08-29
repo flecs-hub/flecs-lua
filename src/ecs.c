@@ -87,6 +87,9 @@ static int bulk_new(lua_State *L)
         count = luaL_checkinteger(L, 2);
 
         ecs_entity_t type_entity = ecs_lookup(w, name);
+
+        if(!type_entity) luaL_argerror(L, 2, "could not find type");
+
         ecs_type_t type = ecs_type_from_entity(w, type_entity);
 
         entities = ecs_bulk_new_w_type(w, type, count);
@@ -161,6 +164,8 @@ static int entity_has(lua_State *L)
     {
         const char *name = luaL_checkstring(L, 2);
         type_entity = ecs_lookup_fullpath(w, name);
+
+        if(!type_entity) luaL_argerror(L, 2, "could not find type");
     }
 
     type = ecs_type_from_entity(w, type_entity);
@@ -183,6 +188,8 @@ static int add_type(lua_State *L)
     {
         const char *name = luaL_checkstring(L, 2);
         type_entity = ecs_lookup_fullpath(w, name);
+
+        if(!type_entity) luaL_argerror(L, 2, "could not find type");
     }
 
     ecs_type_t type = ecs_type_from_entity(w, type_entity);
@@ -204,6 +211,8 @@ static int remove_type(lua_State *L)
     {
         const char *name = luaL_checkstring(L, 2);
         type_entity = ecs_lookup_fullpath(w, name);
+
+        if(!type_entity) luaL_argerror(L, 2, "could not find type");
     }
 
     ecs_type_t type = ecs_type_from_entity(w, type_entity);
