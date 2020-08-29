@@ -1,7 +1,7 @@
 local ecs = require "ecs"
 local t = require "test"
 
-local function print_entity(...)
+local function print_entities(...)
     local args = {...}
     for i,v in ipairs(args) do
         print("id: " .. v .. ", name: " .. ecs.name(v))
@@ -9,7 +9,7 @@ local function print_entity(...)
 end
 
 function string.starts(str, start)
-    return str:sub(1, #start) ==start
+    return str:sub(1, #start) == start
 end
 
 print("Constants:")
@@ -32,7 +32,7 @@ local bulk_comp = ecs.bulk_new("lua_test_comp", 10)
 
 print("Entities:")
 
-print_entity(entity, only_id, only_name, id_n_name, 8192)
+print_entities(entity, only_id, only_name, id_n_name, 8192)
 
 assert(only_id == 4096)
 assert(ecs.name(only_id) ~= nil)
