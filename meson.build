@@ -64,11 +64,19 @@ foreach name : tests
 endforeach
 
 luac = find_program('luac')
+lua = find_program('lua')
 
 run_target('dec',
     command: [
         luac,
         '-l', '-l',
-        files('test/cglm.lua')
+        files('test/test.lua')
+    ]
+)
+
+run_target('script',
+    command: [
+        lua,
+        files('test/test.lua')
     ]
 )
