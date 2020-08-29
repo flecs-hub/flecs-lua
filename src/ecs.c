@@ -125,6 +125,23 @@ static int delete_entity(lua_State *L)
     return 0;
 }
 
+static int new_tag(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    const char *name = luaL_checkstring(L, 1);
+
+    ecs_entity_t e = ecs_new(w, 0);
+
+    //const char *e_name = ecs_name_from_symbol(w, name);
+
+    ecs_set(w, e, EcsName, {.alloc_value = (char*)name, .symbol = name});
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
 static int entity_name(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -285,6 +302,7 @@ static const luaL_Reg ecs_lib[] =
     { "new", new_entity },
     { "bulk_new", bulk_new },
     { "delete", delete_entity },
+    { "tag", new_tag },
     { "name", entity_name },
     { "lookup", lookup_entity },
     { "has", entity_has },

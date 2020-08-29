@@ -8,7 +8,7 @@ This is a Lua script host library for Flecs.
 
 Create a new entity with `id` or a unique id,
 if `name` is given a named entity will be created.
-The entity can be optionally initialized with a 
+The entity can be optionally initialized with a
 set of `components`.
 
 Returns the entity id.
@@ -22,6 +22,12 @@ Returns an array of entities
 #### `ecs.delete(id)`
 
 Delete an entity and all of its components.
+
+#### `ecs.tag(name)`
+
+Create a tag.
+
+Returns the tag entity.
 
 #### `ecs.name(id)`
 

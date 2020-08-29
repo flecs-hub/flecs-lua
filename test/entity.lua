@@ -16,6 +16,7 @@ print("Constants:")
 
 assert(pcall(function () print("ecs.MatchAll: ", ecs.MatchAll) end))
 assert(pcall(function () print("ecs.Module: ", ecs.Module) end))
+assert(pcall(function () print("ecs.OnStore: ", ecs.OnStore) end))
 assert(pcall(function () print("ecs.XOR: ", ecs.XOR) end))
 
 
@@ -66,9 +67,22 @@ assert(ecs.has(id_name_comp, arr))
 
 ecs.remove(id_name_comp, arr)
 assert(not ecs.has(id_name_comp, arr))
+assert(not pcall(function () ecs.has(id_name_comp, "does_not_exist") end))
 
-ecs.add(id_name_comp, "LuaArray")
-assert(ecs.has(id_name_comp, "LuaArray"))
+local tag = ecs.tag("LuaTag")
+local tag2 = ecs.tag("LuaTag2")
 
-ecs.remove(id_name_comp, "LuaArray")
-assert(not ecs.has(id_name_comp, "LuaArray"))
+ecs.add(only_name, tag)
+ecs.add(only_name, "LuaTag2")
+ecs.add(id_name_comp, "LuaTag")
+
+assert(ecs.has(only_name, "LuaTag"))
+assert(ecs.has(only_name, "LuaTag2"))
+assert(ecs.has(id_name_comp, "LuaTag"))
+
+ecs.remove(only_name, tag)
+assert(not ecs.has(only_name, "LuaTag"))
+assert(ecs.has(id_name_comp, "LuaTag"))
+
+ecs.delete(tag2)
+assert(not pcall(function () ecs.has(only_name, "LuaTag2") end))
