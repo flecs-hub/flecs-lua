@@ -68,7 +68,7 @@ static int new_entity(lua_State *L)
     if(name)
     {
         e = ecs_new_entity(w, e, NULL, components);
-        ecs_set(w, e, EcsName, {.alloc_value = name});
+        ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
     }
     else set_default_name(w, e);
 
