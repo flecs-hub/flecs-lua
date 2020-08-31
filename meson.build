@@ -58,9 +58,12 @@ tests = [
     #'meta'
 ]
 
+env = environment()
+env.set('LUA_PATH', meson.current_source_dir() / 'test/?.lua')
+
 foreach name : tests
     script = files('test' / name + '.lua')
-    test(name, test_exe, args : script)
+    test(name, test_exe, args : script, env : env)
 endforeach
 
 luac = find_program('luac')
