@@ -91,7 +91,7 @@ static int new_entity(lua_State *L)
         name = luaL_checkstring(L, 2);
         components = luaL_checkstring(L, 3);
     }
-    else luaL_error(L, "too many arguments");
+    else return luaL_error(L, "too many arguments");
 
     if(name)
     {
@@ -120,7 +120,7 @@ static int bulk_new(lua_State *L)
 
         ecs_entity_t type_entity = ecs_lookup(w, name);
 
-        if(!type_entity) luaL_argerror(L, 2, "could not find type");
+        if(!type_entity) return luaL_argerror(L, 2, "could not find type");
 
         ecs_type_t type = ecs_type_from_entity(w, type_entity);
 
@@ -158,7 +158,7 @@ static int delete_entity(lua_State *L)
         const char *name = luaL_checkstring(L, 1);
         entity = ecs_lookup_fullpath(w, name);
 
-        if(!entity) luaL_argerror(L, 1, "could not find entity");
+        if(!entity) return luaL_argerror(L, 1, "could not find entity");
     }
 
     ecs_delete(w, entity);
@@ -223,7 +223,7 @@ static int entity_has(lua_State *L)
         const char *name = luaL_checkstring(L, 2);
         type_entity = ecs_lookup_fullpath(w, name);
 
-        if(!type_entity) luaL_argerror(L, 2, "could not find type");
+        if(!type_entity) return luaL_argerror(L, 2, "could not find type");
     }
 
     type = ecs_type_from_entity(w, type_entity);
@@ -247,7 +247,7 @@ static int add_type(lua_State *L)
         const char *name = luaL_checkstring(L, 2);
         type_entity = ecs_lookup_fullpath(w, name);
 
-        if(!type_entity) luaL_argerror(L, 2, "could not find type");
+        if(!type_entity) return luaL_argerror(L, 2, "could not find type");
     }
 
     ecs_type_t type = ecs_type_from_entity(w, type_entity);
@@ -270,7 +270,7 @@ static int remove_type(lua_State *L)
         const char *name = luaL_checkstring(L, 2);
         type_entity = ecs_lookup_fullpath(w, name);
 
-        if(!type_entity) luaL_argerror(L, 2, "could not find type");
+        if(!type_entity) return luaL_argerror(L, 2, "could not find type");
     }
 
     ecs_type_t type = ecs_type_from_entity(w, type_entity);
