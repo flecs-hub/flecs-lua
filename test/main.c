@@ -87,6 +87,29 @@ int luaopen_test(lua_State *L)
     return 1;
 }
 
+static lua_State *new_test_state(void)
+{
+    lua_State *L = luaL_newstate();
+
+    luaL_openlibs(L);
+
+    luaL_requiref(L, "test", luaopen_test, 1);
+    lua_pop(L, 1);
+
+    return L;
+}
+
+static lua_State *host_new_state_cb(void)
+{
+    printf("HOST CALLBACK: creating new system state...\n");
+    return new_test_state();
+}
+
+static void host_close_state_cb(lua_State *L)
+{
+    lua_close(L);
+}
+
 static void test_abort(void)
 {
     printf("TEST: ecs_os_abort() was called!\n");
@@ -109,14 +132,11 @@ int main(int argc, char **argv)
     ECS_META(w, lua_test_struct);
     ECS_META(w, lua_test_comp);
 
-    lua_State *L = luaL_newstate();
+    lua_State *L = new_test_state();
 
-    luaL_openlibs(L);
+    ecs_lua_ctx ctx = { L, w, host_new_state_cb, host_close_state_cb };
 
-    ecs_lua_init(w, L);
-
-    luaL_requiref(L, "test", luaopen_test, 1);
-    lua_pop(L, 1);
+    ecs_lua_init(&ctx);
 
     ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
 
@@ -125,8 +145,10 @@ int main(int argc, char **argv)
     if(ret)
     {
         const char *err = lua_tostring(L, 1);
-        printf("script error: %s", err);
+        printf("script error: %s\n", err);
     }
+
+    ecs_lua_exit(L);
 
     lua_close(L);
 

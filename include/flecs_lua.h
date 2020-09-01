@@ -7,8 +7,22 @@
 extern "C" {
 #endif
 
+typedef lua_State* ecs_lua_new_cb(void);
+typedef void ecs_lua_close_cb(lua_State*);
+
+typedef struct ecs_lua_ctx
+{
+    lua_State *L;
+    ecs_world_t *world;
+    ecs_lua_new_cb *new_state_cb;
+    ecs_lua_close_cb *close_state_cb;
+}ecs_lua_ctx;
+
 FLECS_LUA_EXPORT
-int ecs_lua_init(ecs_world_t *world, lua_State *L);
+int ecs_lua_init(ecs_lua_ctx *ctx);
+
+FLECS_LUA_EXPORT
+int ecs_lua_exit(lua_State *L);
 
 /* Get world pointer from registry */
 FLECS_LUA_EXPORT

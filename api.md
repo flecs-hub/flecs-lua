@@ -70,3 +70,11 @@ Create a struct component.
 `desc` format: `"{type member; ...}"`
 
 Returns the component entity
+
+#### `ecs.system(name, phase, [signature : string])` - DRAFT
+
+Create a system `name` and
+
+`name` System and function name
+`phase` tag entity
+`signature`
