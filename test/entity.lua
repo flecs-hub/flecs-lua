@@ -14,10 +14,10 @@ end
 
 print("Constants:")
 
-assert(pcall(function () print("ecs.MatchAll: ", ecs.MatchAll) end))
-assert(pcall(function () print("ecs.Module: ", ecs.Module) end))
-assert(pcall(function () print("ecs.OnStore: ", ecs.OnStore) end))
-assert(pcall(function () print("ecs.XOR: ", ecs.XOR) end))
+assert(pcall(function () print("ecs.MatchAll", "= " .. ecs.MatchAll) end))
+assert(pcall(function () print("ecs.Module", "= " .. ecs.Module) end))
+assert(pcall(function () print("ecs.OnStore", "= " .. ecs.OnStore) end))
+assert(pcall(function () print("ecs.XOR", "= " .. ecs.XOR) end))
 
 
 local entity = ecs.new()
