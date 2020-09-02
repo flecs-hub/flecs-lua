@@ -3,6 +3,11 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+ECS_STRUCT(lua_test_comp,
+{
+    float blah;
+});
+
 ECS_STRUCT(lua_test_struct,
 {
     char c;
@@ -18,15 +23,12 @@ ECS_STRUCT(lua_test_struct,
     int64_t i64;
     float f32;
     double f64;
+
+    lua_test_comp test_comp;
 });
 
-ECS_STRUCT(lua_test_comp,
-{
-    float blah;
-});
-
-ECS_DECLARE_COMPONENT(lua_test_struct);
 ECS_DECLARE_COMPONENT(lua_test_comp);
+ECS_DECLARE_COMPONENT(lua_test_struct);
 
 struct vars
 {
@@ -51,6 +53,8 @@ static void init_globals(void)
         .i64 = 234,
         .f32 = 234,
         .f64 = 234,
+
+        .test_comp.blah = 4.0f
     };
 
     memcpy(&g.s, &s, sizeof(s));
@@ -129,8 +133,8 @@ int main(int argc, char **argv)
 
     ECS_IMPORT(w, FlecsMeta);
 
-    ECS_META(w, lua_test_struct);
     ECS_META(w, lua_test_comp);
+    ECS_META(w, lua_test_struct);
 
     lua_State *L = new_test_state();
 
