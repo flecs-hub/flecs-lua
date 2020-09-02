@@ -71,6 +71,12 @@ Create a struct component.
 
 Returns the component entity
 
+#### `ecs.alias(name, alias)`
+
+Create an `alias` of `name`.
+
+Returns the component entity
+
 #### `ecs.system(name, phase, [signature : string])` - DRAFT
 
 Create a system `name` and

@@ -332,6 +332,30 @@ static int new_struct(lua_State *L)
     return 1;
 }
 
+static int new_alias(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    const char *name = luaL_checkstring(L, 1);
+    const char *alias = luaL_checkstring(L, 2);
+
+    ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
+
+    ecs_entity_t type_entity = ecs_lookup_fullpath(w, name);
+
+    EcsMetaType meta = *ecs_get(w, type_entity, EcsMetaType);
+
+    ecs_entity_t e = ecs_new_component(w, 0, NULL, meta.size, meta.alignment);
+
+    ecs_set(w, e, EcsName, {.alloc_value = (char*)alias});
+
+    ecs_new_meta(w, e, &meta);
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
 static int new_system(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -400,6 +424,7 @@ static const luaL_Reg ecs_lib[] =
     { "remove", remove_type },
     { "array", new_array },
     { "struct", new_struct },
+    { "alias", new_alias },
 
     { "system", new_system },
 #define XX(const) {#const, NULL },

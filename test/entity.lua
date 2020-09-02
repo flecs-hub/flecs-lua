@@ -57,6 +57,12 @@ assert(ecs.name(bulk[1]):starts("Lua"))
 
 ecs.struct("LuaPosition", "{float x; float y; float z;}")
 ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")
+
+local alias = ecs.alias("LuaStruct", "LuaAlias")
+assert(ecs.name(alias) == "LuaAlias")
+ecs.add(alias, "lua_test_comp")
+assert(ecs.has(alias, "lua_test_comp"))
+
 local arr = ecs.array("LuaArray", "(LuaStruct,4)")
 assert(ecs.name(arr) == "LuaArray")
 
