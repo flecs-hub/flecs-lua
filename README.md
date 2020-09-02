@@ -1,4 +1,4 @@
-# flecs.lua
+# flecs-lua
 
 This is a Lua script host library for Flecs.
 
