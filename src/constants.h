@@ -37,7 +37,8 @@
     XX(Flecs) \
     XX(FlecsCore) \
     XX(World) \
-    XX(Singleton)
+    XX(Singleton) \
+    XX(Wildcard)
 
 #define ECS_LUA_MACROS(XX) \
     XX(INSTANCEOF) \
