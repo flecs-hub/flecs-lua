@@ -339,11 +339,11 @@ static int new_alias(lua_State *L)
 
     ecs_entity_t type_entity = ecs_lookup_fullpath(w, name);
 
-    if(!type_entity) luaL_argerror(L, 1, "unknown name");
+    if(!type_entity) return luaL_argerror(L, 1, "unknown name");
 
     const EcsMetaType *p = ecs_get(w, type_entity, EcsMetaType);
 
-    if(!p) luaL_argerror(L, 1, "missing descriptor");
+    if(!p) return luaL_argerror(L, 1, "missing descriptor");
 
     EcsMetaType meta = *p;
 
