@@ -5,8 +5,6 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-int luaopen_ecs(lua_State *L);
-
 typedef struct ecs_lua_system
 {
     lua_State *L;
@@ -174,9 +172,7 @@ static int new_tag(lua_State *L)
 
     ecs_entity_t e = ecs_new(w, 0);
 
-    //const char *e_name = ecs_name_from_symbol(w, name);
-
-    ecs_set(w, e, EcsName, {.alloc_value = (char*)name, .symbol = name});
+    ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
 
     lua_pushinteger(L, e);
 
@@ -375,16 +371,17 @@ static int new_system(lua_State *L)
     lua_pushstring(S, "ecs_lua");
     lua_pushlightuserdata(S, ctx);
     lua_settable(S, LUA_REGISTRYINDEX);
+
+    lua_pushstring(S, "ecs_lua_system");
+    ecs_lua_system *sys = lua_newuserdata(S, sizeof(ecs_lua_system));
+    lua_settable(S, LUA_REGISTRYINDEX);
 #if 0
     lua_pushstring(L, "ecs_lua_systems");
     lua_gettable(L, LUA_REGISTRYINDEX);
     int len = lua_objlen(L, );
     lua_pushinteger(L, len);
+    lua_pushlightuserdata(L, sys);
 #endif
-
-    lua_pushstring(S, "ecs_lua_system");
-    ecs_lua_system *sys = lua_newuserdata(S, sizeof(ecs_lua_system));
-    lua_settable(S, LUA_REGISTRYINDEX);
 
     //TODO: duplicate signature string
 
@@ -464,7 +461,6 @@ int ecs_lua_init(ecs_lua_ctx *ctx)
     lua_newtable(L);
     lua_settable(L, LUA_REGISTRYINDEX);
 
-    //luaL_requiref(L, "_G", luaopen_ecs, 1);
     luaL_requiref(L, "ecs", luaopen_ecs, 1);
     lua_pop(L, 1);
 
