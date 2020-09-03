@@ -28,6 +28,8 @@ int ecs_lua_exit(lua_State *L);
 FLECS_LUA_EXPORT
 ecs_world_t *ecs_lua_get_world(lua_State *L);
 
+FLECS_LUA_EXPORT
+int luaopen_ecs(lua_State *L);
 
 #ifdef __cplusplus
 }
