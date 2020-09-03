@@ -62,6 +62,8 @@ local alias = ecs.alias("LuaStruct", "LuaAlias")
 assert(ecs.name(alias) == "LuaAlias")
 ecs.add(alias, "lua_test_comp")
 assert(ecs.has(alias, "lua_test_comp"))
+assert(not pcall(function() ecs.alias("error", "newname") end))
+assert(not pcall(function() ecs.alias("name_only", "newname") end))
 
 local arr = ecs.array("LuaArray", "(LuaStruct,4)")
 assert(ecs.name(arr) == "LuaArray")
