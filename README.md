@@ -8,11 +8,7 @@ This is a Lua script host library for Flecs.
 
 ### Meson
 
-Meson 0.55.0 or later is required but 0.55.1 may fail to build with MSVC,
-in that case install the previous version:
-```c
-pip install 'meson==0.55.0' #--force-reinstall
-```
+Meson 0.55.0 or later is required
 
 ```bash
 meson build # -Dtests=enabled
