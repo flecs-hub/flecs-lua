@@ -371,7 +371,7 @@ static int new_system(lua_State *L)
 
     phase = luaL_checkinteger(L, 2);
 
-    lua_State *S = ctx->new_state_cb();
+    lua_State *S = ctx->new_state_cb(ctx->ud);
     if(S = NULL) return luaL_error(L, "failed to create system");
 
     lua_pushstring(S, "ecs_lua");

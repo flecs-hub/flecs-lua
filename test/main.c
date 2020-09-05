@@ -103,13 +103,13 @@ static lua_State *new_test_state(void)
     return L;
 }
 
-static lua_State *host_new_state_cb(void)
+static lua_State *host_new_state_cb(void *ud)
 {
     printf("HOST CALLBACK: creating new system state...\n");
     return new_test_state();
 }
 
-static void host_close_state_cb(lua_State *L)
+static void host_close_state_cb(lua_State *L, void *ud)
 {
     lua_close(L);
 }
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 
     lua_State *L = new_test_state();
 
-    ecs_lua_ctx ctx = { L, w, host_new_state_cb, host_close_state_cb };
+    ecs_lua_ctx ctx = { L, w, host_new_state_cb, host_close_state_cb, NULL };
 
     ecs_lua_init(&ctx);
 
