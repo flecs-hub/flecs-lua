@@ -93,7 +93,7 @@ static int new_entity(lua_State *L)
 
     if(name)
     {
-        e = ecs_new_entity(w, e, NULL, components);
+        e = ecs_new_entity(w, e, name, components);
         ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
     }
     else set_default_name(w, e);
@@ -170,8 +170,9 @@ static int new_tag(lua_State *L)
 
     const char *name = luaL_checkstring(L, 1);
 
-    ecs_entity_t e = ecs_new(w, 0);
+    ecs_entity_t e = 0;
 
+    e = ecs_new_entity(w, e, name, NULL);
     ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
 
     lua_pushinteger(L, e);
@@ -396,7 +397,7 @@ static int new_system(lua_State *L)
 
     ecs_entity_t e = 0;
 
-    e = ecs_new_system(w, e, NULL, phase, signature, entry_point);
+    e = ecs_new_system(w, e, name, phase, signature, entry_point);
 
     ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
     ecs_set(w, e, EcsContext, {sys});
