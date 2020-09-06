@@ -83,3 +83,5 @@ run_target('script',
         files('test/test.lua')
     ]
 )
+
+run_target('repl', command: lua)
