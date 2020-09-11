@@ -492,10 +492,12 @@ static int new_module(lua_State *L)
 
 void import_func(ecs_world_t *w)
 {
-    lua_State *L = ecs_get_context(w);
+    ecs_lua_ctx *ctx = ecs_get_context(w);
+    lua_State *L = ctx->L;
 
     ecs_os_dbg("ecs_lua: import callback");
-    lua_pcall(L, 0, 0, 0);
+
+    ctx->error = lua_pcall(L, 0, 0, 0);
 }
 
 static int import_module(lua_State *L)
@@ -520,12 +522,16 @@ static int import_module(lua_State *L)
         luaL_checktype(L, -1, LUA_TFUNCTION);
 
         ecs_world_t *orig = ecs_get_context(w);
-        ecs_set_context(w, L);
+        ecs_set_context(w, ctx);
 
         EcsLuaModule m;
         e = ecs_import(w, import_func, name, &m, sizeof(EcsLuaModule));
 
         ecs_set_context(w, orig);
+
+        ecs_assert(!ctx->error, ECS_INTERNAL_ERROR, lua_tostring(L, -1));
+
+        if(ctx->error) return lua_error(L);
 
         ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
     }
@@ -592,6 +598,9 @@ int ecs_lua_init(ecs_lua_ctx *ctx)
     lua_setfield(L, LUA_REGISTRYINDEX, "ecs_lua");
 
     memcpy(lctx, ctx, sizeof(ecs_lua_ctx));
+
+    lctx->error = 0;
+    lctx->internal = 0;
 
     luaL_requiref(L, "ecs", luaopen_ecs, 1);
     lua_pop(L, 1);

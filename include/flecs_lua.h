@@ -14,6 +14,7 @@ typedef struct ecs_lua_ctx
     int flags;
 
     int internal;
+    int error;
     ecs_world_t *world;
 }ecs_lua_ctx;
 
