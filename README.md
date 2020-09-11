@@ -2,7 +2,7 @@
 
 This is a Lua script host library for Flecs.
 
-## [Lua API](api.md)
+## [Lua API](ecs.lua)
 
 ## Build
 

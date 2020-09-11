@@ -1,5 +1,7 @@
 ## Lua API
 
+This is no loger updated, see [ecs.lua](ecs.lua).
+
 #### `ecs.new([id], [[name : string], components : string])`
 
 Create a new entity with a specific `id` (optional),
@@ -77,10 +79,11 @@ Create an `alias` of `name`.
 
 Returns the component entity
 
-#### `ecs.system(name, phase, [signature : string])` - DRAFT
+#### `ecs.system(module, name, phase, [signature : string])` - DRAFT
 
-Create a system `name` and
+Create a system in a new state
 
-`name` System and function name
+`module` Lua module name
+`name` System function name
 `phase` tag entity
-`signature`
+`signature` System signature

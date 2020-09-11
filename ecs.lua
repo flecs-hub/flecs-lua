@@ -1,3 +1,6 @@
+--EmmyLua annotations and documentation for flecs-lua
+--NOTE: ecs is a native module, do not use this at runtime.
+
 local ecs = {}
 
 ---Create a new entity, all parameters are optional
