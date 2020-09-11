@@ -82,18 +82,33 @@ function ecs.alias(meta_type, alias)
 end
 
 ---Create a system - DRAFT
----@param module string
+---@param func function
 ---@param name string
 ---@param phase integer
 ---@param signature string @optional
-function ecs.system(module, name, phase, signature)
+---@return integer @entity
+function ecs.system(func, name, phase, signature)
 end
 
 ---Create a module - DRAFT
 ---@param name string
----@param callback function
-function ecs.module(name, callback)
+---@return integer @entity
+function ecs.module(name)
 end
 
+--[[
+---Import a Lua module - DRAFT
+---@param module string
+---@return table
+function ecs.import(module)
+    --only C modules are loaded once?
+    if(package.loaded[module]) then
+        return package.loaded[module]
+    end
 
+    local m = require(module)
+    m.import()
+    return m
+end
+]]--
 return ecs

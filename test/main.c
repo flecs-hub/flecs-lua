@@ -103,17 +103,6 @@ static lua_State *new_test_state(void)
     return L;
 }
 
-static lua_State *host_new_state_cb(void *ud)
-{
-    printf("HOST CALLBACK: creating new system state...\n");
-    return new_test_state();
-}
-
-static void host_close_state_cb(lua_State *L, void *ud)
-{
-    lua_close(L);
-}
-
 static void test_abort(void)
 {
     printf("TEST: ecs_os_abort() was called!\n");
@@ -138,7 +127,13 @@ int main(int argc, char **argv)
 
     lua_State *L = new_test_state();
 
-    ecs_lua_ctx ctx = { L, w, host_new_state_cb, host_close_state_cb, NULL };
+    ecs_lua_ctx ctx =
+    {
+        .L = L,
+        .flags = 0,
+
+        .world = w,
+    };
 
     ecs_lua_init(&ctx);
 
@@ -151,6 +146,9 @@ int main(int argc, char **argv)
         const char *err = lua_tostring(L, 1);
         printf("script error: %s\n", err);
     }
+
+    ecs_progress(w, 0);
+    ecs_progress(w, 0);
 
     ecs_lua_exit(L);
 

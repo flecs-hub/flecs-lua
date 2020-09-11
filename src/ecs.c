@@ -8,14 +8,20 @@
 typedef struct ecs_lua_system
 {
     lua_State *L;
+    ecs_entity_t e;
+    int func_ref;
     const char *name;
-    const char *signature;
+    const char *module;
 }ecs_lua_system;
+
+typedef struct EcsLuaModule
+{
+    int x;
+}EcsLuaModule;
 
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L)
 {
-    lua_pushstring(L, "ecs_lua");
-    lua_gettable(L, LUA_REGISTRYINDEX);
+    lua_getfield(L, LUA_REGISTRYINDEX, "ecs_lua");
     ecs_lua_ctx *p = lua_touserdata(L, -1);
     lua_pop(L, 1);
     return p;
@@ -27,17 +33,67 @@ ecs_world_t *ecs_lua_get_world(lua_State *L)
     return p->world;
 }
 
+static void print_time(ecs_time_t *time, const char *str)
+{
+#ifndef NDEBUG
+    double sec = ecs_time_measure(time);
+    ecs_os_dbg("Lua %s took %f milliseconds", str, sec * 1000.0);
+#endif
+}
+
 static void entry_point(ecs_iter_t *it)
 {
     ecs_lua_system *sys = it->param;
     ecs_world_t *w = it->world;
     lua_State *L = sys->L;
+
+    ecs_entity_t e = 0;
+    ecs_entity_t type_entity = 0;
     int nargs = it->column_count;
+    int idx = ecs_get_thread_index(w);
 
-    //TODO: stuff
+    ecs_time_t time;
 
-    lua_pushstring(L, sys->name);
-    lua_pcall(L, nargs, 0, 0);
+    ecs_os_dbg("Lua system: \"%s\", columns: %d, func ref %d", ecs_get_name(w, it->system), nargs, sys->func_ref);
+
+    int i, k, col;
+    for(col=0, i=0; i < nargs; col++, i++)
+    {
+        lua_createtable(L, it->count, 0);
+
+        //type_entity = ecs_type_from_entity(w, it->entities[i]);
+        //ecs_iter_to_lua(w, it, type_entity, L);
+
+        if(ecs_is_readonly(it, col))
+        {
+
+        }
+    }
+
+    ecs_os_get_time(&time);
+
+    int type = lua_rawgeti(L, LUA_REGISTRYINDEX, sys->func_ref);
+
+   luaL_checktype(L, -1, LUA_TFUNCTION);
+
+    int ret = lua_pcall(L, nargs, nargs, 0);
+
+    print_time(&time, "system");
+
+    for(col=0, i=-nargs; i < 0; col++, i++)
+    {
+        luaL_checktype(L, i, LUA_TTABLE);
+        if(it->count == lua_rawlen(L, -1))
+            luaL_error(L, "expected %d elements in column %d, got %d", it->count, -i, lua_rawlen(L, -1));
+
+        if(ecs_is_readonly(it, col))
+        {
+            continue;
+        }
+
+        //type_entity = ecs_type_from_entity(w, it->entities[i]);
+        //ecs_lua_to_iter(w, it, type_entity, L);
+    }
 }
 
 static void set_default_name(ecs_world_t *w, ecs_entity_t e)
@@ -364,47 +420,101 @@ static int new_system(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
 
-    const char *name = luaL_checkstring(L, 1);
+    int func_ref = 0;
+    const char *name = NULL;
     ecs_entity_t phase = 0;
     const char *signature = NULL;
 
-    if(lua_gettop(L) == 3) signature = luaL_checkstring(L, 3);
+    ecs_entity_t e = ecs_new(w, 0);
+    ecs_entity_t t = e;
 
-    phase = luaL_checkinteger(L, 2);
+    lua_pushvalue(L, 1); /* luaL_ref() pops from the stack */
+    func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    luaL_checktype(L, 1, LUA_TFUNCTION);
 
-    lua_State *S = ctx->new_state_cb(ctx->ud);
-    if(S = NULL) return luaL_error(L, "failed to create system");
-
-    lua_pushstring(S, "ecs_lua");
-    lua_pushlightuserdata(S, ctx);
-    lua_settable(S, LUA_REGISTRYINDEX);
-
-    lua_pushstring(S, "ecs_lua_system");
-    ecs_lua_system *sys = lua_newuserdata(S, sizeof(ecs_lua_system));
-    lua_settable(S, LUA_REGISTRYINDEX);
-#if 0
-    lua_pushstring(L, "ecs_lua_systems");
-    lua_gettable(L, LUA_REGISTRYINDEX);
-    int len = lua_objlen(L, );
-    lua_pushinteger(L, len);
-    lua_pushlightuserdata(L, sys);
-#endif
-
-    //TODO: duplicate signature string
-
-    luaL_requiref(S, "ecs", luaopen_ecs, 1);
-    lua_pop(S, 1);
-
-    ecs_entity_t e = 0;
+    name = luaL_checkstring(L, 2);
+    if(lua_gettop(L) >= 3) phase = luaL_checkinteger(L, 3);
+    if(lua_gettop(L) == 4) signature = luaL_checkstring(L, 4);
 
     e = ecs_new_system(w, e, name, phase, signature, entry_point);
 
-    ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
-    ecs_set(w, e, EcsContext, {sys});
+    if(e != t)
+    {
+        ecs_os_dbg("ecs_lua: duplicate system ignored");
+        luaL_unref(L, LUA_REGISTRYINDEX, func_ref);
+        ecs_delete(w, t);
+        lua_pushinteger(L, e);
+        return 1;
+    }
 
-    sys->L = S;
-    sys->name = ecs_get_name(w, e);
-    // sys->signature =
+    ecs_lua_system *sys = lua_newuserdata(L, sizeof(ecs_lua_system));
+    luaL_ref(L, LUA_REGISTRYINDEX);
+
+    sys->func_ref = func_ref;
+    sys->L = L;
+    sys->e = e;
+
+    ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+    ecs_set(w, e, EcsContext, { sys });
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
+static int new_module(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+    ecs_entity_t e = 0;
+
+    const char *name = luaL_checkstring(L, 1);
+
+    ecs_new_module(w, e, name, 4, 4);
+
+    e = ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
+void import_func(ecs_world_t *w)
+{
+    lua_State *L = ecs_get_context(w);
+
+    ecs_os_dbg("ecs_lua: import callback");
+    lua_pcall(L, 0, 0, 0);
+}
+
+static int import_module(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+
+    const char *name = luaL_checkstring(L, 1);
+    ecs_entity_t e = 0;
+
+    lua_getglobal(L, "require");
+    lua_pushstring(L, name);
+    int ret = lua_pcall(L, 1, 1, 0);
+    if(ret) lua_error(L);
+
+    lua_getfield(L, -1, "import");
+    luaL_checktype(L, -1, LUA_TFUNCTION);
+
+    ecs_world_t *orig = ecs_get_context(w);
+    ecs_set_context(w, L);
+
+    EcsLuaModule m;
+    e = ecs_import(w, import_func, name, &m, sizeof(EcsLuaModule));
+
+    ecs_set_context(w, orig);
+
+    ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    lua_getfield(L, -1, name);
 
     return 1;
 }
@@ -431,6 +541,8 @@ static const luaL_Reg ecs_lib[] =
     { "alias", new_alias },
 
     { "system", new_system },
+    { "module", new_module },
+    { "import", import_module },
 #define XX(const) {#const, NULL },
     ECS_LUA_ENUMS(XX)
     ECS_LUA_MACROS(XX)
@@ -454,19 +566,13 @@ int luaopen_ecs(lua_State *L)
 int ecs_lua_init(ecs_lua_ctx *ctx)
 {
     if(ctx->world == NULL || ctx->L == NULL) return 1;
-    if(ctx->new_state_cb == NULL || ctx->close_state_cb == NULL) return 1;
 
     lua_State *L = ctx->L;
 
-    lua_pushstring(ctx->L, "ecs_lua");
-    ecs_lua_ctx *lctx = lua_newuserdata(ctx->L, sizeof(ecs_lua_ctx));
-    lua_settable(L, LUA_REGISTRYINDEX);
+    ecs_lua_ctx *lctx = lua_newuserdata(L, sizeof(ecs_lua_ctx));
+    lua_setfield(L, LUA_REGISTRYINDEX, "ecs_lua");
 
     memcpy(lctx, ctx, sizeof(ecs_lua_ctx));
-
-    lua_pushstring(L, "ecs_lua_systems");
-    lua_newtable(L);
-    lua_settable(L, LUA_REGISTRYINDEX);
 
     luaL_requiref(L, "ecs", luaopen_ecs, 1);
     lua_pop(L, 1);
@@ -474,25 +580,7 @@ int ecs_lua_init(ecs_lua_ctx *ctx)
     return 0;
 }
 
-int ecs_lua_exit(lua_State *L)
+void ecs_lua_exit(lua_State *L)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
-
-#if 0
-    lua_pushstring(L, "ecs_lua_systems");
-    lua_gettable(L, LUA_REGISTRYINDEX);
-    int systems = lua_objlen(L, -1);
-    printf("TEST: freeing %d systems\n", systems);
-    int i;
-    for(i=0; i < systems; i++)
-    {
-        lua_rawgeti(L, -2, i+1);
-        ecs_lua_system *S = lua_touserdata(L, -2);
-        ctx->close_state_cb(S->L);
-    }
-
-    lua_pop(L, 1);
-#endif
-
-    return 0;
 }

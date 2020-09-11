@@ -111,3 +111,17 @@ assert(id_n_name == ecs.new(5120, "id_and_name"))
 assert(id_name_comp ==  ecs.new(10000, "with_comp", "lua_test_struct"))
 assert(no_id_comp == ecs.new("no_id", "lua_test_comp"))
 assert(id_name_comps == ecs.new(10001, "multiple_comps", "lua_test_struct, lua_test_comp"))
+
+
+local m = ecs.import "modules.test"
+--print("loaded: ", package.loaded["modules.test"])
+local m2 = ecs.import "modules.test"
+
+assert(m.imported == 1)
+assert(m.fixed_id == 16000)
+
+--Module should not be loaded twice
+assert(m.random_id == m2.random_id)
+assert(m.fixed_id == m2.fixed_id)
+assert(m.name_only == m2.name_only)
+
