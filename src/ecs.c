@@ -495,23 +495,30 @@ static int import_module(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     ecs_entity_t e = 0;
 
-    lua_getglobal(L, "require");
-    lua_pushstring(L, name);
-    int ret = lua_pcall(L, 1, 1, 0);
-    if(ret) lua_error(L);
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    lua_getfield(L, -1, name);
 
-    lua_getfield(L, -1, "import");
-    luaL_checktype(L, -1, LUA_TFUNCTION);
+    if(!lua_toboolean(L, -1))
+    {
+        lua_getglobal(L, "require");
+        lua_pushstring(L, name);
+        int ret = lua_pcall(L, 1, 1, 0);
+        if(ret) lua_error(L);
 
-    ecs_world_t *orig = ecs_get_context(w);
-    ecs_set_context(w, L);
+        lua_getfield(L, -1, "import");
+        luaL_checktype(L, -1, LUA_TFUNCTION);
 
-    EcsLuaModule m;
-    e = ecs_import(w, import_func, name, &m, sizeof(EcsLuaModule));
+        ecs_world_t *orig = ecs_get_context(w);
+        ecs_set_context(w, L);
 
-    ecs_set_context(w, orig);
+        EcsLuaModule m;
+        e = ecs_import(w, import_func, name, &m, sizeof(EcsLuaModule));
 
-    ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+        ecs_set_context(w, orig);
+
+        ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+    }
+
 
     luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     lua_getfield(L, -1, name);
