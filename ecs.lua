@@ -60,6 +60,11 @@ end
 function ecs.remove(id, type)
 end
 
+---Clear all components
+---@param id integer entity
+function ecs.clear(id)
+end
+
 ---Create a meta array component
 ---@param name string entity name
 ---@param description string @format: "(type,N)"

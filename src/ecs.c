@@ -333,6 +333,17 @@ static int remove_type(lua_State *L)
     return 0;
 }
 
+static int clear_entity(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = lua_tointeger(L, 1);
+
+    ecs_clear(w, e);
+
+    return 0;
+}
+
 static int new_array(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -543,6 +554,7 @@ static const luaL_Reg ecs_lib[] =
     { "has", entity_has },
     { "add", add_type },
     { "remove", remove_type },
+    { "clear", clear_entity },
     { "array", new_array },
     { "struct", new_struct },
     { "alias", new_alias },

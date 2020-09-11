@@ -112,6 +112,9 @@ assert(id_name_comp ==  ecs.new(10000, "with_comp", "lua_test_struct"))
 assert(no_id_comp == ecs.new("no_id", "lua_test_comp"))
 assert(id_name_comps == ecs.new(10001, "multiple_comps", "lua_test_struct, lua_test_comp"))
 
+assert(ecs.has(id_name_comps, "lua_test_struct"))
+ecs.clear(id_name_comps)
+assert(not ecs.has(id_name_comps, "lua_test_struct"))
 
 local m = ecs.import "modules.test"
 --print("loaded: ", package.loaded["modules.test"])
