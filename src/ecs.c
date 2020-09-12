@@ -9,6 +9,7 @@ typedef struct ecs_lua_system
 {
     lua_State *L;
     int func_ref;
+    const char *signature;
 }ecs_lua_system;
 
 typedef struct EcsLuaModule
@@ -50,6 +51,8 @@ static void entry_point(ecs_iter_t *it)
     int idx = ecs_get_thread_index(w);
 
     ecs_time_t time;
+
+    ecs_assert(!strcmp(sys->signature, ecs_get(w, it->system, EcsSignatureExpr)->expr), ECS_INTERNAL_ERROR, NULL);
 
     ecs_os_dbg("Lua system: \"%s\", columns: %d, func ref %d", ecs_get_name(w, it->system), nargs, sys->func_ref);
 
@@ -438,9 +441,7 @@ static int new_system(lua_State *L)
     int func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
     const char *name = luaL_checkstring(L, 2);
     ecs_entity_t phase = luaL_optinteger(L, 3, 0);
-    const char *signature = luaL_optstring(L, 4, NULL);
-
-    if(signature == NULL) signature = "0";
+    const char *signature = luaL_optstring(L, 4, "0");
 
     ecs_entity_t e = ecs_new(w, 0);
     ecs_entity_t t = e;
@@ -459,8 +460,13 @@ static int new_system(lua_State *L)
     ecs_lua_system *sys = lua_newuserdata(L, sizeof(ecs_lua_system));
     luaL_ref(L, LUA_REGISTRYINDEX);
 
-    sys->func_ref = func_ref;
+    lua_pushstring(L, signature);
+    int sig = luaL_ref(L, LUA_REGISTRYINDEX);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, sig);
+
     sys->L = L;
+    sys->func_ref = func_ref;
+    sys->signature = lua_tostring(L, -1);
 
     ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
     ecs_set(w, e, EcsContext, { sys });
