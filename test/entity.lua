@@ -1,24 +1,8 @@
 local ecs = require "ecs"
 local t = require "test"
+local u = require "util"
 
-local function print_entities(...)
-    local args = {...}
-    for i,v in ipairs(args) do
-        print("id: " .. v .. ", name: " .. ecs.name(v))
-    end
-end
-
-function string.starts(str, start)
-    return str:sub(1, #start) == start
-end
-
-print("Constants:")
-
-assert(pcall(function () print("ecs.MatchAll", "= " .. ecs.MatchAll) end))
-assert(pcall(function () print("ecs.Module", "= " .. ecs.Module) end))
-assert(pcall(function () print("ecs.OnStore", "= " .. ecs.OnStore) end))
-assert(pcall(function () print("ecs.XOR", "= " .. ecs.XOR) end))
-
+u.print_constants("MatchAll", "Module", "OnStore", "XOR")
 
 local entity = ecs.new()
 local only_id = ecs.new(4096)
@@ -30,9 +14,7 @@ local id_name_comps = ecs.new(10001, "multiple_comps", "lua_test_struct, lua_tes
 local bulk = ecs.bulk_new(10)
 local bulk_comp = ecs.bulk_new("lua_test_comp", 10)
 
-print("Entities:")
-
-print_entities(entity, only_id, only_name, id_n_name, 8192)
+u.print_entities(entity, only_id, only_name, id_n_name, 8192)
 
 assert(only_id == 4096)
 assert(ecs.name(only_id) ~= nil)
@@ -108,7 +90,7 @@ assert(tag2 == ecs.tag("Tag2"))
 assert(only_id == ecs.new(4096))
 assert(only_name == ecs.new("name_only"))
 assert(id_n_name == ecs.new(5120, "id_and_name"))
-assert(id_name_comp ==  ecs.new(10000, "with_comp", "lua_test_struct"))
+assert(id_name_comp == ecs.new(10000, "with_comp", "lua_test_struct"))
 assert(no_id_comp == ecs.new("no_id", "lua_test_comp"))
 assert(id_name_comps == ecs.new(10001, "multiple_comps", "lua_test_struct, lua_test_comp"))
 
