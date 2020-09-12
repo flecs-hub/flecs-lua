@@ -8,10 +8,7 @@
 typedef struct ecs_lua_system
 {
     lua_State *L;
-    ecs_entity_t e;
     int func_ref;
-    const char *name;
-    const char *module;
 }ecs_lua_system;
 
 typedef struct EcsLuaModule
@@ -43,8 +40,8 @@ static void print_time(ecs_time_t *time, const char *str)
 
 static void entry_point(ecs_iter_t *it)
 {
-    ecs_lua_system *sys = it->param;
     ecs_world_t *w = it->world;
+    ecs_lua_system *sys = it->param;
     lua_State *L = sys->L;
 
     ecs_entity_t e = 0;
@@ -443,6 +440,8 @@ static int new_system(lua_State *L)
     ecs_entity_t phase = luaL_optinteger(L, 3, 0);
     const char *signature = luaL_optstring(L, 4, NULL);
 
+    if(signature == NULL) signature = "0";
+
     ecs_entity_t e = ecs_new(w, 0);
     ecs_entity_t t = e;
 
@@ -462,7 +461,6 @@ static int new_system(lua_State *L)
 
     sys->func_ref = func_ref;
     sys->L = L;
-    sys->e = e;
 
     ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
     ecs_set(w, e, EcsContext, { sys });
