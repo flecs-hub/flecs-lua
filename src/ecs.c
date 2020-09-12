@@ -56,6 +56,8 @@ static void entry_point(ecs_iter_t *it)
 
     ecs_os_dbg("Lua system: \"%s\", columns: %d, func ref %d", ecs_get_name(w, it->system), nargs, sys->func_ref);
 
+    ecs_os_get_time(&time);
+
     int i, k, col;
     for(col=0, i=0; i < nargs; col++, i++)
     {
@@ -70,11 +72,13 @@ static void entry_point(ecs_iter_t *it)
         }
     }
 
+    print_time(&time, "iter serialization");
+
     ecs_os_get_time(&time);
 
     int type = lua_rawgeti(L, LUA_REGISTRYINDEX, sys->func_ref);
 
-   luaL_checktype(L, -1, LUA_TFUNCTION);
+    luaL_checktype(L, -1, LUA_TFUNCTION);
 
     int ret = lua_pcall(L, nargs, nargs, 0);
 
@@ -431,21 +435,16 @@ static int new_system(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
 
-    int func_ref = 0;
-    const char *name = NULL;
-    ecs_entity_t phase = 0;
-    const char *signature = NULL;
+    lua_pushvalue(L, 1); /* luaL_ref() pops from the stack */
+    luaL_checktype(L, 1, LUA_TFUNCTION);
+
+    int func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    const char *name = luaL_checkstring(L, 2);
+    ecs_entity_t phase = luaL_optinteger(L, 3, 0);
+    const char *signature = luaL_optstring(L, 4, NULL);
 
     ecs_entity_t e = ecs_new(w, 0);
     ecs_entity_t t = e;
-
-    lua_pushvalue(L, 1); /* luaL_ref() pops from the stack */
-    func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-    luaL_checktype(L, 1, LUA_TFUNCTION);
-
-    name = luaL_checkstring(L, 2);
-    if(lua_gettop(L) >= 3) phase = luaL_checkinteger(L, 3);
-    if(lua_gettop(L) == 4) signature = luaL_checkstring(L, 4);
 
     e = ecs_new_system(w, e, name, phase, signature, entry_point);
 
