@@ -443,19 +443,7 @@ static int new_system(lua_State *L)
     ecs_entity_t phase = luaL_optinteger(L, 3, 0);
     const char *signature = luaL_optstring(L, 4, "0");
 
-    ecs_entity_t e = ecs_new(w, 0);
-    ecs_entity_t t = e;
-
-    e = ecs_new_system(w, e, name, phase, signature, entry_point);
-
-    if(e != t)
-    {
-        ecs_os_dbg("ecs_lua: duplicate system ignored");
-        luaL_unref(L, LUA_REGISTRYINDEX, func_ref);
-        ecs_delete(w, t);
-        lua_pushinteger(L, e);
-        return 1;
-    }
+    ecs_entity_t e = ecs_new_system(w, 0, name, phase, signature, entry_point);
 
     ecs_lua_system *sys = lua_newuserdata(L, sizeof(ecs_lua_system));
     luaL_ref(L, LUA_REGISTRYINDEX);
