@@ -527,8 +527,7 @@ static int import_module(lua_State *L)
         ecs_world_t *orig = ecs_get_context(w);
         ecs_set_context(w, ctx);
 
-        EcsLuaModule m;
-        e = ecs_import(w, import_func, name, &m, sizeof(EcsLuaModule));
+        e = ecs_import(w, import_func, name, NULL, 0);
 
         ecs_set_context(w, orig);
 
