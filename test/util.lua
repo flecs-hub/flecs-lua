@@ -10,7 +10,7 @@ function m.print_entities(...)
     print("Entities:")
     local args = {...}
     for i,v in ipairs(args) do
-        print("id: " .. v .. ", name: " .. ecs.name(v))
+        print("\tid: " .. v .. ", name: " .. ecs.name(v))
     end
 end
 
@@ -18,13 +18,20 @@ function m.print_constants(...)
     print("Constants:")
     local args = {...}
     for i,v in ipairs(args) do
-        print("ecs." .. v, "= " .. ecs[v])
+        print("\tecs." .. v, "= " .. ecs[v])
     end
 end
 
 function m.print_array(a)
     for i, v in ipairs(a) do
         print("[" .. i .. "] = " .. v)
+    end
+end
+
+function m.print_packages()
+    print("Loaded packages:")
+    for k, v in pairs(package.loaded) do
+        print("\tname: ", k)
     end
 end
 

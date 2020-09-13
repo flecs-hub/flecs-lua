@@ -99,7 +99,7 @@ ecs.clear(id_name_comps)
 assert(not ecs.has(id_name_comps, "lua_test_struct"))
 
 local m = ecs.import "modules.test"
---print("loaded: ", package.loaded["modules.test"])
+--u.print_packages()
 local m2 = ecs.import "modules.test"
 
 assert(m.imported == 1)
