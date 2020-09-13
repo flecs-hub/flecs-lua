@@ -66,6 +66,10 @@ foreach name : tests
     test(name, test_exe, args : script, env : env)
 endforeach
 
+const = executable('print_const', 'const.c', dependencies : flecs_lua_dep)
+
+run_target('const', command : const)
+
 luac = find_program('luac')
 lua = find_program('lua')
 

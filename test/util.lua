@@ -35,4 +35,13 @@ function m.print_packages()
     end
 end
 
+function m.print_ecs_ints()
+    print("ecs constants:")
+    for k, v in pairs(ecs) do
+        if type(v) == "number" then
+            print(k .. " = " ..  v)
+        end
+    end
+end
+
 return m
