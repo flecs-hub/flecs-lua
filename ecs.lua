@@ -116,4 +116,47 @@ function ecs.import(module)
     return m
 end
 ]]--
+
+ecs.MatchDefault = 0
+ecs.MatchAll = 1
+ecs.MatchAny = 2
+ecs.MatchExact = 3
+ecs.Module = 256
+ecs.Prefab = 257
+ecs.Hidden = 258
+ecs.Disabled = 259
+ecs.DisabledIntern = 260
+ecs.Inactive = 261
+ecs.OnDemand = 262
+ecs.Monitor = 263
+ecs.Pipeline = 264
+ecs.OnAdd = 265
+ecs.OnRemove = 266
+ecs.OnSet = 267
+ecs.UnSet = 268
+ecs.PreFrame = 269
+ecs.OnLoad = 270
+ecs.PostLoad = 271
+ecs.PreUpdate = 272
+ecs.OnUpdate = 273
+ecs.OnValidate = 274
+ecs.PostUpdate = 275
+ecs.PreStore = 276
+ecs.OnStore = 277
+ecs.PostFrame = 278
+ecs.Flecs = 279
+ecs.FlecsCore = 280
+ecs.World = 281
+ecs.Singleton = 282
+ecs.Wildcard = 283
+ecs.INSTANCEOF = -144115188075855872
+ecs.CHILDOF = -216172782113783808
+ecs.TRAIT = -288230376151711744
+ecs.AND = -360287970189639680
+ecs.OR = -432345564227567616
+ecs.XOR = -504403158265495552
+ecs.NOT = -576460752303423488
+ecs.CASE = -648518346341351424
+ecs.SWITCH = -720575940379279360
+
 return ecs
