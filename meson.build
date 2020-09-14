@@ -52,6 +52,7 @@ if get_option('tests').disabled()
 endif
 
 test_exe = executable('e', files('test/main.c'), dependencies : flecs_lua_dep)
+const_exe = executable('print_const', 'test/const.c', dependencies : flecs_lua_dep)
 
 tests = [
     'entity',
@@ -66,9 +67,8 @@ foreach name : tests
     test(name, test_exe, args : script, env : env)
 endforeach
 
-const = executable('print_const', 'const.c', dependencies : flecs_lua_dep)
 
-run_target('const', command : const)
+run_target('const', command : const_exe)
 
 luac = find_program('luac')
 lua = find_program('lua')
