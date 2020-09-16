@@ -597,13 +597,13 @@ static ecs_lua_ctx * ctx_init(ecs_lua_ctx ctx)
     return lctx;
 }
 
-int ecs_lua_init(ecs_lua_ctx *ctx)
+int ecs_lua_init(ecs_lua_ctx ctx)
 {
-    if(ctx->world == NULL || ctx->L == NULL) return 1;
+    if(ctx.world == NULL || ctx.L == NULL) return 1;
 
-    ctx->internal = ECS_LUA__KEEPOPEN;
+    ctx.internal = ECS_LUA__KEEPOPEN;
 
-    ctx_init(*ctx);
+    ctx_init(ctx);
 
     return 0;
 }
