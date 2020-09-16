@@ -620,9 +620,13 @@ int ecs_lua_set_state(ecs_world_t *w, lua_State *L)
 {
     ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaHost");
 
+    EcsLuaHost *ctx = ecs_get_mut_w_entity(w, EcsSingleton, e, NULL);
+
+    ecs_lua_exit(ctx->L);
+
     ecs_lua_ctx param = { .L = L, .world = w, .internal = ECS_LUA__KEEPOPEN };
 
-    ecs_lua_ctx *ctx = ctx_init(param);
+    ctx = ctx_init(param);
 
     ecs_set_ptr_w_entity(w, EcsSingleton, e, sizeof(EcsLuaHost), ctx);
 
