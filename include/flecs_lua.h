@@ -18,11 +18,24 @@ typedef struct ecs_lua_ctx
     ecs_world_t *world;
 }ecs_lua_ctx;
 
+typedef ecs_lua_ctx EcsLuaHost;
+
+typedef struct FlecsLua
+{
+    ECS_DECLARE_COMPONENT(EcsLuaHost);
+}FlecsLua;
+
 FLECS_LUA_EXPORT
 int ecs_lua_init(ecs_lua_ctx *ctx);
 
 FLECS_LUA_EXPORT
 void ecs_lua_exit(lua_State *L);
+
+FLECS_LUA_EXPORT
+void FlecsLuaImport(ecs_world_t *w);
+
+#define FlecsLuaImportHandles(handles)\
+    ECS_IMPORT_COMPONENT(handles, EcsLuaHost);\
 
 /* Get world pointer from registry */
 FLECS_LUA_EXPORT

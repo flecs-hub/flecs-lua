@@ -91,14 +91,19 @@ int luaopen_test(lua_State *L)
     return 1;
 }
 
-static lua_State *new_test_state(void)
+static void init_test_state(lua_State *L)
 {
-    lua_State *L = luaL_newstate();
-
     luaL_openlibs(L);
 
     luaL_requiref(L, "test", luaopen_test, 1);
     lua_pop(L, 1);
+}
+
+static lua_State *new_test_state(void)
+{
+    lua_State *L = luaL_newstate();
+
+    init_test_state(L);
 
     return L;
 }
@@ -120,24 +125,17 @@ int main(int argc, char **argv)
     os_api.abort_ = test_abort;
     ecs_os_set_api(&os_api);
 
-    ECS_IMPORT(w, FlecsMeta);
+    ECS_IMPORT(w, FlecsLua);
 
     ECS_META(w, lua_test_comp);
     ECS_META(w, lua_test_struct);
 
-    lua_State *L = new_test_state();
-
-    ecs_lua_ctx ctx =
-    {
-        .L = L,
-        .flags = 0,
-
-        .world = w,
-    };
-
-    ecs_lua_init(&ctx);
-
     ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
+
+    const EcsLuaHost *ctx = ecs_get(w, EcsSingleton, EcsLuaHost);
+    lua_State *L = ctx->L;
+
+    init_test_state(L);
 
     int ret = luaL_dofile(L, argv[1]);
 
@@ -149,10 +147,6 @@ int main(int argc, char **argv)
 
     ecs_progress(w, 0);
     ecs_progress(w, 0);
-
-    ecs_lua_exit(L);
-
-    lua_close(L);
 
     ecs_fini(w);
 

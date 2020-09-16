@@ -598,7 +598,65 @@ int ecs_lua_init(ecs_lua_ctx *ctx)
     return 0;
 }
 
+void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+    if(!nsize)
+    {
+        ecs_os_free(ptr);
+        return NULL;
+    }
+
+    return ecs_os_realloc(ptr, nsize);
+}
+
+ecs_lua_ctx * ctx_init(ecs_lua_ctx ctx)
+{
+    lua_State *L = lua_newstate(Allocf, NULL);
+
+    ecs_lua_ctx *lctx = lua_newuserdata(L, sizeof(ecs_lua_ctx));
+    lua_setfield(L, LUA_REGISTRYINDEX, "ecs_lua");
+
+    memcpy(lctx, &ctx, sizeof(ecs_lua_ctx));
+
+    luaL_requiref(L, "ecs", luaopen_ecs, 1);
+    lua_pop(L, 1);
+
+    lctx->L = L;
+
+    return lctx;
+}
+
 void ecs_lua_exit(lua_State *L)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+}
+
+ECS_DTOR(EcsLuaHost, ctx,
+{
+    lua_State *L = ctx->L;
+    ecs_lua_exit(L);
+    lua_close(L);
+});
+
+void FlecsLuaImport(ecs_world_t *w)
+{
+    ECS_MODULE(w, FlecsLua);
+
+    ECS_IMPORT(w, FlecsMeta);
+
+    ecs_set_name_prefix(w, "Ecs");
+
+    ECS_COMPONENT(w, EcsLuaHost);
+
+    ECS_EXPORT_COMPONENT(EcsLuaHost);
+
+    ecs_lua_ctx param = {.world = w};
+    ecs_lua_ctx *ctx = ctx_init(param);
+
+    ecs_set_ptr(w, EcsSingleton, EcsLuaHost, ctx);
+
+    ecs_set_component_actions(w, EcsLuaHost,
+    {
+        .dtor = ecs_dtor(EcsLuaHost)
+    });
 }
