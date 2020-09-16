@@ -2,6 +2,8 @@ local ecs = require "ecs"
 local t = require "test"
 local u = require "util"
 
+ecs.dbg("This is a DEBUG message: ", 1234, ecs.OnStore)
+
 u.print_constants("MatchAll", "Module", "OnStore", "XOR")
 
 local entity = ecs.new()

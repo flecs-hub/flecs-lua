@@ -117,6 +117,12 @@ function ecs.import(module)
 end
 ]]--
 
+---Print debug string
+function ecs.dbg(...)
+end
+
+
+
 ecs.MatchDefault = 0
 ecs.MatchAll = 1
 ecs.MatchAny = 2

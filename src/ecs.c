@@ -535,6 +535,45 @@ static int import_module(lua_State *L)
     return 1;
 }
 
+static int vararg2str(lua_State *L, int n, ecs_strbuf_t *buf)
+{
+    lua_getglobal(L, "tostring");
+
+    int i;
+    for(i=1; i <= n; i++)
+    {
+        lua_pushvalue(L, -1);
+        lua_pushvalue(L, i);
+        lua_call(L, 1, 1);
+        const char *arg = lua_tostring(L, -1);
+
+        if(!arg) return luaL_error(L, "expected string from 'tostring'");
+
+        if(i>1) ecs_strbuf_appendstr(buf, " ");
+
+        ecs_strbuf_appendstr(buf, arg);
+
+        lua_pop(L, 1);
+    }
+
+    return 0;
+}
+
+static int print_dbg(lua_State *L)
+{
+    int n = lua_gettop(L);
+
+    ecs_strbuf_t buf = ECS_STRBUF_INIT;
+
+    vararg2str(L, n, &buf);
+
+    ecs_os_dbg("%s", ecs_strbuf_get(&buf));
+
+    ecs_strbuf_reset(&buf);
+
+    return 0;
+}
+
 static int func(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -560,6 +599,8 @@ static const luaL_Reg ecs_lib[] =
     { "system", new_system },
     { "module", new_module },
     { "import", import_module },
+
+    { "dbg", print_dbg },
 #define XX(const) {#const, NULL },
     ECS_LUA_ENUMS(XX)
     ECS_LUA_MACROS(XX)
