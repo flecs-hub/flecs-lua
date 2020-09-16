@@ -615,6 +615,27 @@ static int set_target_fps(lua_State *L)
     return 0;
 }
 
+void ecs_lua_progress(lua_State *L)
+{
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->progress_ref);
+
+    ecs_assert(LUA_TFUNCTION == lua_type(L, 1), ECS_INVALID_PARAMETER, NULL);
+
+    lua_pcall(L, 0, 0, 0);
+}
+
+static int progress(lua_State *L)
+{
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+    ecs_world_t *w = ctx->world;
+
+    luaL_checktype(L, 1, LUA_TFUNCTION);
+    ctx->progress_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    return 0;
+}
+
 static int func(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -646,6 +667,7 @@ static const luaL_Reg ecs_lib[] =
     { "warn", print_warn },
 
     { "set_target_fps", set_target_fps },
+    { "progress", progress },
 
 #define XX(const) {#const, NULL },
     ECS_LUA_ENUMS(XX)

@@ -15,6 +15,7 @@ typedef struct ecs_lua_ctx
 
     int internal;
     int error;
+    int progress_ref;
     ecs_world_t *world;
 }ecs_lua_ctx;
 
@@ -33,6 +34,11 @@ void FlecsLuaImport(ecs_world_t *w);
 
 /* Reinitialize with a custom lua_State */
 int ecs_lua_set_state(ecs_world_t *w, lua_State *L);
+
+/* Call progress function callback (if set),
+   this is meant to be called between iterations. */
+FLECS_LUA_EXPORT
+void ecs_lua_progress(lua_State *L);
 
 /* Get world pointer from registry */
 FLECS_LUA_EXPORT

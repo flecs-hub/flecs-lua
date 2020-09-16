@@ -134,6 +134,11 @@ end
 function ecs.set_target_fps(fps)
 end
 
+---Set progress function callback
+---@param cb function
+function ecs.progress(cb)
+end
+
 ecs.MatchDefault = 0
 ecs.MatchAll = 1
 ecs.MatchAny = 2

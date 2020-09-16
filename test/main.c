@@ -191,6 +191,7 @@ int main(int argc, char **argv)
     }
 
     ecs_progress(w, 0);
+    ecs_lua_progress(L);
     ecs_progress(w, 0);
 
     ecs_fini(w);

@@ -116,3 +116,6 @@ assert(m.random_id == m2.random_id)
 assert(m.fixed_id == m2.fixed_id)
 assert(m.name_only == m2.name_only)
 
+ecs.progress(function()
+    ecs.log("progress!")
+end)
