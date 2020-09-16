@@ -5,6 +5,8 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+#define ECS_LUA__KEEPOPEN 1
+
 typedef struct ecs_lua_system
 {
     lua_State *L;
@@ -578,27 +580,56 @@ int luaopen_ecs(lua_State *L)
     return 1;
 }
 
-int ecs_lua_init(ecs_lua_ctx *ctx)
+static ecs_lua_ctx * ctx_init(ecs_lua_ctx ctx)
 {
-    if(ctx->world == NULL || ctx->L == NULL) return 1;
-
-    lua_State *L = ctx->L;
+    lua_State *L = ctx.L;
 
     ecs_lua_ctx *lctx = lua_newuserdata(L, sizeof(ecs_lua_ctx));
     lua_setfield(L, LUA_REGISTRYINDEX, "ecs_lua");
 
-    memcpy(lctx, ctx, sizeof(ecs_lua_ctx));
+    memcpy(lctx, &ctx, sizeof(ecs_lua_ctx));
 
     lctx->error = 0;
-    lctx->internal = 0;
+    lctx->internal = ECS_LUA__KEEPOPEN;
 
     luaL_requiref(L, "ecs", luaopen_ecs, 1);
     lua_pop(L, 1);
 
+    return lctx;
+}
+
+int ecs_lua_init(ecs_lua_ctx *ctx)
+{
+    if(ctx->world == NULL || ctx->L == NULL) return 1;
+
+    ctx->internal |= ECS_LUA__KEEPOPEN;
+
+    ctx_init(*ctx);
+
     return 0;
 }
 
-void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
+void ecs_lua_exit(lua_State *L)
+{
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+
+    if( !(ctx->internal & ECS_LUA__KEEPOPEN) ) lua_close(L);
+}
+
+int ecs_lua_set_state(ecs_world_t *w, lua_State *L)
+{
+    ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaHost");
+
+    ecs_lua_ctx param = { .L = L, .world = w, .internal = ECS_LUA__KEEPOPEN };
+
+    ecs_lua_ctx *ctx = ctx_init(param);
+
+    ecs_set_ptr_w_entity(w, EcsSingleton, e, sizeof(EcsLuaHost), ctx);
+
+    return 0;
+}
+
+static void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
 {
     if(!nsize)
     {
@@ -609,33 +640,10 @@ void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
     return ecs_os_realloc(ptr, nsize);
 }
 
-ecs_lua_ctx * ctx_init(ecs_lua_ctx ctx)
-{
-    lua_State *L = lua_newstate(Allocf, NULL);
-
-    ecs_lua_ctx *lctx = lua_newuserdata(L, sizeof(ecs_lua_ctx));
-    lua_setfield(L, LUA_REGISTRYINDEX, "ecs_lua");
-
-    memcpy(lctx, &ctx, sizeof(ecs_lua_ctx));
-
-    luaL_requiref(L, "ecs", luaopen_ecs, 1);
-    lua_pop(L, 1);
-
-    lctx->L = L;
-
-    return lctx;
-}
-
-void ecs_lua_exit(lua_State *L)
-{
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
-}
-
 ECS_DTOR(EcsLuaHost, ctx,
 {
     lua_State *L = ctx->L;
     ecs_lua_exit(L);
-    lua_close(L);
 });
 
 void FlecsLuaImport(ecs_world_t *w)
@@ -650,7 +658,9 @@ void FlecsLuaImport(ecs_world_t *w)
 
     ECS_EXPORT_COMPONENT(EcsLuaHost);
 
-    ecs_lua_ctx param = {.world = w};
+    lua_State *L = lua_newstate(Allocf, NULL);
+
+    ecs_lua_ctx param = { .L = L, .world = w};
     ecs_lua_ctx *ctx = ctx_init(param);
 
     ecs_set_ptr(w, EcsSingleton, EcsLuaHost, ctx);

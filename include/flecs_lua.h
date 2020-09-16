@@ -26,16 +26,13 @@ typedef struct FlecsLua
 }FlecsLua;
 
 FLECS_LUA_EXPORT
-int ecs_lua_init(ecs_lua_ctx *ctx);
-
-FLECS_LUA_EXPORT
-void ecs_lua_exit(lua_State *L);
-
-FLECS_LUA_EXPORT
 void FlecsLuaImport(ecs_world_t *w);
 
 #define FlecsLuaImportHandles(handles)\
     ECS_IMPORT_COMPONENT(handles, EcsLuaHost);\
+
+/* Reinitialize with a custom lua_State */
+int ecs_lua_set_state(ecs_world_t *w, lua_State *L);
 
 /* Get world pointer from registry */
 FLECS_LUA_EXPORT
@@ -43,6 +40,14 @@ ecs_world_t *ecs_lua_get_world(lua_State *L);
 
 FLECS_LUA_EXPORT
 int luaopen_ecs(lua_State *L);
+
+/* Legacy */
+
+FLECS_LUA_EXPORT
+int ecs_lua_init(ecs_lua_ctx *ctx);
+
+FLECS_LUA_EXPORT
+void ecs_lua_exit(lua_State *L);
 
 #ifdef __cplusplus
 }

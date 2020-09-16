@@ -114,6 +114,21 @@ static void test_abort(void)
     fflush(stdout);
 }
 
+static int custom_alloc;
+
+void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+    custom_alloc = 1;
+
+    if(!nsize)
+    {
+        ecs_os_free(ptr);
+        return NULL;
+    }
+
+    return ecs_os_realloc(ptr, nsize);
+}
+
 int main(int argc, char **argv)
 {
     if(argc < 2) return 1;
@@ -132,8 +147,12 @@ int main(int argc, char **argv)
 
     ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
 
-    const EcsLuaHost *ctx = ecs_get(w, EcsSingleton, EcsLuaHost);
-    lua_State *L = ctx->L;
+    //const EcsLuaHost *ctx = ecs_get(w, EcsSingleton, EcsLuaHost);
+    //lua_State *L = ctx->L;
+
+    lua_State *L = lua_newstate(Allocf, NULL);
+    ecs_lua_set_state(w, L);
+    ecs_assert(custom_alloc, ECS_INTERNAL_ERROR, NULL);
 
     init_test_state(L);
 
