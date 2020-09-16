@@ -6,6 +6,8 @@ ecs.log("This is a LOG message: ", 1234, ecs.OnStore)
 ecs.dbg("This is a DEBUG message")
 ecs.warn("This is a WARN message")
 
+ecs.set_target_fps(60)
+
 u.print_constants("MatchAll", "Module", "OnStore", "XOR")
 
 local entity = ecs.new()

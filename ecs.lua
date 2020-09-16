@@ -129,6 +129,10 @@ end
 function ecs.warn(...)
 end
 
+---Set target fps
+---@param fps number
+function ecs.set_target_fps(fps)
+end
 
 ecs.MatchDefault = 0
 ecs.MatchAll = 1

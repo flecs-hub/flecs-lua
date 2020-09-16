@@ -604,6 +604,17 @@ static int print_warn(lua_State *L)
     return print_type(L, ECS_LUA__WARN);
 }
 
+static int set_target_fps(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    lua_Number fps = luaL_checknumber(L, 1);
+
+    ecs_set_target_fps(w, fps);
+
+    return 0;
+}
+
 static int func(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -633,6 +644,8 @@ static const luaL_Reg ecs_lib[] =
     { "log", print_log },
     { "dbg", print_dbg },
     { "warn", print_warn },
+
+    { "set_target_fps", set_target_fps },
 
 #define XX(const) {#const, NULL },
     ECS_LUA_ENUMS(XX)
