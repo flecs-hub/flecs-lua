@@ -2,7 +2,9 @@ local ecs = require "ecs"
 local t = require "test"
 local u = require "util"
 
-ecs.dbg("This is a DEBUG message: ", 1234, ecs.OnStore)
+ecs.log("This is a LOG message: ", 1234, ecs.OnStore)
+ecs.dbg("This is a DEBUG message")
+ecs.warn("This is a WARN message")
 
 u.print_constants("MatchAll", "Module", "OnStore", "XOR")
 

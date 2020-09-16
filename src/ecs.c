@@ -554,7 +554,12 @@ static int vararg2str(lua_State *L, int n, ecs_strbuf_t *buf)
     return 0;
 }
 
-static int print_dbg(lua_State *L)
+#define ECS_LUA__LOG 0
+#define ECS_LUA__ERROR 1
+#define ECS_LUA__DEBUG 2
+#define ECS_LUA__WARN 3
+
+static int print_type(lua_State *L, int type)
 {
     int n = lua_gettop(L);
 
@@ -562,11 +567,41 @@ static int print_dbg(lua_State *L)
 
     vararg2str(L, n, &buf);
 
-    ecs_os_dbg("%s", ecs_strbuf_get(&buf));
+    char *str = ecs_strbuf_get(&buf);
+
+    switch(type)
+    {
+        case ECS_LUA__LOG:
+            ecs_os_log(str);
+            break;
+        case ECS_LUA__DEBUG:
+            ecs_os_dbg(str);
+            break;
+        case ECS_LUA__WARN:
+            ecs_os_warn(str);
+            break;
+        default:
+            break;
+    }
 
     ecs_strbuf_reset(&buf);
 
     return 0;
+}
+
+static int print_log(lua_State *L)
+{
+    return print_type(L, ECS_LUA__LOG);
+}
+
+static int print_dbg(lua_State *L)
+{
+    return print_type(L, ECS_LUA__DEBUG);
+}
+
+static int print_warn(lua_State *L)
+{
+    return print_type(L, ECS_LUA__WARN);
 }
 
 static int func(lua_State *L)
@@ -595,7 +630,10 @@ static const luaL_Reg ecs_lib[] =
     { "module", new_module },
     { "import", import_module },
 
+    { "log", print_log },
     { "dbg", print_dbg },
+    { "warn", print_warn },
+
 #define XX(const) {#const, NULL },
     ECS_LUA_ENUMS(XX)
     ECS_LUA_MACROS(XX)

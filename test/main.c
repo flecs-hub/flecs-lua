@@ -112,6 +112,29 @@ static void test_abort(void)
 {
     printf("TEST: ecs_os_abort() was called!\n");
     fflush(stdout);
+    printf("\n");
+}
+
+static void test_msg(const char *type, const char *fmt, va_list args)
+{
+    printf("TEST %s: ", type);
+    vprintf(fmt, args);
+    printf("\n");
+}
+
+static void test_log(const char *fmt, va_list args)
+{
+    test_msg("LOG", fmt, args);
+}
+
+static void test_debug(const char *fmt, va_list args)
+{
+    test_msg("DBG", fmt, args);
+}
+
+static void test_warn(const char *fmt, va_list args)
+{
+    test_msg("WARN", fmt, args);
 }
 
 static int custom_alloc;
@@ -138,6 +161,9 @@ int main(int argc, char **argv)
     ecs_os_set_api_defaults();
     ecs_os_api_t os_api = ecs_os_api;
     os_api.abort_ = test_abort;
+    os_api.log_ = test_log;
+    os_api.log_debug_ = test_debug;
+    os_api.log_warning_ = test_warn;
     ecs_os_set_api(&os_api);
 
     ECS_IMPORT(w, FlecsLua);

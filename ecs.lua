@@ -117,10 +117,17 @@ function ecs.import(module)
 end
 ]]--
 
----Print debug string
+---Print log message
+function ecs.log(...)
+end
+
+---Print debug message
 function ecs.dbg(...)
 end
 
+---Print warning message
+function ecs.warn(...)
+end
 
 
 ecs.MatchDefault = 0
