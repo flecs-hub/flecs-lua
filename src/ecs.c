@@ -14,11 +14,6 @@ typedef struct ecs_lua_system
     const char *signature;
 }ecs_lua_system;
 
-typedef struct EcsLuaModule
-{
-    int x;
-}EcsLuaModule;
-
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L)
 {
     lua_getfield(L, LUA_REGISTRYINDEX, "ecs_lua");
