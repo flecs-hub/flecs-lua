@@ -127,6 +127,11 @@ static void test_log(const char *fmt, va_list args)
     test_msg("LOG", fmt, args);
 }
 
+static void test_error(const char *fmt, va_list args)
+{
+    test_msg("ERROR", fmt, args);
+}
+
 static void test_debug(const char *fmt, va_list args)
 {
     test_msg("DBG", fmt, args);
@@ -162,6 +167,7 @@ int main(int argc, char **argv)
     ecs_os_api_t os_api = ecs_os_api;
     os_api.abort_ = test_abort;
     os_api.log_ = test_log;
+    os_api.log_error_ = test_error;
     os_api.log_debug_ = test_debug;
     os_api.log_warning_ = test_warn;
     ecs_os_set_api(&os_api);

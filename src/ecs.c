@@ -574,6 +574,9 @@ static int print_type(lua_State *L, int type)
         case ECS_LUA__LOG:
             ecs_os_log(str);
             break;
+        case ECS_LUA__ERROR:
+            ecs_os_err(str);
+            break;
         case ECS_LUA__DEBUG:
             ecs_os_dbg(str);
             break;
@@ -592,6 +595,11 @@ static int print_type(lua_State *L, int type)
 static int print_log(lua_State *L)
 {
     return print_type(L, ECS_LUA__LOG);
+}
+
+static int print_err(lua_State *L)
+{
+    return print_type(L, ECS_LUA__ERROR);
 }
 
 static int print_dbg(lua_State *L)
@@ -663,6 +671,7 @@ static const luaL_Reg ecs_lib[] =
     { "import", import_module },
 
     { "log", print_log },
+    { "err", print_err },
     { "dbg", print_dbg },
     { "warn", print_warn },
 

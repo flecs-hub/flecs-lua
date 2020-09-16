@@ -3,6 +3,7 @@ local t = require "test"
 local u = require "util"
 
 ecs.log("This is a LOG message: ", 1234, ecs.OnStore)
+ecs.err("This is an ERROR message")
 ecs.dbg("This is a DEBUG message")
 ecs.warn("This is a WARN message")
 

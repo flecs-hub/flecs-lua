@@ -121,6 +121,10 @@ end
 function ecs.log(...)
 end
 
+---Print error message
+function ecs.err(...)
+end
+
 ---Print debug message
 function ecs.dbg(...)
 end
