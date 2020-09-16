@@ -590,7 +590,6 @@ static ecs_lua_ctx * ctx_init(ecs_lua_ctx ctx)
     memcpy(lctx, &ctx, sizeof(ecs_lua_ctx));
 
     lctx->error = 0;
-    lctx->internal = ECS_LUA__KEEPOPEN;
 
     luaL_requiref(L, "ecs", luaopen_ecs, 1);
     lua_pop(L, 1);
@@ -602,7 +601,7 @@ int ecs_lua_init(ecs_lua_ctx *ctx)
 {
     if(ctx->world == NULL || ctx->L == NULL) return 1;
 
-    ctx->internal |= ECS_LUA__KEEPOPEN;
+    ctx->internal = ECS_LUA__KEEPOPEN;
 
     ctx_init(*ctx);
 
