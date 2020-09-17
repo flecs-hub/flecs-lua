@@ -99,9 +99,24 @@ static void init_test_state(lua_State *L)
     lua_pop(L, 1);
 }
 
+static int custom_alloc;
+
+void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+    custom_alloc = 1;
+
+    if(!nsize)
+    {
+        ecs_os_free(ptr);
+        return NULL;
+    }
+
+    return ecs_os_realloc(ptr, nsize);
+}
+
 static lua_State *new_test_state(void)
 {
-    lua_State *L = luaL_newstate();
+    lua_State *L = lua_newstate(Allocf, NULL);
 
     init_test_state(L);
 
@@ -142,21 +157,6 @@ static void test_warn(const char *fmt, va_list args)
     test_msg("WARN", fmt, args);
 }
 
-static int custom_alloc;
-
-void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
-{
-    custom_alloc = 1;
-
-    if(!nsize)
-    {
-        ecs_os_free(ptr);
-        return NULL;
-    }
-
-    return ecs_os_realloc(ptr, nsize);
-}
-
 int main(int argc, char **argv)
 {
     if(argc < 2) return 1;
@@ -182,7 +182,7 @@ int main(int argc, char **argv)
     //const EcsLuaHost *ctx = ecs_get(w, EcsSingleton, EcsLuaHost);
     //lua_State *L = ctx->L;
 
-    lua_State *L = lua_newstate(Allocf, NULL);
+    lua_State *L = new_test_state();
     ecs_lua_set_state(w, L);
     ecs_assert(custom_alloc, ECS_INTERNAL_ERROR, NULL);
 
@@ -196,9 +196,14 @@ int main(int argc, char **argv)
         printf("script error: %s\n", err);
     }
 
-    ecs_progress(w, 0);
-    ecs_lua_progress(L);
-    ecs_progress(w, 0);
+    int runs = 2;
+
+    while(ecs_progress(w, 0) && runs)
+    {
+        ecs_lua_progress(L);
+
+        runs--;
+    }
 
     ecs_fini(w);
 
