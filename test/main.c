@@ -166,10 +166,10 @@ int main(int argc, char **argv)
     ecs_os_set_api_defaults();
     ecs_os_api_t os_api = ecs_os_api;
     os_api.abort_ = test_abort;
-    os_api.log_ = test_log;
+    /*os_api.log_ = test_log;
     os_api.log_error_ = test_error;
     os_api.log_debug_ = test_debug;
-    os_api.log_warning_ = test_warn;
+    os_api.log_warning_ = test_warn;*/
     ecs_os_set_api(&os_api);
 
     ECS_IMPORT(w, FlecsLua);
