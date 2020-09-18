@@ -49,7 +49,8 @@
     XX(XOR) \
     XX(NOT) \
     XX(CASE) \
-    XX(SWITCH)
+    XX(SWITCH) \
+    XX(OWNED)
 
 
 
