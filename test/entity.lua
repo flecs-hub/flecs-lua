@@ -7,8 +7,6 @@ ecs.err("This is an ERROR message")
 ecs.dbg("This is a DEBUG message")
 ecs.warn("This is a WARN message")
 
-ecs.set_target_fps(60)
-
 u.print_constants("MatchAll", "Module", "OnStore", "XOR")
 
 local entity = ecs.new()
@@ -117,6 +115,8 @@ assert(m.random_id == m2.random_id)
 assert(m.fixed_id == m2.fixed_id)
 assert(m.name_only == m2.name_only)
 
+ecs.set_target_fps(60)
+
 ecs.progress(function()
-    ecs.log("progress!")
+    ecs.log("progress()!")
 end)
