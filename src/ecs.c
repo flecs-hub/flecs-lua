@@ -284,6 +284,17 @@ static int entity_has(lua_State *L)
     return 1;
 }
 
+static int has_role(lua_State *L)
+{
+    ecs_entity_t e = lua_checkinteger(L, 1);
+    ecs_entity_t role = luaL_checkinteger(L, 2);
+
+    if((e & ECS_ROLE_MASK) == role) lua_pushboolean(L, 1);
+    else lua_pushboolean(L, 0);
+
+    return 1;
+}
+
 static int add_type(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -655,6 +666,7 @@ static const luaL_Reg ecs_lib[] =
     { "name", entity_name },
     { "lookup", lookup_entity },
     { "has", entity_has },
+    { "has_role", has_role },
     { "add", add_type },
     { "remove", remove_type },
     { "clear", clear_entity },

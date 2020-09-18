@@ -64,6 +64,21 @@ ecs.remove(id_name_comp, arr)
 assert(not ecs.has(id_name_comp, arr))
 assert(not pcall(function () ecs.has(id_name_comp, "does_not_exist") end))
 
+local parent = ecs.new()
+local child = ecs.new(ecs.CHILDOF | parent)
+
+assert(ecs.has_role(child, ecs.CHILDOF))
+assert(not ecs.has_role(parent, ecs.CHILDOF))
+
+--XXX: ecs.add() needs type role support
+--[[
+ecs.clear(parent)
+ecs.delete(child)
+
+child = ecs.new()
+ecs.add(child, ecs.CHILDOF | parent)
+assert(ecs.has_role(child, ecs.CHILDOF))
+]]--
 local tag = ecs.tag("LuaTag")
 local tag2 = ecs.tag("LuaTag2")
 

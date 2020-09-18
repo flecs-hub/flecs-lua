@@ -48,6 +48,13 @@ end
 function ecs.has(id, type)
 end
 
+---Test if an entity has a role
+---@param id integer @entity
+---@param role integer
+---@return boolean
+function ecs.has_role(id, role)
+end
+
 ---Add a component, type or tag to an entity
 ---@param id integer entity
 ---@param type string|integer
