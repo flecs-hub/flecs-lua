@@ -1,5 +1,11 @@
-#ifndef ECS__LUA_CONSTANTS_H
-#define ECS__LUA_CONSTANTS_H
+#ifndef ECS_LUA__PRIVATE_H
+#define ECS_LUA__PRIVATE_H
+
+#include <flecs_lua.h>
+
+#include <lualib.h>
+#include <lauxlib.h>
+
 
 #define ECS_LUA_ENUMS(XX) \
     XX(MatchDefault) \
@@ -56,4 +62,4 @@
 
 
 
-#endif /* ECS__LUA_CONSTANTS_H */
+#endif /* ECS_LUA__PRIVATE_H */

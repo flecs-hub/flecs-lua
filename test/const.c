@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <flecs.h>
-#include "src/constants.h"
+#include "src/private.h"
 
 int main(void)
 {

@@ -1,9 +1,5 @@
-#include <flecs_lua.h>
+#include "private.h"
 
-#include "constants.h"
-
-#include <lualib.h>
-#include <lauxlib.h>
 
 #define ECS_LUA__KEEPOPEN 1
 
