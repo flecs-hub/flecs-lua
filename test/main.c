@@ -5,14 +5,19 @@
 
 ECS_STRUCT(lua_test_comp,
 {
-    float blah;
+    float foo;
+    uint8_t u8a[4];
+});
+
+ECS_STRUCT(lua_test_comp2,
+{
+    lua_test_comp comp;
+    int32_t bar;
 });
 
 ECS_STRUCT(lua_test_struct,
 {
     char c;
-    char a[4];
-
     uint8_t u8;
     uint16_t u16;
     uint32_t u32;
@@ -24,10 +29,14 @@ ECS_STRUCT(lua_test_struct,
     float f32;
     double f64;
 
-    lua_test_comp test_comp;
+    char ca[4];
+
+    lua_test_comp comp;
+    lua_test_comp2 comp2;
 });
 
 ECS_DECLARE_COMPONENT(lua_test_comp);
+ECS_DECLARE_COMPONENT(lua_test_comp2);
 ECS_DECLARE_COMPONENT(lua_test_struct);
 
 struct vars
@@ -43,18 +52,22 @@ static void init_globals(void)
     lua_test_struct s =
     {
         .c = 1,
-        .u8 = 234,
-        .u16 = 234,
-        .u32 = 234,
-        .u64 = 234,
-        .i8 = 234,
-        .i16 = 234,
-        .i32 = 234,
-        .i64 = 234,
-        .f32 = 234,
-        .f64 = 234,
+        .ca = { 10, 20, 30, 40 },
 
-        .test_comp.blah = 4.0f
+        .u8 = 2,
+        .u16 = 4,
+        .u32 = 8,
+        .u64 = 16,
+        .i8 = 32,
+        .i16 = 64,
+        .i32 = 128,
+        .i64 = 256,
+        .f32 = 512,
+        .f64 = 1024,
+
+        .comp.foo = 4.0f,
+        .comp.u8a = { 10, 20, 30, 40 },
+        .comp2.bar = 5,
     };
 
     memcpy(&g.s, &s, sizeof(s));
@@ -64,9 +77,11 @@ int lpush_test_struct(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
 
-    lua_pushinteger(L, 232);
+    ecs_entity_t e = ecs_lookup_fullpath(w, "lua_test_struct");
+    ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
 
- //   ecs_lua_push_ptr(w, ecs_entity(lua_test_struct), &g.s, L);
+    ecs_lua_push_ptr(w, L, e, &g.s);
+
     return 1;
 }
 
@@ -87,7 +102,6 @@ static const luaL_Reg test_lib[] =
 int luaopen_test(lua_State *L)
 {
     luaL_newlib(L, test_lib);
-
     return 1;
 }
 
@@ -95,7 +109,7 @@ static void init_test_state(lua_State *L)
 {
     luaL_openlibs(L);
 
-    luaL_requiref(L, "test", luaopen_test, 1);
+    luaL_requiref(L, "test", luaopen_test, 0);
     lua_pop(L, 1);
 }
 
@@ -161,6 +175,8 @@ int main(int argc, char **argv)
 {
     if(argc < 2) return 1;
 
+    init_globals();
+
     ecs_world_t *w = ecs_init();
 
     ecs_os_set_api_defaults();
@@ -175,6 +191,7 @@ int main(int argc, char **argv)
     ECS_IMPORT(w, FlecsLua);
 
     ECS_META(w, lua_test_comp);
+    ECS_META(w, lua_test_comp2);
     ECS_META(w, lua_test_struct);
 
     ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);

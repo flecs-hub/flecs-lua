@@ -286,7 +286,7 @@ static int entity_has(lua_State *L)
 
 static int has_role(lua_State *L)
 {
-    ecs_entity_t e = lua_checkinteger(L, 1);
+    ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t role = luaL_checkinteger(L, 2);
 
     if((e & ECS_ROLE_MASK) == role) lua_pushboolean(L, 1);
@@ -633,9 +633,12 @@ static int set_target_fps(lua_State *L)
 void ecs_lua_progress(lua_State *L)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+
+    if(!ctx->progress_ref) return;
+
     lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->progress_ref);
 
-    ecs_assert(LUA_TFUNCTION == lua_type(L, 1), ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(LUA_TFUNCTION == lua_type(L, 1), ECS_INTERNAL_ERROR, NULL);
 
     lua_pcall(L, 0, 0, 0);
 }
@@ -649,6 +652,41 @@ static int progress(lua_State *L)
     ctx->progress_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
     return 0;
+}
+
+static int world_info(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+    const ecs_world_info_t *wi = ecs_get_world_info(w);
+
+    ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaWorldInfo");
+    ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
+
+    struct EcsLuaWorldInfo world_info =
+    {
+        .last_component_id = wi->last_component_id,
+        .last_id = wi->last_id,
+        .min_id = wi->min_id,
+        .max_id = wi->max_id,
+        .delta_time_raw = wi->delta_time_raw,
+        .delta_time = wi->delta_time,
+        .time_scale = wi->time_scale,
+        .target_fps = wi->target_fps,
+        .frame_time_total = wi->frame_time_total,
+        .system_time_total = wi->system_time_total,
+        .merge_time_total = wi->merge_time_total,
+        .world_time_total = wi->world_time_total,
+        .world_time_total_raw = wi->world_time_total_raw,
+        .sleep_err = wi->sleep_err,
+        .frame_count_total = wi->frame_count_total,
+        .merge_count_total = wi->merge_count_total,
+        .pipeline_build_count_total = wi->pipeline_build_count_total,
+        .systems_ran_frame = wi->systems_ran_frame,
+    };
+
+    ecs_lua_push_ptr(w, L, e, &world_info);
+
+    return 1;
 }
 
 static int func(lua_State *L)
@@ -685,6 +723,7 @@ static const luaL_Reg ecs_lib[] =
 
     { "set_target_fps", set_target_fps },
     { "progress", progress },
+    { "world_info", world_info },
 
 #define XX(const) {#const, NULL },
     ECS_LUA_ENUMS(XX)
@@ -757,30 +796,6 @@ int ecs_lua_set_state(ecs_world_t *w, lua_State *L)
 
     return 0;
 }
-
-ECS_STRUCT(EcsLuaWorldInfo,
-{
-    ecs_entity_t last_component_id;
-    ecs_entity_t last_id;
-    ecs_entity_t min_id;
-    ecs_entity_t max_id;
-
-    float delta_time_raw;
-    float delta_time;
-    float time_scale;
-    float target_fps;
-    float frame_time_total;
-    float system_time_total;
-    float merge_time_total;
-    float world_time_total;
-    float world_time_total_raw;
-    float sleep_err;
-
-    int32_t frame_count_total;
-    int32_t merge_count_total;
-    int32_t pipeline_build_count_total;
-    int32_t systems_ran_frame;
-});
 
 static void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
 {

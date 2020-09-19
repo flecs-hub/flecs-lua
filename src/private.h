@@ -6,6 +6,30 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+ECS_STRUCT(EcsLuaWorldInfo,
+{
+    ecs_entity_t last_component_id;
+    ecs_entity_t last_id;
+    ecs_entity_t min_id;
+    ecs_entity_t max_id;
+
+    float delta_time_raw;
+    float delta_time;
+    float time_scale;
+    float target_fps;
+    float frame_time_total;
+    float system_time_total;
+    float merge_time_total;
+    float world_time_total;
+    float world_time_total_raw;
+    float sleep_err;
+
+    int32_t frame_count_total;
+    int32_t merge_count_total;
+    int32_t pipeline_build_count_total;
+    int32_t systems_ran_frame;
+});
+
 
 #define ECS_LUA_ENUMS(XX) \
     XX(MatchDefault) \

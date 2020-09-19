@@ -132,6 +132,9 @@ assert(m.name_only == m2.name_only)
 
 ecs.set_target_fps(60)
 
+local wi = ecs.world_info()
+ecs.log("target fps: " .. wi.target_fps, "last component: " .. wi.last_component_id)
+
 ecs.progress(function()
     ecs.log("progress()!")
 end)

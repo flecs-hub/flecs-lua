@@ -7,7 +7,6 @@
 extern "C" {
 #endif
 
-
 typedef struct ecs_lua_ctx
 {
     lua_State *L;
@@ -39,6 +38,16 @@ int ecs_lua_set_state(ecs_world_t *w, lua_State *L);
    this is meant to be called between iterations. */
 FLECS_LUA_EXPORT
 void ecs_lua_progress(lua_State *L);
+
+/* Meta */
+
+FLECS_LUA_EXPORT
+void ecs_lua_push_ptr(
+    ecs_world_t *world,
+    lua_State *L,
+    ecs_entity_t type,
+    void* ptr);
+
 
 /* Get world pointer from registry */
 FLECS_LUA_EXPORT

@@ -24,7 +24,8 @@ endif
 flecs_lua_inc = include_directories('include')
 
 flecs_lua_src += files(
-    'src/ecs.c'
+    'src/ecs.c',
+    'src/meta.c'
 )
 
 flecs_lua_lib = library('flecs-lua',

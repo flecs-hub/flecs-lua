@@ -150,6 +150,34 @@ end
 function ecs.progress(cb)
 end
 
+---@class world_info_t
+---@field last_component_id integer
+---@field last_id integer
+---@field min_id integer
+---@field max_id integer
+
+---@field delta_time_raw number
+---@field delta_time number
+---@field time_scale number
+---@field target_fps number
+---@field frame_time_total number
+---@field system_time_total number
+---@field merge_time_total number
+---@field world_time_total number
+---@field world_time_total_raw number
+---@field sleep_err number
+
+---@field frame_count_total integer
+---@field merge_count_total integer
+---@field pipeline_build_count_total integer
+---@field systems_ran_frame integer
+local world_info_t = {}
+
+---Get world info
+---@return world_info_t
+function ecs.world_info()
+end
+
 ecs.MatchDefault = 0
 ecs.MatchAll = 1
 ecs.MatchAny = 2
