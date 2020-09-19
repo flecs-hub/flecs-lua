@@ -104,8 +104,9 @@ end
 
 ---Create a module - DRAFT
 ---@param name string
+---@param cb function import callback
 ---@return integer @entity
-function ecs.module(name)
+function ecs.module(name, cb)
 end
 
 --[[

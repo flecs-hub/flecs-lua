@@ -2,11 +2,6 @@ local ecs = require "ecs"
 local t = require "test"
 local u = require "util"
 
-ecs.log("This is a LOG message: ", 1234, ecs.OnStore)
-ecs.err("This is an ERROR message")
-ecs.dbg("This is a DEBUG message")
-ecs.warn("This is a WARN message")
-
 u.print_constants("MatchAll", "Module", "OnStore", "XOR")
 
 local entity = ecs.new()
@@ -118,9 +113,9 @@ assert(ecs.has(id_name_comps, "lua_test_struct"))
 ecs.clear(id_name_comps)
 assert(not ecs.has(id_name_comps, "lua_test_struct"))
 
-local m = ecs.import "modules.test"
+local m = require "modules.test"
 --u.print_packages()
-local m2 = ecs.import "modules.test"
+local m2 = require "modules.test"
 
 assert(m.imported == 1)
 assert(m.fixed_id == 16000)

@@ -10,6 +10,13 @@ typedef struct ecs_lua_system
     const char *signature;
 }ecs_lua_system;
 
+typedef struct ecs_lua_module
+{
+    ecs_lua_ctx *ctx;
+    const char *name;
+    ecs_entity_t e;
+}ecs_lua_module;
+
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L)
 {
     lua_getfield(L, LUA_REGISTRYINDEX, "ecs_lua");
@@ -468,31 +475,46 @@ static int new_system(lua_State *L)
     return 1;
 }
 
-static int new_module(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_get_world(L);
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
-    ecs_entity_t e = 0;
-
-    const char *name = luaL_checkstring(L, 1);
-
-    ecs_new_module(w, e, name, 4, 4);
-
-    e = ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
-
-    lua_pushinteger(L, e);
-
-    return 1;
-}
-
 void import_func(ecs_world_t *w)
 {
-    ecs_lua_ctx *ctx = ecs_get_context(w);
+    ecs_lua_module *m = ecs_get_context(w);
+    ecs_lua_ctx *ctx = m->ctx;
     lua_State *L = ctx->L;
 
     ecs_os_dbg("ecs_lua: import callback");
 
+    m->e = ecs_new_module(w, 0, m->name, 4, 4);
+
+    ecs_set(w, m->e, EcsName, {.alloc_value = (char*)m->name});
+
     ctx->error = lua_pcall(L, 0, 0, 0);
+}
+
+static int new_module(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+
+    const char *name = luaL_checkstring(L, 1);
+
+    luaL_checktype(L, 2, LUA_TFUNCTION);
+
+    ecs_lua_module m = { .ctx = ctx, .name = name };
+
+    void *orig = ecs_get_context(w);
+    ecs_set_context(w, &m);
+
+    ecs_import(w, import_func, name, NULL, 0);
+
+    ecs_set_context(w, orig);
+
+    ecs_assert(!ctx->error, ECS_INTERNAL_ERROR, lua_tostring(L, -1));
+
+    if(ctx->error) return lua_error(L);
+
+    lua_pushinteger(L, m.e);
+
+    return 1;
 }
 
 static int import_module(lua_State *L)
@@ -634,7 +656,7 @@ void ecs_lua_progress(lua_State *L)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
 
-    if(!ctx->progress_ref) return;
+    if(ctx->progress_ref == LUA_NOREF) return;
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->progress_ref);
 
@@ -755,6 +777,7 @@ static ecs_lua_ctx * ctx_init(ecs_lua_ctx ctx)
     memcpy(lctx, &ctx, sizeof(ecs_lua_ctx));
 
     lctx->error = 0;
+    lctx->progress_ref = LUA_NOREF;
 
     luaL_requiref(L, "ecs", luaopen_ecs, 1);
     lua_pop(L, 1);

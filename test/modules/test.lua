@@ -15,9 +15,7 @@ end
 
 m.imported = 0
 
-
-function m.import()
-    assert(ecs.module("modules.test")) --has to match pathname, for now
+ecs.module("test", function ()
 
     local private = ecs.new()
 
@@ -31,7 +29,7 @@ function m.import()
     assert(m.imported == 0)
 
     m.imported = 1
-end
+end)
 
 --ecs.module -> ecs_import() -> import_func(if not loaded) { ecs_module(); m.import() } ?
 
