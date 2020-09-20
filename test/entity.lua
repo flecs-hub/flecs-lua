@@ -127,6 +127,7 @@ assert(m.name_only == m2.name_only)
 
 assert(ecs.lookup_fullpath("flecs.lua.LuaWorldInfo") ~= 0)
 assert(ecs.lookup_fullpath("test.MStruct") ~= 0)
+assert(ecs.lookup_fullpath("test.MStruct") == m.component)
 assert(ecs.lookup_fullpath("test.NoSuchComponent") == 0)
 
 ecs.set_target_fps(60)
