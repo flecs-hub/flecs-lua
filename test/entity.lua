@@ -2,6 +2,8 @@ local ecs = require "ecs"
 local t = require "test"
 local u = require "util"
 
+assert(ecs.assert(123) == 123)
+
 u.print_constants("MatchAll", "Module", "OnStore", "XOR")
 
 local entity = ecs.new()

@@ -147,6 +147,13 @@ end
 function ecs.warn(...)
 end
 
+---Similar to the standard assert(), but the assertion
+---will always succeed when built with -DNDEBUG
+---@param v any
+---@param message any
+function ecs.assert(v, message)
+end
+
 ---Set target fps
 ---@param fps number
 function ecs.set_target_fps(fps)

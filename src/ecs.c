@@ -654,6 +654,32 @@ static int print_warn(lua_State *L)
     return print_type(L, ECS_LUA__WARN);
 }
 
+static int assert_func(lua_State *L)
+{
+    if(lua_toboolean(L, 1)) return lua_gettop(L);
+
+#ifdef NDEBUG
+    return lua_gettop(L);
+#endif
+
+    luaL_checkany(L, 1);
+    lua_remove(L, 1);
+    lua_pushliteral(L, "assertion failed!");
+    lua_settop(L, 1);
+
+    int level = (int)luaL_optinteger(L, 2, 1);
+    lua_settop(L, 1);
+
+    if(lua_type(L, 1) == LUA_TSTRING && level > 0)
+    {
+        luaL_where(L, level);
+        lua_pushvalue(L, 1);
+        lua_concat(L, 2);
+    }
+
+    return lua_error(L);
+}
+
 static int set_target_fps(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -756,6 +782,7 @@ static const luaL_Reg ecs_lib[] =
     { "err", print_err },
     { "dbg", print_dbg },
     { "warn", print_warn },
+    { "assert", assert_func },
 
     { "set_target_fps", set_target_fps },
     { "progress", progress },
