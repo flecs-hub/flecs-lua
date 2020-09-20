@@ -54,7 +54,7 @@ static void entry_point(ecs_iter_t *it)
 
     ecs_assert(!strcmp(sys->signature, ecs_get(w, it->system, EcsSignatureExpr)->expr), ECS_INTERNAL_ERROR, NULL);
 
-    ecs_os_dbg("Lua system: \"%s\", columns: %d, func ref %d", ecs_get_name(w, it->system), nargs, sys->func_ref);
+    ecs_os_dbg("Lua system: \"%s\", %d columns, func ref %d", ecs_get_name(w, it->system), nargs, sys->func_ref);
 
     ecs_os_get_time(&time);
 
@@ -260,6 +260,19 @@ static int lookup_entity(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
 
     ecs_entity_t e = ecs_lookup(w, name);
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
+static int lookup_fullpath(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    const char *name = luaL_checkstring(L, 1);
+
+    ecs_entity_t e = ecs_lookup_fullpath(w, name);
 
     lua_pushinteger(L, e);
 
@@ -725,6 +738,7 @@ static const luaL_Reg ecs_lib[] =
     { "tag", new_tag },
     { "name", entity_name },
     { "lookup", lookup_entity },
+    { "lookup_fullpath", lookup_fullpath },
     { "has", entity_has },
     { "has_role", has_role },
     { "add", add_type },

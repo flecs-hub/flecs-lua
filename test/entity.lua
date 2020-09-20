@@ -125,6 +125,10 @@ assert(m.random_id == m2.random_id)
 assert(m.fixed_id == m2.fixed_id)
 assert(m.name_only == m2.name_only)
 
+assert(ecs.lookup_fullpath("flecs.lua.LuaWorldInfo") ~= 0)
+assert(ecs.lookup_fullpath("test.MStruct") ~= 0)
+assert(ecs.lookup_fullpath("test.NoSuchComponent") == 0)
+
 ecs.set_target_fps(60)
 
 local wi = ecs.world_info()

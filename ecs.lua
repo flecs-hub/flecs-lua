@@ -37,8 +37,14 @@ end
 
 ---Look up an entity by name
 ---@param name string
----@return string|nil @entity name
+---@return string @entity name
 function ecs.lookup(name)
+end
+
+---Lookup an entity from a full path
+---@param name string
+---@return string @entity name
+function ecs.lookup_fullpath(name)
 end
 
 ---Test if an entity has a component, type or tag
