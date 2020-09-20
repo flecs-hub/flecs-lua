@@ -196,6 +196,8 @@ int main(int argc, char **argv)
 
     ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
 
+    ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g);
+
     //const EcsLuaHost *ctx = ecs_get(w, EcsSingleton, EcsLuaHost);
     //lua_State *L = ctx->L;
 

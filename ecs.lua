@@ -92,6 +92,13 @@ end
 function ecs.struct(name, description)
 end
 
+---Get an immutable table for a component
+---@param entity integer
+---@param component integer
+---@return table
+function ecs.get(entity, component)
+end
+
 ---Create an alias for a meta type
 ---@param meta_type string @name
 ---@param alias string

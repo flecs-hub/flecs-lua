@@ -458,6 +458,21 @@ static int new_alias(lua_State *L)
     return 1;
 }
 
+static int get_func(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t component = luaL_checkinteger(L, 2);
+
+    const void *ptr = ecs_get_w_entity(w, e, component);
+
+    if(ptr) ecs_lua_push_ptr(w, L, component, ptr);
+    else lua_pushnil(L);
+
+    return 1;
+}
+
 static int new_system(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -781,6 +796,8 @@ static const luaL_Reg ecs_lib[] =
     { "array", new_array },
     { "struct", new_struct },
     { "alias", new_alias },
+
+    { "get", get_func },
 
     { "system", new_system },
     { "module", new_module },

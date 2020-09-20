@@ -137,6 +137,10 @@ ecs.set_target_fps(60)
 local wi = ecs.world_info()
 ecs.log("target fps: " .. wi.target_fps, "last component: " .. wi.last_component_id)
 
+local tstruct = ecs.lookup("lua_test_struct")
+local test_struct = ecs.get(ecs.Singleton, tstruct)
+assert(test_struct.i64 == 256)
+
 ecs.progress(function()
     ecs.log("progress()!")
 end)
