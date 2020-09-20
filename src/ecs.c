@@ -1,5 +1,7 @@
 #include "private.h"
 
+#define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
+#define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
 
 #define ECS_LUA__KEEPOPEN 1
 
@@ -44,6 +46,7 @@ static void entry_point(ecs_iter_t *it)
     ecs_world_t *w = it->world;
     ecs_lua_system *sys = it->param;
     lua_State *L = sys->L;
+    ecs_lua__prolog(L);
 
     ecs_entity_t e = 0;
     ecs_entity_t type_entity = 0;
@@ -98,6 +101,7 @@ static void entry_point(ecs_iter_t *it)
         //type_entity = ecs_type_from_entity(w, it->entities[i]);
         //ecs_lua_to_iter(w, it, type_entity, L);
     }
+    ecs_lua__epilog(L);
 }
 
 static void set_default_name(ecs_world_t *w, ecs_entity_t e)
@@ -505,6 +509,7 @@ void import_func(ecs_world_t *w)
 
 static int new_module(lua_State *L)
 {
+    ecs_lua__prolog(L);
     ecs_world_t *w = ecs_lua_get_world(L);
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
 
@@ -527,6 +532,7 @@ static int new_module(lua_State *L)
 
     lua_pushinteger(L, m.e);
 
+    ecs_lua__epilog(L);
     return 1;
 }
 
@@ -693,15 +699,17 @@ static int set_target_fps(lua_State *L)
 
 void ecs_lua_progress(lua_State *L)
 {
+    ecs_lua__prolog(L);
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
 
     if(ctx->progress_ref == LUA_NOREF) return;
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->progress_ref);
-
     ecs_assert(LUA_TFUNCTION == lua_type(L, 1), ECS_INTERNAL_ERROR, NULL);
 
     lua_pcall(L, 0, 0, 0);
+
+    ecs_lua__epilog(L);
 }
 
 static int progress(lua_State *L)
