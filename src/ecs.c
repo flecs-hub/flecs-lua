@@ -717,6 +717,8 @@ void ecs_lua_progress(lua_State *L)
     ecs_lua__prolog(L);
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
 
+    ecs_assert(ctx->progress_ref != LUA_NOREF, ECS_INVALID_PARAMETER, "progress callback is not set");
+
     if(ctx->progress_ref == LUA_NOREF) return;
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->progress_ref);
