@@ -92,11 +92,18 @@ end
 function ecs.struct(name, description)
 end
 
----Get an immutable table for a component
+---Get an immutable table to a component
 ---@param entity integer
 ---@param component integer
 ---@return table
 function ecs.get(entity, component)
+end
+
+---Get a mutable table to a component
+---@param entity integer
+---@param component integer
+---@return table, boolean
+function ecs.get_mut(entity, component)
 end
 
 ---Create an alias for a meta type
