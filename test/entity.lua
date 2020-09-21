@@ -70,15 +70,13 @@ local child = ecs.new(ecs.CHILDOF | parent)
 assert(ecs.has_role(child, ecs.CHILDOF))
 assert(not ecs.has_role(parent, ecs.CHILDOF))
 
---XXX: ecs.add() needs type role support
---[[
 ecs.clear(parent)
 ecs.delete(child)
 
 child = ecs.new()
 ecs.add(child, ecs.CHILDOF | parent)
-assert(ecs.has_role(child, ecs.CHILDOF))
-]]--
+assert(ecs.has(child, ecs.CHILDOF | parent))
+
 local tag = ecs.tag("LuaTag")
 local tag2 = ecs.tag("LuaTag2")
 

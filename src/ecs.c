@@ -301,21 +301,18 @@ static int entity_has(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t type_entity = 0;
-    ecs_type_t type = NULL;
+    ecs_entity_t to_check = 0;
 
-    if(lua_isinteger(L, 2)) type_entity = luaL_checkinteger(L, 2);
+    if(lua_isinteger(L, 2)) to_check = luaL_checkinteger(L, 2);
     else
     {
         const char *name = luaL_checkstring(L, 2);
-        type_entity = ecs_lookup_fullpath(w, name);
+        to_check = ecs_lookup_fullpath(w, name);
 
-        if(!type_entity) return luaL_argerror(L, 2, "could not find type");
+        if(!to_check) return luaL_argerror(L, 2, "could not find type");
     }
 
-    type = ecs_type_from_entity(w, type_entity);
-
-    if(ecs_has_type(w, e, type)) lua_pushboolean(L, 1);
+    if(ecs_has_entity(w, e, to_check)) lua_pushboolean(L, 1);
     else lua_pushboolean(L, 0);
 
     return 1;
@@ -337,20 +334,18 @@ static int add_type(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t type_entity = 0;
+    ecs_entity_t entity_add = 0;
 
-    if(lua_isinteger(L, 2)) type_entity = luaL_checkinteger(L, 2);
+    if(lua_isinteger(L, 2)) entity_add = luaL_checkinteger(L, 2);
     else
     {
         const char *name = luaL_checkstring(L, 2);
-        type_entity = ecs_lookup_fullpath(w, name);
+        entity_add = ecs_lookup_fullpath(w, name);
 
-        if(!type_entity) return luaL_argerror(L, 2, "could not find type");
+        if(!entity_add) return luaL_argerror(L, 2, "could not find type");
     }
 
-    ecs_type_t type = ecs_type_from_entity(w, type_entity);
-
-    ecs_add_type(w, e, type);
+    ecs_add_entity(w, e, entity_add);
 
     return 0;
 }
@@ -360,20 +355,18 @@ static int remove_type(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t type_entity = 0;
+    ecs_entity_t to_remove = 0;
 
-    if(lua_isinteger(L, 2)) type_entity = luaL_checkinteger(L, 2);
+    if(lua_isinteger(L, 2)) to_remove = luaL_checkinteger(L, 2);
     else
     {
         const char *name = luaL_checkstring(L, 2);
-        type_entity = ecs_lookup_fullpath(w, name);
+        to_remove = ecs_lookup_fullpath(w, name);
 
-        if(!type_entity) return luaL_argerror(L, 2, "could not find type");
+        if(!to_remove) return luaL_argerror(L, 2, "could not find type");
     }
 
-    ecs_type_t type = ecs_type_from_entity(w, type_entity);
-
-    ecs_remove_type(w, e, type);
+    ecs_remove_entity(w, e, to_remove);
 
     return 0;
 }
