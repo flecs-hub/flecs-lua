@@ -19,7 +19,7 @@ function ecs.bulk_new(type, n)
 end
 
 ---Delete an entity and all of its components
----@param entity integer|string
+---@param entity string|integer|integer[]
 function ecs.delete(entity)
 end
 

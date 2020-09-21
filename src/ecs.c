@@ -215,6 +215,19 @@ static int delete_entity(lua_State *L)
     ecs_entity_t entity;
 
     if(lua_isinteger(L, 1)) entity = luaL_checkinteger(L, 1);
+    else if(lua_type(L, 1) == LUA_TTABLE)
+    {
+        int len = lua_rawlen(L, 1);
+        int i;
+        for(i=0; i < len; i++)
+        {
+            lua_rawgeti(L, 1, i + 1);
+            entity = luaL_checkinteger(L, -1);
+            ecs_delete(w, entity);
+        }
+
+        return 0;
+    }
     else
     {
         const char *name = luaL_checkstring(L, 1);
