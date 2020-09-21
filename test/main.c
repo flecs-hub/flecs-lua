@@ -6,7 +6,7 @@
 ECS_STRUCT(lua_test_comp,
 {
     float foo;
-    uint8_t u8a[4];
+    uint16_t u8a[4];
 });
 
 ECS_STRUCT(lua_test_comp2,
@@ -68,6 +68,7 @@ static void init_globals(void)
         .comp.foo = 4.0f,
         .comp.u8a = { 10, 20, 30, 40 },
         .comp2.bar = 5,
+        .comp2.comp.u8a = { 100, 200, 300, 400 }
     };
 
     memcpy(&g.s, &s, sizeof(s));
