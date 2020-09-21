@@ -1,6 +1,6 @@
 ## Lua API
 
-This is no loger updated, see [ecs.lua](ecs.lua).
+This is no longer updated, see [ecs.lua](ecs.lua).
 
 #### `ecs.new([id], [[name : string], components : string])`
 
