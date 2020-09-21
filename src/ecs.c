@@ -722,7 +722,11 @@ void ecs_lua_progress(lua_State *L)
     if(ctx->progress_ref == LUA_NOREF) return;
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->progress_ref);
-    ecs_assert(LUA_TFUNCTION == lua_type(L, 1), ECS_INTERNAL_ERROR, NULL);
+
+    int type = lua_type(L, -1);
+    ecs_assert(type == LUA_TFUNCTION, ECS_INTERNAL_ERROR, NULL);
+
+    if(type != LUA_TFUNCTION) return;
 
     lua_pcall(L, 0, 0, 0);
 
