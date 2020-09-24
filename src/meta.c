@@ -1,21 +1,21 @@
 #include "private.h"
 
 static
-void lua_ser_type(
+void serialize_type(
     ecs_world_t *world,
     ecs_vector_t *ser,
     const void *base,
     lua_State *L);
 
 static
-void lua_ser_type_op(
+void serialize_type_op(
     ecs_world_t *world,
     ecs_type_op_t *op,
     const void *base,
     lua_State *L);
 
 static
-void lua_ser_primitive(
+void serialize_primitive(
     ecs_world_t *world,
     ecs_type_op_t *op,
     const void *base,
@@ -72,7 +72,7 @@ void lua_ser_primitive(
 }
 
 static
-void lua_ser_elements(
+void serialize_elements(
     ecs_world_t *world,
     ecs_vector_t *elem_ops,
     const void *base,
@@ -87,7 +87,7 @@ void lua_ser_elements(
     int i;
     for(i=0; i < elem_count; i++)
     {
-        lua_ser_type(world, elem_ops, ptr, L);
+        serialize_type(world, elem_ops, ptr, L);
         lua_rawseti(L, -2, i + 1);
 
         ptr = ECS_OFFSET(ptr, elem_size);
@@ -95,7 +95,7 @@ void lua_ser_elements(
 }
 
 static
-void lua_ser_array(
+void serialize_array(
     ecs_world_t *world,
     ecs_type_op_t *op,
     const void *base,
@@ -104,11 +104,11 @@ void lua_ser_array(
     const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    lua_ser_elements(world, ser->ops, base, op->count, op->size, L);
+    serialize_elements(world, ser->ops, base, op->count, op->size, L);
 }
 
 static
-void lua_ser_type_op(
+void serialize_type_op(
     ecs_world_t *world,
     ecs_type_op_t *op,
     const void *base,
@@ -122,7 +122,7 @@ void lua_ser_type_op(
         ecs_abort(ECS_INVALID_PARAMETER, NULL);
         break;
     case EcsOpPrimitive:
-        lua_ser_primitive(world, op, ECS_OFFSET(base, op->offset), L);
+        serialize_primitive(world, op, ECS_OFFSET(base, op->offset), L);
         break;
     case EcsOpEnum:
       // ecs_lua_push_enum(world, op, ECS_OFFSET(base, op->offset), L);
@@ -131,7 +131,7 @@ void lua_ser_type_op(
       // ecs_lua_push_bitmask(world, op, ECS_OFFSET(base, op->offset), L);
         break;
     case EcsOpArray:
-        lua_ser_array(world, op, ECS_OFFSET(base, op->offset), L);
+        serialize_array(world, op, ECS_OFFSET(base, op->offset), L);
         break;
     case EcsOpVector:
         //ecs_lua_push_vector(world, op, ECS_OFFSET(base, op->offset), L);
@@ -143,7 +143,7 @@ void lua_ser_type_op(
 }
 
 static
-void lua_ser_type(
+void serialize_type(
     ecs_world_t *world,
     ecs_vector_t *ser,
     const void *base,
@@ -176,7 +176,7 @@ void lua_ser_type(
             }
             default:
             {
-                lua_ser_type_op(world, op, base, L);
+                serialize_type_op(world, op, base, L);
                 if(op->name) lua_setfield(L, -2, op->name);
                 break;
             }
@@ -194,5 +194,5 @@ void ecs_lua_push_ptr(
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
 
-    lua_ser_type(world, ser->ops, ptr, L);
+    serialize_type(world, ser->ops, ptr, L);
 }

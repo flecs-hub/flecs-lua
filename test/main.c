@@ -6,7 +6,7 @@
 ECS_STRUCT(lua_test_comp,
 {
     float foo;
-    uint16_t u8a[4];
+    uint16_t u16a[4];
 });
 
 ECS_STRUCT(lua_test_comp2,
@@ -47,6 +47,8 @@ struct vars
 static struct vars g;
 static struct vars g_out;
 
+#define TEST_COMP_INIT { .foo = 123.4f, .u16a = 123, 4321, 32, 688}
+
 static void init_globals(void)
 {
     lua_test_struct s =
@@ -66,9 +68,9 @@ static void init_globals(void)
         .f64 = 1024,
 
         .comp.foo = 4.0f,
-        .comp.u8a = { 10, 20, 30, 40 },
+        .comp.u16a = { 10, 20, 30, 40 },
         .comp2.bar = 5,
-        .comp2.comp.u8a = { 100, 200, 300, 400 }
+        .comp2.comp.u16a = { 100, 200, 300, 400 }
     };
 
     memcpy(&g.s, &s, sizeof(s));
@@ -196,6 +198,9 @@ int main(int argc, char **argv)
     ECS_META(w, lua_test_struct);
 
     ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
+    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
+    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
+    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
 
     ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g);
 
