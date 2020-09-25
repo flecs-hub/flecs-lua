@@ -111,6 +111,14 @@ end
 function ecs.modified(t)
 end
 
+---Set the value of a component
+---@param entity integer
+---@param component integer
+---@param v table
+---@return integer entity
+function ecs.set(entity, component, v)
+end
+
 ---Create an alias for a meta type
 ---@param meta_type string @name
 ---@param alias string

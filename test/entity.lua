@@ -156,3 +156,7 @@ ecs.modified(test_struct)
 test_struct = nil
 test_struct = ecs.get(ecs.Singleton, tstruct)
 assert(test_struct.i64 == 420)
+
+assert(ecs.set(ecs.Singleton, tstruct, { i64 = 32}))
+test_struct = ecs.get(ecs.Singleton, tstruct)
+assert(test_struct.i64 == 32)

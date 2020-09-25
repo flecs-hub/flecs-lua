@@ -545,6 +545,24 @@ static int mutable_modified(lua_State *L)
     return 0;
 }
 
+static int set_func(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t component = luaL_checkinteger(L, 2);
+
+    void *ptr = ecs_get_mut_w_entity(w, e, component, NULL);
+
+    ecs_lua_to_ptr(w, L, 3, component, ptr);
+
+    ecs_modified_w_entity(w, e, component);
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
 static int new_system(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -878,6 +896,7 @@ static const luaL_Reg ecs_lib[] =
     { "get", get_func },
     { "get_mut", get_mut },
     { "modified", mutable_modified },
+    { "set", set_func },
 
     { "system", new_system },
     { "module", new_module },
