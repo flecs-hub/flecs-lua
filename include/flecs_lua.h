@@ -46,7 +46,14 @@ void ecs_lua_push_ptr(
     ecs_world_t *world,
     lua_State *L,
     ecs_entity_t type,
-    void* ptr);
+    const void *ptr);
+
+void ecs_lua_to_ptr(
+    ecs_world_t *world,
+    lua_State *L,
+    int idx,
+    ecs_entity_t type,
+    void *ptr);
 
 
 /* Get world pointer from registry */

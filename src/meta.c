@@ -188,11 +188,112 @@ void ecs_lua_push_ptr(
     ecs_world_t *world,
     lua_State *L,
     ecs_entity_t type,
-    void* ptr)
+    const void *ptr)
 {
     ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
 
     serialize_type(world, ser->ops, ptr, L);
+}
+
+static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State *L, int idx)
+{
+    int ktype, vtype, depth = 0;
+
+    ecs_meta_push(c);
+
+    luaL_checktype(L, idx, LUA_TTABLE);
+
+    lua_pushnil(L);
+
+    while(lua_next(L, idx))
+    {
+        ktype = lua_type(L, -2);
+        vtype = lua_type(L, -1);
+
+        switch(ktype)
+        {
+            case LUA_TSTRING:
+            {
+                ecs_os_dbg("move_name field: %s", lua_tostring(L, -2));
+                ecs_assert(!ecs_meta_move_name(c, lua_tostring(L, -2)), ECS_INTERNAL_ERROR, NULL);
+                break;
+            }
+            case LUA_TNUMBER:
+            {
+                ecs_os_dbg("move field: %lld", lua_tointeger(L, -2));
+                ecs_assert(!ecs_meta_move(c, lua_tointeger(L, -2)), ECS_INTERNAL_ERROR, NULL);
+                break;
+            }
+            default: /* shouldn't happen */
+            {
+                ecs_abort(ECS_INTERNAL_ERROR, NULL);
+            }
+        }
+
+        switch(vtype)
+        {
+            case LUA_TTABLE:
+            {
+                lua_pop(L, 1);
+                continue;
+                ecs_os_dbg("meta_push (nested)\n");
+                ecs_meta_push(c);
+                lua_gettable(L, -1);
+                deserialize_type(world, c, L, idx);
+                lua_pop(L, 1);
+                break;
+            }
+            case LUA_TNUMBER:
+            {
+                if(lua_isinteger(L, -1))
+                {
+                    ecs_os_dbg("  set_int: %lld", lua_tointeger(L, -1));
+                    ecs_assert(!ecs_meta_set_int(c, lua_tointeger(L, -1)), ECS_INTERNAL_ERROR, NULL);
+                }
+                else
+                {
+                    ecs_os_dbg("  set_float %f", lua_tonumber(L, -1));
+                    ecs_assert(!ecs_meta_set_float(c, lua_tonumber(L, -1)), ECS_INTERNAL_ERROR, NULL);
+                }
+
+                break;
+            }
+            case LUA_TBOOLEAN:
+            {
+                ecs_os_dbg("  set_bool: %d", lua_toboolean(L, -1));
+                ecs_assert(!ecs_meta_set_bool(c, lua_toboolean(L, -1)), ECS_INTERNAL_ERROR, NULL);
+                break;
+            }
+            case LUA_TSTRING:
+            {
+                ecs_os_dbg("  set_string: %s", lua_tostring(L, -2));
+                ecs_assert(!ecs_meta_set_string(c, lua_tostring(L, -1)), ECS_INTERNAL_ERROR, NULL);
+                break;
+            }
+            case LUA_TNIL:
+            {
+                ecs_os_dbg("  set_null");
+                ecs_assert(!ecs_meta_set_null(c), ECS_INTERNAL_ERROR, NULL);
+                break;
+            }
+        }
+
+        lua_pop(L, 1);
+    }
+
+    ecs_assert(!ecs_meta_pop(c), ECS_INTERNAL_ERROR, NULL); ecs_os_dbg("meta pop");
+}
+
+void ecs_lua_to_ptr(
+    ecs_world_t *world,
+    lua_State *L,
+    int idx,
+    ecs_entity_t type,
+    void *ptr)
+{
+    ecs_meta_cursor_t c = ecs_meta_cursor(world, type, ptr);
+
+    deserialize_type(world, &c, L, idx);
 }

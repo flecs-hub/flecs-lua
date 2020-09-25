@@ -150,3 +150,9 @@ assert(test_struct.ca[4] == 40)
 assert(test_struct.comp2.bar == 5)
 assert(test_struct.comp.u16a[3] == 30)
 assert(test_struct.comp2.comp.u16a[2] == 200)
+
+test_struct.i64 = 420
+ecs.modified(test_struct)
+test_struct = nil
+test_struct = ecs.get(ecs.Singleton, tstruct)
+assert(test_struct.i64 == 420)

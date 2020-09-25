@@ -489,12 +489,60 @@ static int get_mut(lua_State *L)
     bool is_added = 0;
     void *ptr = ecs_get_mut_w_entity(w, e, component, &is_added);
 
+    if(!ptr)
+    {
+        lua_pushnil(L);
+        lua_pushboolean(L, 0);
+        return 2;
+    }
+
+    ecs_lua_push_ptr(w, L, component, ptr);
+
+    lua_createtable(L, 0, 1);
+    lua_createtable(L, 3, 0);
+
+    lua_pushlightuserdata(L, ptr);
+    lua_rawseti(L, -2, 1);
+
+    lua_pushinteger(L, e);
+    lua_rawseti(L, -2, 2);
+
+    lua_pushinteger(L, component);
+    lua_rawseti(L, -2, 3);
+
+    lua_setfield(L, -2, "__ecs_mutable");
+    lua_setmetatable(L, -2);
+
     lua_pushboolean(L, (int)is_added);
 
-    if(ptr) ecs_lua_push_ptr(w, L, component, ptr);
-    else lua_pushnil(L);
+    return 2;
+}
 
-    return 1;
+static int mutable_modified(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    luaL_getmetafield(L, 1, "__ecs_mutable");
+
+    lua_rawgeti(L, -1, 1);
+    void *ptr = lua_touserdata(L, -1);
+    lua_pop(L, 1);
+
+    lua_rawgeti(L, -1, 2);
+    ecs_entity_t e = luaL_checkinteger(L, -1);
+    lua_pop(L, 1);
+
+    lua_rawgeti(L, -1, 3);
+    ecs_entity_t c = luaL_checkinteger(L, -1);
+    lua_pop(L, 1);
+
+    ecs_lua_to_ptr(w, L, 1, c, ptr);
+
+    ecs_modified_w_entity(w, e, c);
+
+    return 0;
 }
 
 static int new_system(lua_State *L)
@@ -829,6 +877,7 @@ static const luaL_Reg ecs_lib[] =
 
     { "get", get_func },
     { "get_mut", get_mut },
+    { "modified", mutable_modified },
 
     { "system", new_system },
     { "module", new_module },

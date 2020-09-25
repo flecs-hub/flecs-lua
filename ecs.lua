@@ -106,6 +106,11 @@ end
 function ecs.get_mut(entity, component)
 end
 
+---Signal that a component has been modified
+---@param t table
+function ecs.modified(t)
+end
+
 ---Create an alias for a meta type
 ---@param meta_type string @name
 ---@param alias string
