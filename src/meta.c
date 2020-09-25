@@ -199,7 +199,7 @@ void ecs_lua_push_ptr(
 
 static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State *L, int idx)
 {
-    int ktype, vtype, depth = 0;
+    int ktype, vtype, ret, depth = 0;
 
     ecs_meta_push(c);
 
@@ -217,13 +217,15 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             case LUA_TSTRING:
             {
                 ecs_os_dbg("move_name field: %s", lua_tostring(L, -2));
-                ecs_assert(!ecs_meta_move_name(c, lua_tostring(L, -2)), ECS_INTERNAL_ERROR, NULL);
+                ret = ecs_meta_move_name(c, lua_tostring(L, -2));
+                ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 break;
             }
             case LUA_TNUMBER:
             {
-                ecs_os_dbg("move field: %lld", lua_tointeger(L, -2));
-                ecs_assert(!ecs_meta_move(c, lua_tointeger(L, -2)), ECS_INTERNAL_ERROR, NULL);
+                ecs_os_dbg("move idx: %lld", lua_tointeger(L, -2)-1);
+                ret = ecs_meta_move(c, lua_tointeger(L, -2)-1);
+                ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 break;
             }
             default: /* shouldn't happen */
@@ -236,13 +238,15 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
         {
             case LUA_TTABLE:
             {
-                lua_pop(L, 1);
-                continue;
+             //   lua_pop(L, 1);
+              //  continue;
                 ecs_os_dbg("meta_push (nested)\n");
-                ecs_meta_push(c);
-                lua_gettable(L, -1);
-                deserialize_type(world, c, L, idx);
-                lua_pop(L, 1);
+                //ecs_meta_push(c);
+                //lua_gettable(L, -2);
+                //lua_pushnil(L);
+                //idx = -2;
+                deserialize_type(world, c, L, lua_gettop(L));
+                //lua_pop(L, 1);
                 break;
             }
             case LUA_TNUMBER:
@@ -250,12 +254,14 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
                 if(lua_isinteger(L, -1))
                 {
                     ecs_os_dbg("  set_int: %lld", lua_tointeger(L, -1));
-                    ecs_assert(!ecs_meta_set_int(c, lua_tointeger(L, -1)), ECS_INTERNAL_ERROR, NULL);
+                    int ret = ecs_meta_set_int(c, lua_tointeger(L, -1));
+                    ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 }
                 else
                 {
                     ecs_os_dbg("  set_float %f", lua_tonumber(L, -1));
-                    ecs_assert(!ecs_meta_set_float(c, lua_tonumber(L, -1)), ECS_INTERNAL_ERROR, NULL);
+                    ret = ecs_meta_set_float(c, lua_tonumber(L, -1));
+                    ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 }
 
                 break;
@@ -263,19 +269,22 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             case LUA_TBOOLEAN:
             {
                 ecs_os_dbg("  set_bool: %d", lua_toboolean(L, -1));
-                ecs_assert(!ecs_meta_set_bool(c, lua_toboolean(L, -1)), ECS_INTERNAL_ERROR, NULL);
+                int ret = ecs_meta_set_bool(c, lua_toboolean(L, -1));
+                ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 break;
             }
             case LUA_TSTRING:
             {
                 ecs_os_dbg("  set_string: %s", lua_tostring(L, -2));
-                ecs_assert(!ecs_meta_set_string(c, lua_tostring(L, -1)), ECS_INTERNAL_ERROR, NULL);
+                ret = ecs_meta_set_string(c, lua_tostring(L, -1));
+                ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 break;
             }
             case LUA_TNIL:
             {
                 ecs_os_dbg("  set_null");
-                ecs_assert(!ecs_meta_set_null(c), ECS_INTERNAL_ERROR, NULL);
+                ret = ecs_meta_set_null(c);
+                ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 break;
             }
         }
@@ -283,7 +292,9 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
         lua_pop(L, 1);
     }
 
-    ecs_assert(!ecs_meta_pop(c), ECS_INTERNAL_ERROR, NULL); ecs_os_dbg("meta pop");
+    ecs_os_dbg("meta pop");
+    ret = ecs_meta_pop(c);
+    ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
 }
 
 void ecs_lua_to_ptr(
