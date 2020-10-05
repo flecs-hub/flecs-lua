@@ -4,11 +4,11 @@
 local ecs = {}
 
 ---Create a new entity, all parameters are optional
----@param id integer @optional
+---@param e integer @optional
 ---@param name string @optional
 ---@param components string
 ---@return integer @entity
-function ecs.new(id, name, components)
+function ecs.new(e, name, components)
 end
 
 ---Create N new entities with optional components
@@ -30,9 +30,9 @@ function ecs.tag(name)
 end
 
 ---Get the name of an entity
----@param id integer
+---@param e integer
 ---@return string|nil @entity name
-function ecs.name(id)
+function ecs.name(e)
 end
 
 ---Look up an entity by name
@@ -48,47 +48,47 @@ function ecs.lookup_fullpath(name)
 end
 
 ---Test if an entity has a component, type or tag
----@param id integer @entity
+---@param e integer @entity
 ---@param type string|integer
 ---@return boolean
-function ecs.has(id, type)
+function ecs.has(e, type)
 end
 
 ---Test if an entity has a role
----@param id integer @entity
+---@param e integer @entity
 ---@param role integer
 ---@return boolean
-function ecs.has_role(id, role)
+function ecs.has_role(e, role)
 end
 
 ---Test whether an entity is alive
----@param id integer entity
+---@param e integer entity
 ---@return boolean
-function ecs.is_alive(id)
+function ecs.is_alive(e)
 end
 
 ---Test whether an entity exists
 ---Similar to ecs.is_alive, but ignores entity generation count
----@param id integer entity
+---@param e integer entity
 ---@return boolean
-function ecs.exists(id)
+function ecs.exists(e)
 end
 
 ---Add a component, type or tag to an entity
----@param id integer entity
+---@param e integer entity
 ---@param type string|integer
-function ecs.add(id, type)
+function ecs.add(e, type)
 end
 
 ---Remove a component, type or tag from an entity
----@param id integer @entity
+---@param e integer @entity
 ---@param type string|integer
-function ecs.remove(id, type)
+function ecs.remove(e, type)
 end
 
 ---Clear all components
----@param id integer entity
-function ecs.clear(id)
+---@param e integer entity
+function ecs.clear(e)
 end
 
 ---Create a meta array component
