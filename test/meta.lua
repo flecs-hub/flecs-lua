@@ -19,10 +19,10 @@ local INT16_MIN  = -32767 - 1
 local INT32_MIN  = -2147483647 - 1
 local INT64_MIN  = -9223372036854775807
 
-local F32_MAX = (1 << 24) - 1
-local F64_MAX = (1 << 53) - 1
-local F32_MIN = -(1 << 24)
-local F64_MIN = -(1 << 53)
+local F32_MAX    =  (1 << 24) - 1
+local F64_MAX    =  (1 << 53) - 1
+local F32_MIN    = -(1 << 24)
+local F64_MIN    = -(1 << 53)
 
 local tstruct = ecs.lookup("lua_test_struct")
 local test_struct, added = ecs.get_mut(ecs.Singleton, tstruct)
