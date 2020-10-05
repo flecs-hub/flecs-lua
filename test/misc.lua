@@ -1,6 +1,15 @@
 local ecs = require "ecs"
 
-ecs.progress(function() ecs.log("progress()!") end)
+local runs = 0
+
+ecs.progress(function()
+    ecs.log("progress()!")
+
+    runs = runs + 1
+    assert(runs <= 1)
+
+    ecs.quit()
+end)
 
 ecs.log("This is a LOG message: ", 1234, ecs.OnStore)
 ecs.err("This is an ERROR message")

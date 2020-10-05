@@ -232,6 +232,10 @@ local world_info_t = {}
 function ecs.world_info()
 end
 
+---Signal that the application should quit
+function ecs.quit()
+end
+
 ecs.MatchDefault = 0
 ecs.MatchAll = 1
 ecs.MatchAny = 2

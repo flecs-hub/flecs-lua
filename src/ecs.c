@@ -893,6 +893,15 @@ static int world_info(lua_State *L)
     return 1;
 }
 
+static int lquit(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_quit(w);
+
+    return 0;
+}
+
 static int func(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -937,6 +946,7 @@ static const luaL_Reg ecs_lib[] =
     { "set_target_fps", set_target_fps },
     { "progress", progress },
     { "world_info", world_info },
+    { "quit", lquit },
 
 #define XX(const) {#const, NULL },
     ECS_LUA_ENUMS(XX)
