@@ -56,6 +56,7 @@ test_exe = executable('e', files('test/main.c'), dependencies : flecs_lua_dep)
 const_exe = executable('print_const', 'test/const.c', dependencies : flecs_lua_dep)
 
 tests = [
+    'misc',
     'entity',
     'meta'
 ]
