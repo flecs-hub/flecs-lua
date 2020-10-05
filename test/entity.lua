@@ -123,7 +123,7 @@ local m2 = require "modules.test"
 assert(m.imported == 1)
 assert(m.fixed_id == 16000)
 
---Module should not be loaded twice
+--Sanity check
 assert(m.random_id == m2.random_id)
 assert(m.fixed_id == m2.fixed_id)
 assert(m.name_only == m2.name_only)
@@ -141,22 +141,3 @@ ecs.log("target fps: " .. wi.target_fps, "last component: " .. wi.last_component
 ecs.progress(function()
     ecs.log("progress()!")
 end)
-
-local tstruct = ecs.lookup("lua_test_struct")
-local test_struct, added = ecs.get_mut(ecs.Singleton, tstruct)
-assert(not added)
-assert(test_struct.i64 == 256)
-assert(test_struct.ca[4] == 40)
-assert(test_struct.comp2.bar == 5)
-assert(test_struct.comp.u16a[3] == 30)
-assert(test_struct.comp2.comp.u16a[2] == 200)
-
-test_struct.i64 = 420
-ecs.modified(test_struct)
-test_struct = nil
-test_struct = ecs.get(ecs.Singleton, tstruct)
-assert(test_struct.i64 == 420)
-
-assert(ecs.set(ecs.Singleton, tstruct, { i64 = 32}))
-test_struct = ecs.get(ecs.Singleton, tstruct)
-assert(test_struct.i64 == 32)

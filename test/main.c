@@ -15,19 +15,40 @@ ECS_STRUCT(lua_test_comp2,
     int32_t bar;
 });
 
+ECS_ENUM(lua_test_enum,
+{
+    TestEnum1,
+    TestEnum2
+});
+
+ECS_BITMASK(lua_test_bitmask,
+{
+    One = 1,
+    Two = 2,
+    Three = 3
+});
+
+ECS_VECTOR(lua_test_vector,float);
+
+ECS_MAP(lua_test_mapi32, int32_t, float);
+
 ECS_STRUCT(lua_test_struct,
 {
+    bool b;
     char c;
     uint8_t u8;
     uint16_t u16;
     uint32_t u32;
     uint64_t u64;
     int8_t i8;
-    int8_t i16;
+    int16_t i16;
     int32_t i32;
     int64_t i64;
     float f32;
     double f64;
+    lua_test_enum enumeration;
+    lua_test_bitmask bitmask;
+    lua_test_vector vector;
 
     char ca[4];
 
@@ -53,6 +74,7 @@ static void init_globals(void)
 {
     lua_test_struct s =
     {
+        .b = true,
         .c = 1,
         .ca = { 10, 20, 30, 40 },
 
@@ -66,6 +88,8 @@ static void init_globals(void)
         .i64 = 256,
         .f32 = 512,
         .f64 = 1024,
+        .enumeration = 465,
+        .bitmask = One | Two,
 
         .comp.foo = 4.0f,
         .comp.u16a = { 10, 20, 30, 40 },
@@ -83,7 +107,7 @@ int lpush_test_struct(lua_State *L)
     ecs_entity_t e = ecs_lookup_fullpath(w, "lua_test_struct");
     ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
 
-    ecs_lua_push_ptr(w, L, e, &g.s);
+    ecs_ptr_to_lua(w, L, e, &g.s);
 
     return 1;
 }
@@ -195,6 +219,10 @@ int main(int argc, char **argv)
 
     ECS_META(w, lua_test_comp);
     ECS_META(w, lua_test_comp2);
+    ECS_META(w, lua_test_enum);
+    ECS_META(w, lua_test_bitmask);
+    ECS_META(w, lua_test_vector);
+    ECS_META(w, lua_test_mapi32);
     ECS_META(w, lua_test_struct);
 
     ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);

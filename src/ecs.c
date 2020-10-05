@@ -473,7 +473,7 @@ static int get_func(lua_State *L)
 
     const void *ptr = ecs_get_w_entity(w, e, component);
 
-    if(ptr) ecs_lua_push_ptr(w, L, component, ptr);
+    if(ptr) ecs_ptr_to_lua(w, L, component, ptr);
     else lua_pushnil(L);
 
     return 1;
@@ -496,7 +496,7 @@ static int get_mut(lua_State *L)
         return 2;
     }
 
-    ecs_lua_push_ptr(w, L, component, ptr);
+    ecs_ptr_to_lua(w, L, component, ptr);
 
     lua_createtable(L, 0, 1);
     lua_createtable(L, 3, 0);
@@ -864,7 +864,7 @@ static int world_info(lua_State *L)
         .systems_ran_frame = wi->systems_ran_frame,
     };
 
-    ecs_lua_push_ptr(w, L, e, &world_info);
+    ecs_ptr_to_lua(w, L, e, &world_info);
 
     return 1;
 }

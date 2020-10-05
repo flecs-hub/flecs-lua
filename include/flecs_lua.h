@@ -39,15 +39,16 @@ int ecs_lua_set_state(ecs_world_t *w, lua_State *L);
 FLECS_LUA_EXPORT
 void ecs_lua_progress(lua_State *L);
 
-/* Meta */
-
+/* Pushes the component at ptr onto the stack */
 FLECS_LUA_EXPORT
-void ecs_lua_push_ptr(
+void ecs_ptr_to_lua(
     ecs_world_t *world,
     lua_State *L,
     ecs_entity_t type,
     const void *ptr);
 
+/* Converts the Lua value at the given index to the component type */
+FLECS_LUA_EXPORT
 void ecs_lua_to_ptr(
     ecs_world_t *world,
     lua_State *L,

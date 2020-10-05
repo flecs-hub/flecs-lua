@@ -57,7 +57,7 @@ const_exe = executable('print_const', 'test/const.c', dependencies : flecs_lua_d
 
 tests = [
     'entity',
-    #'meta'
+    'meta'
 ]
 
 env = environment()
