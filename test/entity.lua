@@ -73,6 +73,9 @@ assert(not ecs.has_role(parent, ecs.CHILDOF))
 ecs.clear(parent)
 ecs.delete(child)
 
+assert(ecs.exists(child))
+assert(not ecs.is_alive(child))
+
 local tag = ecs.tag("LuaTag")
 local tag2 = ecs.tag("LuaTag2")
 

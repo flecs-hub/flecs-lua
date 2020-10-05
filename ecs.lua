@@ -61,6 +61,19 @@ end
 function ecs.has_role(id, role)
 end
 
+---Test whether an entity is alive
+---@param id integer entity
+---@return boolean
+function ecs.is_alive(id)
+end
+
+---Test whether an entity exists
+---Similar to ecs.is_alive, but ignores entity generation count
+---@param id integer entity
+---@return boolean
+function ecs.exists(id)
+end
+
 ---Add a component, type or tag to an entity
 ---@param id integer entity
 ---@param type string|integer

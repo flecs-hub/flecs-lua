@@ -329,6 +329,30 @@ static int has_role(lua_State *L)
     return 1;
 }
 
+static int is_alive(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    if(ecs_is_alive(w, e)) lua_pushboolean(L, 1);
+    else lua_pushboolean(L, 0);
+
+    return 1;
+}
+
+static int exists(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    if(ecs_exists(w, e)) lua_pushboolean(L, 1);
+    else lua_pushboolean(L, 0);
+
+    return 1;
+}
+
 static int add_type(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -886,6 +910,8 @@ static const luaL_Reg ecs_lib[] =
     { "lookup_fullpath", lookup_fullpath },
     { "has", entity_has },
     { "has_role", has_role },
+    { "is_alive", is_alive },
+    { "exists", exists },
     { "add", add_type },
     { "remove", remove_type },
     { "clear", clear_entity },
