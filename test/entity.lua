@@ -73,10 +73,6 @@ assert(not ecs.has_role(parent, ecs.CHILDOF))
 ecs.clear(parent)
 ecs.delete(child)
 
-child = ecs.new()
-ecs.add(child, ecs.CHILDOF | parent)
-assert(ecs.has(child, ecs.CHILDOF | parent))
-
 local tag = ecs.tag("LuaTag")
 local tag2 = ecs.tag("LuaTag2")
 
