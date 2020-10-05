@@ -64,14 +64,6 @@ ecs_world_t *ecs_lua_get_world(lua_State *L);
 FLECS_LUA_EXPORT
 int luaopen_ecs(lua_State *L);
 
-/* Legacy */
-
-FLECS_LUA_EXPORT
-int ecs_lua_init(ecs_lua_ctx ctx);
-
-FLECS_LUA_EXPORT
-void ecs_lua_exit(lua_State *L);
-
 #ifdef __cplusplus
 }
 #endif
