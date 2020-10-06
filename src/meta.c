@@ -68,6 +68,12 @@ void serialize_primitive(
         case EcsEntity:
             lua_pushinteger(L, *(ecs_entity_t*)base);
             break;
+        case EcsIPtr:
+            lua_pushinteger(L, *(intptr_t*)base);
+            break;
+        case EcsUPtr:
+            lua_pushinteger(L, *(uintptr_t*)base);
+            break;
     }
 }
 
