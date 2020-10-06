@@ -32,7 +32,6 @@ local test_struct, added = ecs.get_mut(ecs.Singleton, tstruct)
 assert(not added)
 assert(test_struct.b == true)
 assert(test_struct.c == 1)
-assert(test_struct.ca[1] == 10 and test_struct.ca[4] == 40)
 assert(test_struct.u8 == 2)
 assert(test_struct.u16 == 4)
 assert(test_struct.u32 == 8)
@@ -43,6 +42,11 @@ assert(test_struct.i32 == 128)
 assert(test_struct.i64 == 256)
 assert(test_struct.f32 == 512)
 assert(test_struct.f64 == 1024)
+
+assert(test_struct.ca[1] == 10 and test_struct.ca[4] == 40)
+
+assert(test_struct.vptr == test_struct.uptr)
+
 assert(test_struct.enumeration == 465)
 assert(test_struct.bitmask == 1 | 2)
 
@@ -65,6 +69,7 @@ test_struct = ecs.get(ecs.Singleton, tstruct)
 
 assert(test_struct.b == false)
 assert(test_struct.i64 == 420)
+assert(test_struct.vptr == test_struct.uptr)
 assert(test_struct.comp2.comp.u16a[2] == 344)
 assert(test_struct.enumeration == 500)
 assert(test_struct.bitmask == (1 | 2 | 3))

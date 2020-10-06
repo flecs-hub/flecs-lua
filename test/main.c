@@ -46,11 +46,16 @@ ECS_STRUCT(lua_test_struct,
     int64_t i64;
     float f32;
     double f64;
+
+    char ca[4];
+
+    char *cptr;
+    void *vptr;
+    uintptr_t uptr;
+
     lua_test_enum enumeration;
     lua_test_bitmask bitmask;
     lua_test_vector vector;
-
-    char ca[4];
 
     lua_test_comp comp;
     lua_test_comp2 comp2;
@@ -76,8 +81,6 @@ static void init_globals(void)
     {
         .b = true,
         .c = 1,
-        .ca = { 10, 20, 30, 40 },
-
         .u8 = 2,
         .u16 = 4,
         .u32 = 8,
@@ -88,6 +91,12 @@ static void init_globals(void)
         .i64 = 256,
         .f32 = 512,
         .f64 = 1024,
+
+        .ca = { 10, 20, 30, 40 },
+
+        .vptr = &g,
+        .uptr = (uintptr_t)&g,
+
         .enumeration = 465,
         .bitmask = One | Two,
 
