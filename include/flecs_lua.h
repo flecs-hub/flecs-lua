@@ -7,18 +7,13 @@
 extern "C" {
 #endif
 
-typedef struct ecs_lua_ctx
+typedef struct ecs_lua_ctx ecs_lua_ctx;
+
+typedef struct EcsLuaHost
 {
     lua_State *L;
-    int flags;
-
-    int internal;
-    int error;
-    int progress_ref;
-    ecs_world_t *world;
-}ecs_lua_ctx;
-
-typedef ecs_lua_ctx EcsLuaHost;
+    ecs_lua_ctx *ctx;
+}EcsLuaHost;
 
 typedef struct FlecsLua
 {

@@ -241,8 +241,8 @@ int main(int argc, char **argv)
 
     ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g);
 
-    //const EcsLuaHost *ctx = ecs_get(w, EcsSingleton, EcsLuaHost);
-    //lua_State *L = ctx->L;
+    //const EcsLuaHost *host = ecs_singleton_get(w, EcsLuaHost);
+    //lua_State *L = host->L;
 
     lua_State *L = new_test_state();
     ecs_lua_set_state(w, L);

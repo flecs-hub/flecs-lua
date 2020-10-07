@@ -995,17 +995,19 @@ void ecs_lua_exit(lua_State *L)
 
 int ecs_lua_set_state(ecs_world_t *w, lua_State *L)
 {
-    ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaHost");
+    ecs_entity_t ecs_entity(EcsLuaHost) = ecs_lookup_fullpath(w, "flecs.lua.LuaHost");
+    ecs_assert(ecs_entity(EcsLuaHost) != 0, ECS_INTERNAL_ERROR, NULL);
 
-    EcsLuaHost *ctx = ecs_get_mut_w_entity(w, EcsSingleton, e, NULL);
+    EcsLuaHost *host = ecs_singleton_get_mut(w, EcsLuaHost);
 
-    ecs_lua_exit(ctx->L);
+    ecs_lua_exit(host->L);
 
     ecs_lua_ctx param = { .L = L, .world = w, .internal = ECS_LUA__KEEPOPEN };
 
-    ctx = ctx_init(param);
+    host->L = L;
+    host->ctx = ctx_init(param);
 
-    ecs_set_ptr_w_entity(w, EcsSingleton, e, sizeof(EcsLuaHost), ctx);
+    ecs_singleton_modified(w, EcsLuaHost);
 
     return 0;
 }
@@ -1021,10 +1023,10 @@ static void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
     return ecs_os_realloc(ptr, nsize);
 }
 
-ECS_DTOR(EcsLuaHost, ctx,
+ECS_DTOR(EcsLuaHost, ptr,
 {
-    lua_State *L = ctx->L;
-    ecs_lua_exit(L);
+    ecs_lua_exit(ptr->L);
+    ptr->L = NULL;
 });
 
 void FlecsLuaImport(ecs_world_t *w)
@@ -1048,7 +1050,7 @@ void FlecsLuaImport(ecs_world_t *w)
     ecs_lua_ctx param = { .L = L, .world = w};
     ecs_lua_ctx *ctx = ctx_init(param);
 
-    ecs_set_ptr(w, EcsSingleton, EcsLuaHost, ctx);
+    ecs_singleton_set(w, EcsLuaHost, { .L = L, .ctx = ctx });
 
     ecs_set_component_actions(w, EcsLuaHost,
     {

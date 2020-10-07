@@ -6,6 +6,17 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+typedef struct ecs_lua_ctx
+{
+    lua_State *L;
+    int flags;
+
+    int internal;
+    int error;
+    int progress_ref;
+    ecs_world_t *world;
+}ecs_lua_ctx;
+
 ECS_STRUCT(EcsLuaWorldInfo,
 {
     ecs_entity_t last_component_id;
