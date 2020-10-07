@@ -154,3 +154,6 @@ assert(not pcall(function () ecs.set(ecs.Singleton, tstruct, { u32 = INT32_MIN -
 assert(not pcall(function () ecs.set(ecs.Singleton, tstruct, { f32 = F32_MAX + 1}) end))
 assert(not pcall(function () ecs.set(ecs.Singleton, tstruct, { f32 = F32_MIN - 1}) end))
 assert(not pcall(function () ecs.set(ecs.Singleton, tstruct, { i16 = 1000000}) end))
+
+local v = { foo = "bar"}
+assert(not pcall(function () ecs.modified(v) end))

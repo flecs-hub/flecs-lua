@@ -550,6 +550,8 @@ static int mutable_modified(lua_State *L)
 
     luaL_getmetafield(L, 1, "__ecs_mutable");
 
+    if(lua_type(L, -1) != LUA_TTABLE) return luaL_error(L, "table is not a mutable");
+
     lua_rawgeti(L, -1, 1);
     void *ptr = lua_touserdata(L, -1);
     lua_pop(L, 1);
