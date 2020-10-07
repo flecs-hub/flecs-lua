@@ -74,6 +74,8 @@ void serialize_primitive(
         case EcsUPtr:
             lua_pushinteger(L, *(uintptr_t*)base);
             break;
+        default:
+            luaL_error(L, "unknown primitive (%d)", op->is.primitive);
     }
 }
 
@@ -322,15 +324,19 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
         if(ktype == LUA_TSTRING)
         {
             const char *key = lua_tostring(L, -2);
+
             ecs_os_dbg("move_name field: %s", key);
             ret = ecs_meta_move_name(c, key);
+
             if(ret) luaL_error(L, "field \"%s\" does not exist", key);
         }
         else if(ktype == LUA_TNUMBER)
         {
             lua_Integer key = lua_tointeger(L, -2) - 1;
+
             ecs_os_dbg("move idx: %lld", key);
             ret = ecs_meta_move(c, key);
+
             if(ret) luaL_error(L, "invalid index %I (Lua [%I])", key, key + 1);
         }
 
@@ -352,14 +358,20 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
                 if(lua_isinteger(L, -1))
                 {
                     lua_Integer integer = lua_tointeger(L, -1);
+
                     ecs_os_dbg("  set_int: %lld", integer);
                     ret = ecs_meta_set_int(c, integer);
+
                     if(ret) luaL_error(L, "integer out of range (%I)", integer);
                 }
                 else
                 {
-                    ecs_os_dbg("  set_float %f", lua_tonumber(L, -1));
-                    ret = ecs_meta_set_float(c, lua_tonumber(L, -1));
+                    lua_Number number = lua_tonumber(L, -1);
+
+                    ecs_os_dbg("  set_float %f", number);
+                    ret = ecs_meta_set_float(c, number);
+
+                    if(ret) luaL_error(L, "failed to set float (%f)", number);
                 }
 
                 break;
@@ -368,6 +380,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             {
                 ecs_os_dbg("  set_bool: %d", lua_toboolean(L, -1));
                 ret = ecs_meta_set_bool(c, lua_toboolean(L, -1));
+
                 ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 break;
             }
@@ -375,6 +388,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             {
                 ecs_os_dbg("  set_string: %s", lua_tostring(L, -1));
                 ret = ecs_meta_set_string(c, lua_tostring(L, -1));
+
                 ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 break;
             }
@@ -382,6 +396,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             {
                 ecs_os_dbg("  set_null");
                 ret = ecs_meta_set_null(c);
+
                 ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 break;
             }
