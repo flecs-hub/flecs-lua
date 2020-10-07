@@ -139,7 +139,7 @@ end
 function ecs.alias(meta_type, alias)
 end
 
----Create a system - DRAFT
+---Create a system
 ---@param func function
 ---@param name string
 ---@param phase integer
@@ -148,7 +148,7 @@ end
 function ecs.system(func, name, phase, signature)
 end
 
----Create a module - DRAFT
+---Create a module
 ---@param name string
 ---@param cb function import callback
 ---@return integer @entity
