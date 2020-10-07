@@ -201,7 +201,7 @@ end
 
 ---Set progress function callback
 ---@param cb function
-function ecs.progress(cb)
+function ecs.progress_cb(cb)
 end
 
 ---@class world_info_t

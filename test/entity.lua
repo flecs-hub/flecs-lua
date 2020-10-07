@@ -137,6 +137,6 @@ ecs.set_target_fps(60)
 local wi = ecs.world_info()
 ecs.log("target fps: " .. wi.target_fps, "last component: " .. wi.last_component_id)
 
-ecs.progress(function()
+ecs.progress_cb(function()
     ecs.log("progress()!")
 end)

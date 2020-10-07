@@ -2,7 +2,7 @@ local ecs = require "ecs"
 local t = require "test"
 local u = require "util"
 
-ecs.progress(function() ecs.log("progress()!") end)
+ecs.progress_cb(function() ecs.log("progress()!") end)
 
 local UINT8_MAX  = 0xff
 local UINT16_MAX = 0xffff

@@ -2,7 +2,7 @@ local ecs = require "ecs"
 
 local runs = 0
 
-ecs.progress(function()
+ecs.progress_cb(function()
     ecs.log("progress()!")
 
     runs = runs + 1
