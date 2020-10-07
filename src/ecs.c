@@ -665,48 +665,6 @@ static int new_module(lua_State *L)
     return 1;
 }
 
-static int import_module(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_get_world(L);
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
-
-    const char *name = luaL_checkstring(L, 1);
-    ecs_entity_t e = 0;
-
-    luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
-    lua_getfield(L, -1, name);
-
-    if(!lua_toboolean(L, -1))
-    {
-        lua_getglobal(L, "require");
-        lua_pushstring(L, name);
-        int ret = lua_pcall(L, 1, 1, 0);
-        if(ret) lua_error(L);
-
-        lua_getfield(L, -1, "import");
-        luaL_checktype(L, -1, LUA_TFUNCTION);
-
-        ecs_world_t *orig = ecs_get_context(w);
-        ecs_set_context(w, ctx);
-
-        e = ecs_import(w, import_func, name, NULL, 0);
-
-        ecs_set_context(w, orig);
-
-        ecs_assert(!ctx->error, ECS_INTERNAL_ERROR, lua_tostring(L, -1));
-
-        if(ctx->error) return lua_error(L);
-
-        ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
-    }
-
-
-    luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
-    lua_getfield(L, -1, name);
-
-    return 1;
-}
-
 static int vararg2str(lua_State *L, int n, ecs_strbuf_t *buf)
 {
     lua_getglobal(L, "tostring");
@@ -935,7 +893,6 @@ static const luaL_Reg ecs_lib[] =
 
     { "system", new_system },
     { "module", new_module },
-    { "import", import_module },
 
     { "log", print_log },
     { "err", print_err },

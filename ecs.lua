@@ -155,22 +155,6 @@ end
 function ecs.module(name, cb)
 end
 
---[[
----Import a Lua module - DRAFT
----@param module string
----@return table
-function ecs.import(module)
-    --only C modules are loaded once?
-    if(package.loaded[module]) then
-        return package.loaded[module]
-    end
-
-    local m = require(module)
-    m.import()
-    return m
-end
-]]--
-
 ---Print log message
 function ecs.log(...)
 end
