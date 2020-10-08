@@ -92,17 +92,18 @@ function ecs.clear(e)
 end
 
 ---Create a meta array component
----@param name string entity name
----@param description string @format: "(type,N)"
+---@param name string name
+---@param type string
+---@param count integer
 ---@return integer @entity
-function ecs.array(name, description)
+function ecs.array(name, type, count)
 end
 
 ---Create a meta struct component
----@param name string entity name
----@param description string @format: "{type member; ...}"
+---@param name string name
+---@param descriptor string @format: "{type member; ...}"
 ---@return integer @entity
-function ecs.struct(name, description)
+function ecs.struct(name, descriptor)
 end
 
 ---Get an immutable table to a component
