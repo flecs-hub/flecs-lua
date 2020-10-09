@@ -18,4 +18,5 @@ ecs.warn("This is a WARN message")
 
 ecs.assert(1)
 ecs.assert(1, "test")
+assert(not pcall(ecs.assert(0)))
 assert(not pcall(function () ecs.assert(false, "failing assert") end))
