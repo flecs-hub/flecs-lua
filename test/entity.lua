@@ -2,7 +2,7 @@ local ecs = require "ecs"
 local t = require "test"
 local u = require "util"
 
-assert(ecs.assert(123) == 123)
+ecs.progress_cb(function() ecs.log("progress()!") end)
 
 u.print_constants("MatchAll", "Module", "OnStore", "XOR")
 
@@ -52,7 +52,7 @@ assert(ecs.has(alias, "lua_test_comp"))
 assert(not pcall(function() ecs.alias("error", "newname") end))
 assert(not pcall(function() ecs.alias("name_only", "newname") end))
 
-local arr = ecs.array("LuaArray", "(LuaStruct,4)")
+local arr = ecs.array("LuaArray", "LuaStruct", 4)
 assert(ecs.name(arr) == "LuaArray")
 
 assert(not ecs.has(id_name_comp, "LuaArray"))
@@ -115,28 +115,4 @@ assert(ecs.has(id_name_comps, "lua_test_struct"))
 ecs.clear(id_name_comps)
 assert(not ecs.has(id_name_comps, "lua_test_struct"))
 
-local m = require "modules.test"
---u.print_packages()
-local m2 = require "modules.test"
-
-assert(m.imported == 1)
-assert(m.fixed_id == 16000)
-
---Sanity check
-assert(m.random_id == m2.random_id)
-assert(m.fixed_id == m2.fixed_id)
-assert(m.name_only == m2.name_only)
-
 assert(ecs.lookup_fullpath("flecs.lua.LuaWorldInfo") ~= 0)
-assert(ecs.lookup_fullpath("test.MStruct") ~= 0)
-assert(ecs.lookup_fullpath("test.MStruct") == m.component)
-assert(ecs.lookup_fullpath("test.NoSuchComponent") == 0)
-
-ecs.set_target_fps(60)
-
-local wi = ecs.world_info()
-ecs.log("target fps: " .. wi.target_fps, "last component: " .. wi.last_component_id)
-
-ecs.progress_cb(function()
-    ecs.log("progress()!")
-end)
