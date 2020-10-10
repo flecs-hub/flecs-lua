@@ -453,12 +453,10 @@ void serialize_column(
     serialize_elements(world, ser->ops, base, count, hdr->size, L);
 }
 
-void ecs_iter_to_lua(
-    ecs_world_t *world,
-    lua_State *L,
-    ecs_iter_t *it,
-    ecs_type_t select)
+void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select)
 {
+    ecs_world_t *world = it->world;
+
     ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INTERNAL_ERROR, NULL);
 
@@ -551,10 +549,7 @@ void deserialize_column(
     }
 }
 
-void ecs_lua_to_iter(
-    ecs_world_t *world,
-    lua_State *L,
-    int idx)
+void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
 {
     ecs_lua__prolog(L);
     ecs_iter_t *it = ecs_lua__checkiter(L, idx);

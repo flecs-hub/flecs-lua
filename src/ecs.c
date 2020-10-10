@@ -59,7 +59,7 @@ static void system_entry_point(ecs_iter_t *it)
 
     ecs_os_get_time(&time);
 
-    ecs_iter_to_lua(w, L, it, NULL);
+    ecs_iter_to_lua(it, L, NULL);
 
     print_time(&time, "iter serialization");
 
