@@ -21,6 +21,11 @@ ecs.assert(1, "test")
 assert(not pcall(ecs.assert(0)))
 assert(not pcall(function () ecs.assert(false, "failing assert") end))
 
+local time = ecs.get_time()
+
+print("time = " .. time.sec .. " seconds, " .. time.nanosec .. " nanoseconds")
+print("elapsed: " .. ecs.time_measure(time) .. "seconds")
+
 runs = 2
 
 while runs > 0 and ecs.progress(0)  do

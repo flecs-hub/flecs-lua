@@ -223,6 +223,22 @@ end
 function ecs.assert(v, message)
 end
 
+---@class ecs_time_t
+---@field sec integer
+---@field nanosec integer
+local ecs_time_t = {}
+
+---Get the current time
+---@return ecs_time_t
+function ecs.get_time()
+end
+
+---Measure elapsed time for timestamp
+---@param start ecs_time_t
+---@return number
+function ecs.time_measure(start)
+end
+
 ---Set target fps
 ---@param fps number
 function ecs.set_target_fps(fps)
