@@ -4,6 +4,10 @@ project('flecs-lua', 'c',
     default_options : 'c_std=c99'
 )
 
+if get_option('tests').enabled()
+    add_global_arguments('-DLUA_USE_APICHECK', language : 'c')
+endif
+
 if get_option('lua54') == true
     subproject('lua-5.4')
 endif
