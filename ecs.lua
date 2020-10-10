@@ -224,6 +224,12 @@ end
 function ecs.set_target_fps(fps)
 end
 
+---Progress the world
+---@param delta_time number
+---@return boolean
+function ecs.progress(delta_time)
+end
+
 ---Set progress function callback
 ---@param cb function
 function ecs.progress_cb(cb)

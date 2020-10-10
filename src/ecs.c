@@ -873,6 +873,19 @@ void ecs_lua_progress(lua_State *L)
     ecs_lua__epilog(L);
 }
 
+static int progress(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    lua_Number delta_time = luaL_checknumber(L, 1);
+
+    int b = ecs_progress(w, delta_time);
+
+    lua_pushboolean(L, b); 
+
+    return 1;
+}
+
 static int progress_cb(lua_State *L)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
@@ -972,6 +985,7 @@ static const luaL_Reg ecs_lib[] =
     { "assert", assert_func },
 
     { "set_target_fps", set_target_fps },
+    { "progress", progress },
     { "progress_cb", progress_cb },
     { "world_info", world_info },
     { "quit", lquit },

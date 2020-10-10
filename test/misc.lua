@@ -20,3 +20,12 @@ ecs.assert(1)
 ecs.assert(1, "test")
 assert(not pcall(ecs.assert(0)))
 assert(not pcall(function () ecs.assert(false, "failing assert") end))
+
+runs = 2
+
+while runs > 0 and ecs.progress(0)  do
+    runs = runs - 1
+end
+
+local wi = ecs.world_info()
+assert(wi.frame_count_total == 2)
