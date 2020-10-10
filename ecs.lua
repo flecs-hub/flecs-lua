@@ -1,5 +1,5 @@
 --EmmyLua annotations and documentation for flecs-lua
---NOTE: ecs is a native module, do not use this at runtime.
+--NOTE: ecs is a native module, this is not used at runtime.
 
 local ecs = {}
 

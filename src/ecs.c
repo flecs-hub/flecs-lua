@@ -38,7 +38,7 @@ static void print_time(ecs_time_t *time, const char *str)
 #endif
 }
 
-static void system_func(ecs_iter_t *it)
+static void system_entry_point(ecs_iter_t *it)
 {
     ecs_world_t *w = it->world;
     ecs_lua_system *sys = it->param;
@@ -654,7 +654,7 @@ static int new_system(lua_State *L)
     ecs_entity_t phase = luaL_optinteger(L, 3, 0);
     const char *signature = luaL_optstring(L, 4, "0");
 
-    ecs_entity_t e = ecs_new_system(w, 0, name, phase, signature, system_func);
+    ecs_entity_t e = ecs_new_system(w, 0, name, phase, signature, system_entry_point);
 
     ecs_lua_system *sys = lua_newuserdata(L, sizeof(ecs_lua_system));
     luaL_ref(L, LUA_REGISTRYINDEX);
@@ -675,13 +675,11 @@ static int new_system(lua_State *L)
     return 1;
 }
 
-static void import_func(ecs_world_t *w)
+static void import_entry_point(ecs_world_t *w)
 {
     ecs_lua_module *m = ecs_get_context(w);
     ecs_lua_ctx *ctx = m->ctx;
     lua_State *L = ctx->L;
-
-    ecs_os_dbg("ecs_lua: import callback");
 
     m->e = ecs_new_module(w, 0, m->name, 4, 4);
 
@@ -705,7 +703,7 @@ static int new_module(lua_State *L)
     void *orig = ecs_get_context(w);
     ecs_set_context(w, &m);
 
-    ecs_import(w, import_func, name, NULL, 0);
+    ecs_import(w, import_entry_point, name, NULL, 0);
 
     ecs_set_context(w, orig);
 
