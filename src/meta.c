@@ -306,6 +306,12 @@ void ecs_ptr_to_lua(
     serialize_type(world, ser->ops, ptr, L);
 }
 
+#ifdef NDEBUG
+    #define ecs_lua_dbg(fmt, ...)
+#else
+    #define ecs_lua_dbg(fmt, ...) //ecs_os_dbg(fmt, __VA_ARGS__)
+#endif
+
 static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State *L, int idx)
 {
     int ktype, vtype, ret, depth = 0;
@@ -325,7 +331,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
         {
             const char *key = lua_tostring(L, -2);
 
-            ecs_os_dbg("move_name field: %s", key);
+            ecs_lua_dbg("move_name field: %s", key);
             ret = ecs_meta_move_name(c, key);
 
             if(ret) luaL_error(L, "field \"%s\" does not exist", key);
@@ -334,7 +340,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
         {
             lua_Integer key = lua_tointeger(L, -2) - 1;
 
-            ecs_os_dbg("move idx: %lld", key);
+            ecs_lua_dbg("move idx: %lld", key);
             ret = ecs_meta_move(c, key);
 
             if(ret) luaL_error(L, "invalid index %I (Lua [%I])", key, key + 1);
@@ -344,7 +350,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
         {
             case LUA_TTABLE:
             {
-                ecs_os_dbg("meta_push (nested)");
+                ecs_lua_dbg("meta_push (nested)");
                 //ecs_meta_push(c);
                 //idx = lua_gettop(L);
                 //lua_pushnil(L);
@@ -359,7 +365,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
                 {
                     lua_Integer integer = lua_tointeger(L, -1);
 
-                    ecs_os_dbg("  set_int: %lld", integer);
+                    ecs_lua_dbg("  set_int: %lld", integer);
                     ret = ecs_meta_set_int(c, integer);
 
                     if(ret) luaL_error(L, "integer out of range (%I)", integer);
@@ -368,7 +374,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
                 {
                     lua_Number number = lua_tonumber(L, -1);
 
-                    ecs_os_dbg("  set_float %f", number);
+                    ecs_lua_dbg("  set_float %f", number);
                     ret = ecs_meta_set_float(c, number);
 
                     if(ret) luaL_error(L, "failed to set float (%f)", number);
@@ -378,7 +384,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             }
             case LUA_TBOOLEAN:
             {
-                ecs_os_dbg("  set_bool: %d", lua_toboolean(L, -1));
+                ecs_lua_dbg("  set_bool: %d", lua_toboolean(L, -1));
                 ret = ecs_meta_set_bool(c, lua_toboolean(L, -1));
 
                 ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
@@ -386,7 +392,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             }
             case LUA_TSTRING:
             {
-                ecs_os_dbg("  set_string: %s", lua_tostring(L, -1));
+                ecs_lua_dbg("  set_string: %s", lua_tostring(L, -1));
                 ret = ecs_meta_set_string(c, lua_tostring(L, -1));
 
                 ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
@@ -394,7 +400,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             }
             case LUA_TNIL:
             {
-                ecs_os_dbg("  set_null");
+                ecs_lua_dbg("  set_null");
                 ret = ecs_meta_set_null(c);
 
                 ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
@@ -412,7 +418,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
         lua_pop(L, 1);
     }
 
-    ecs_os_dbg("meta pop");
+    ecs_lua_dbg("meta pop");
     ret = ecs_meta_pop(c);
     ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
 }
