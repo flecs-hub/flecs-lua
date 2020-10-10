@@ -5,7 +5,7 @@ local u = require "util"
 ecs.progress_cb(function() ecs.log("progress()!") end)
 
 local tstruct = ecs.lookup("lua_test_struct")
-local test_struct, added = ecs.get_mut(ecs.Singleton, tstruct)
+local test_struct, added = ecs.singleton_get_mut(tstruct)
 
 --Verify values set by host
 assert(not added)
@@ -42,9 +42,9 @@ test_struct.enumeration = 500
 test_struct.bitmask = (1 | 2 | 3)
 test_struct.comp2.comp.foo = 1048333
 
-ecs.modified(test_struct)
+ecs.singleton_modified(test_struct)
 test_struct = nil
-test_struct = ecs.get(ecs.Singleton, tstruct)
+test_struct = ecs.singleton_get(tstruct)
 
 assert(test_struct.b == false)
 assert(test_struct.i64 == 420)
@@ -56,8 +56,8 @@ assert(test_struct.comp2.comp.foo == 1048333)
 
 
 --Partial declaration
-assert(ecs.set(ecs.Singleton, tstruct, { i64 = 32}))
-test_struct = ecs.get(ecs.Singleton, tstruct)
+assert(ecs.singleton_set(tstruct, { i64 = 32}))
+test_struct = ecs.singleton_get(tstruct)
 assert(test_struct.i64 == 32)
 
 local v = { foo = "bar"}

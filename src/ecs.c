@@ -507,23 +507,13 @@ static int get_func(lua_State *L)
     return 1;
 }
 
-static int get_mut(lua_State *L)
+static void pushmutable(
+    ecs_world_t *w,
+    lua_State *L,
+    ecs_entity_t e,
+    ecs_entity_t component,
+    void *ptr)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
-
-    ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t component = luaL_checkinteger(L, 2);
-
-    bool is_added = 0;
-    void *ptr = ecs_get_mut_w_entity(w, e, component, &is_added);
-
-    if(!ptr)
-    {
-        lua_pushnil(L);
-        lua_pushboolean(L, 0);
-        return 2;
-    }
-
     ecs_ptr_to_lua(w, L, component, ptr);
 
     lua_createtable(L, 0, 1);
@@ -540,10 +530,36 @@ static int get_mut(lua_State *L)
 
     lua_setfield(L, -2, "__ecs_mutable");
     lua_setmetatable(L, -2);
+}
+
+static get_mutable(ecs_world_t *w, lua_State *L, ecs_entity_t e, ecs_entity_t component)
+{
+
+    bool is_added = 0;
+    void *ptr = ecs_get_mut_w_entity(w, e, component, &is_added);
+
+    if(!ptr)
+    {
+        lua_pushnil(L);
+        lua_pushboolean(L, 0);
+        return 2;
+    }
+
+    pushmutable(w, L, e, component, ptr);
 
     lua_pushboolean(L, (int)is_added);
 
     return 2;
+}
+
+static int get_mut(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t component = luaL_checkinteger(L, 2);
+
+    return get_mutable(w, L, e, component);
 }
 
 static int mutable_modified(lua_State *L)
@@ -589,6 +605,44 @@ static int set_func(lua_State *L)
     ecs_modified_w_entity(w, e, component);
 
     lua_pushinteger(L, e);
+
+    return 1;
+}
+
+static int singleton_get(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t component = luaL_checkinteger(L, 1);
+
+    const void *ptr = ecs_get_w_entity(w, component, component);
+
+    if(ptr) ecs_ptr_to_lua(w, L, component, ptr);
+    else lua_pushnil(L);
+
+    return 1;
+}
+
+static int singleton_get_mut(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t component = luaL_checkinteger(L, 1);
+
+    return get_mutable(w, L, component, component);
+}
+
+static int singleton_set(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t component = luaL_checkinteger(L, 1);
+
+    void *ptr = ecs_get_mut_w_entity(w, component, component, NULL);
+
+    ecs_lua_to_ptr(w, L, 2, component, ptr);
+
+    ecs_modified_w_entity(w, component, component);
 
     return 1;
 }
@@ -1006,6 +1060,11 @@ static const luaL_Reg ecs_lib[] =
     { "get_mut", get_mut },
     { "modified", mutable_modified },
     { "set", set_func },
+
+    { "singleton_get", singleton_get },
+    { "singleton_get_mut", singleton_get_mut },
+    { "singleton_modified", mutable_modified },
+    { "singleton_set", singleton_set },
 
     { "column", column },
     { "columns", columns },

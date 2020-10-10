@@ -154,6 +154,29 @@ end
 function ecs.set(entity, component, v)
 end
 
+---Get an immutable table to a singleton component
+---@param component integer
+---@return table
+function ecs.singleton_get(component)
+end
+
+---Get a mutable table to a singleton component
+---@param component integer
+---@return table, boolean
+function ecs.singleton_get_mut(component)
+end
+
+---Signal that a singleton component has been modified
+---@param component table
+function ecs.singleton_modified(component)
+end
+
+---Set the value of a singleton component
+---@param component table
+---@return integer entity
+function ecs.singleton_set(component)
+end
+
 ---@class ecs_iter_t
 ---@field count integer
 ---@field columns table

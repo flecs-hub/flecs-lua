@@ -150,17 +150,23 @@ static void init_test_state(lua_State *L)
 }
 
 static int custom_alloc;
+static size_t mem_usage;
 
 void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
 {
     custom_alloc = 1;
+    size_t *mem;
+
+    if(!ptr) osize = 0;
 
     if(!nsize)
     {
+        mem_usage -= osize;
         ecs_os_free(ptr);
         return NULL;
     }
 
+    mem_usage += (nsize - osize);
     return ecs_os_realloc(ptr, nsize);
 }
 
@@ -240,6 +246,7 @@ int main(int argc, char **argv)
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
 
     ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g);
+    ecs_set_ptr(w, ecs_entity(lua_test_struct), lua_test_struct, &g);
 
     //const EcsLuaHost *host = ecs_singleton_get(w, EcsLuaHost);
     //lua_State *L = host->L;
@@ -268,6 +275,7 @@ int main(int argc, char **argv)
     }
 
     ecs_fini(w);
+    lua_close(L);
 
     return ret;
 }
