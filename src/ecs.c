@@ -46,61 +46,63 @@ static void system_func(ecs_iter_t *it)
     ecs_world_t *w = it->world;
     ecs_lua_system *sys = it->param;
     lua_State *L = sys->L;
+
     ecs_lua__prolog(L);
-
-    ecs_entity_t e = 0;
-    ecs_entity_t type_entity = 0;
-    int nargs = it->column_count;
-    int idx = ecs_get_thread_index(w);
-
-    ecs_time_t time;
-
     ecs_assert(!strcmp(sys->signature, ecs_get(w, it->system, EcsSignatureExpr)->expr), ECS_INTERNAL_ERROR, NULL);
 
-    ecs_os_dbg("Lua system: \"%s\", %d columns, func ref %d", ecs_get_name(w, it->system), nargs, sys->func_ref);
+    ecs_time_t time;
+    int idx = ecs_get_thread_index(w);
 
-    ecs_os_get_time(&time);
-
-    int i, k, col;
-    for(col=0, i=0; i < nargs; col++, i++)
-    {
-        lua_createtable(L, it->count, 0);
-
-        //type_entity = ecs_type_from_entity(w, it->entities[i]);
-        //ecs_iter_to_lua(w, it, type_entity, L);
-
-        if(ecs_is_readonly(it, col))
-        {
-
-        }
-    }
-
-    print_time(&time, "iter serialization");
-
-    ecs_os_get_time(&time);
+    ecs_os_dbg("Lua system: \"%s\", %d columns, count %d, func ref %d",
+        ecs_get_name(w, it->system), it->column_count, it->count, sys->func_ref);
 
     int type = lua_rawgeti(L, LUA_REGISTRYINDEX, sys->func_ref);
 
     luaL_checktype(L, -1, LUA_TFUNCTION);
 
-    int ret = lua_pcall(L, nargs, nargs, 0);
+    ecs_os_get_time(&time);
+
+    ecs_iter_to_lua(w, L, it, NULL);
+
+    print_time(&time, "iter serialization");
+
+    lua_pushvalue(L, -1);
+    int it_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    ecs_os_get_time(&time);
+
+    int ret = lua_pcall(L, 1, 0, 0);
 
     print_time(&time, "system");
 
+    if(ret) ecs_os_err("error running system \"%s\" (%d): %s", ecs_get_name(w, it->system), ret, lua_tostring(L, 1));
+
+    ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
+
+    lua_rawgeti(L, LUA_REGISTRYINDEX, it_ref);
+
+    ecs_assert(lua_type(L, -1) == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    return;
+
+    ecs_os_get_time(&time);
+
+    //ecs_lua_to_iter(w, L, -1);
+
+    print_time(&time, "iter deserialization");
+
+#if 0
+    int i, k, col;
     for(col=0, i=-nargs; i < 0; col++, i++)
     {
         luaL_checktype(L, i, LUA_TTABLE);
         if(it->count == lua_rawlen(L, -1))
             luaL_error(L, "expected %d elements in column %d, got %d", it->count, -i, lua_rawlen(L, -1));
-
-        if(ecs_is_readonly(it, col))
-        {
-            continue;
-        }
-
-        //type_entity = ecs_type_from_entity(w, it->entities[i]);
-        //ecs_lua_to_iter(w, it, type_entity, L);
     }
+#endif
+    luaL_unref(L, LUA_REGISTRYINDEX, it_ref);
+    lua_pop(L, 1);
+
     ecs_lua__epilog(L);
 }
 
@@ -113,6 +115,16 @@ static void set_default_name(ecs_world_t *w, ecs_entity_t e)
 #else
     ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
 #endif
+}
+
+static const char *checkname(lua_State *L, int arg)
+{
+    int type = lua_type(L, arg);
+
+    if(type == LUA_TSTRING) return luaL_checkstring(L, arg);
+    else if(type != LUA_TNIL) luaL_argerror(L, arg, "expected string or nil for name");
+
+    return NULL;
 }
 
 static int new_entity(lua_State *L)
@@ -129,38 +141,40 @@ static int new_entity(lua_State *L)
     {
         e = ecs_new(w, 0);
     }
-    else if(args == 1)
+    else if(args == 1) /* entity | name(string) */
     {
+        int type = lua_type(L, 1);
+
         if(lua_isinteger(L, 1)) e = luaL_checkinteger(L, 1);
-        else name = luaL_checkstring(L, 1);
+        else if(type == LUA_TSTRING) name = luaL_checkstring(L, 1);
+        else return luaL_argerror(L, 1, "expected entity or name");
     }
     else if(args == 2)
     {
-        if(lua_isinteger(L, 1))
+        if(lua_isinteger(L, 1)) /* entity, name (string) */
         {
+            luaL_checktype(L, 2, LUA_TSTRING);
+
             e = luaL_checkinteger(L, 1);
             name = luaL_checkstring(L, 2);
         }
-        else
+        else /* name (string|nil), component */
         {
-            name = luaL_checkstring(L, 1);
+            name = checkname(L, 1);
             components = luaL_checkstring(L, 2);
         }
     }
-    else if(args == 3)
+    else if(args == 3) /* entity, name (string|nil), component */
     {
         e = luaL_checkinteger(L, 1);
-        name = luaL_checkstring(L, 2);
+        name = checkname(L, 2);
         components = luaL_checkstring(L, 3);
     }
     else return luaL_error(L, "too many arguments");
 
-    if(name)
-    {
-        e = ecs_new_entity(w, e, name, components);
-        ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
-    }
-    else set_default_name(w, e);
+    if(args) e = ecs_new_entity(w, e, name, components);
+
+    if(name) ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
 
     lua_pushinteger(L, e);
 
@@ -172,27 +186,30 @@ static int bulk_new(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
 
     lua_Integer count = 0;
-    const char *name = NULL;
+    ecs_type_t type = NULL;
     const ecs_entity_t* entities = NULL;
 
     if(lua_gettop(L) == 2)
     {
-        name = luaL_checkstring(L, 1);
+        ecs_entity_t type_entity = 0;
+
+        if(lua_isinteger(L, 1)) type_entity = luaL_checkinteger(L, 1);
+        else
+        {
+            const char *name = luaL_checkstring(L, 1);
+
+            type_entity = ecs_lookup(w, name);
+
+            if(!type_entity) return luaL_argerror(L, 2, "could not find type");
+        }
+
+        type = ecs_type_from_entity(w, type_entity);
+
         count = luaL_checkinteger(L, 2);
-
-        ecs_entity_t type_entity = ecs_lookup(w, name);
-
-        if(!type_entity) return luaL_argerror(L, 2, "could not find type");
-
-        ecs_type_t type = ecs_type_from_entity(w, type_entity);
-
-        entities = ecs_bulk_new_w_type(w, type, count);
     }
-    else
-    {
-        count = luaL_checkinteger(L, 1);
-        entities = ecs_bulk_new(w, 0, count);
-    }
+    else count = luaL_checkinteger(L, 1);
+
+    entities = ecs_bulk_new_w_type(w, type, count);
 
     lua_newtable(L);
 
@@ -201,8 +218,6 @@ static int bulk_new(lua_State *L)
     {
         lua_pushinteger(L, entities[i]);
         lua_rawseti(L, -2, i+1);
-
-        set_default_name(w, entities[i]);
     }
 
     return 1;
@@ -592,6 +607,54 @@ static int set_func(lua_State *L)
     return 1;
 }
 
+ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx)
+{
+    if(luaL_getmetafield(L, idx, "__ecs_iter") != LUA_TTABLE) luaL_error(L, "table is not an iterator");
+
+    lua_rawgeti(L, -1, 1);
+    ecs_iter_t *it = lua_touserdata(L, -1);
+    lua_pop(L, 2);
+
+    return it;
+}
+
+static ecs_iter_t *get_iter_columns(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_iter_t *it = ecs_lua__checkiter(L, 1);
+
+    luaL_getsubtable(L, 1, "columns");
+
+    return it;
+}
+
+static int column(lua_State *L)
+{
+    ecs_iter_t *it = get_iter_columns(L);
+
+    lua_Integer i = luaL_checkinteger(L, 2);
+
+    if(i < 1 || i > it->column_count) luaL_argerror(L, 2, "invalid column index");
+
+    lua_rawgeti(L, -1, i);
+
+    return 1;
+}
+
+static int columns(lua_State *L)
+{
+    ecs_iter_t *it = get_iter_columns(L);
+
+    int i;
+    for(i=1; i <= it->column_count; i++)
+    {
+        lua_rawgeti(L, 2, i);
+    }
+
+    return it->column_count;
+}
+
 static int new_system(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -895,6 +958,9 @@ static const luaL_Reg ecs_lib[] =
     { "get_mut", get_mut },
     { "modified", mutable_modified },
     { "set", set_func },
+
+    { "column", column },
+    { "columns", columns },
 
     { "system", new_system },
     { "module", new_module },

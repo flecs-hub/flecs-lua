@@ -51,6 +51,14 @@ void ecs_lua_to_ptr(
     ecs_entity_t type,
     void *ptr);
 
+/* Pushes the iterator onto the stack */
+FLECS_LUA_EXPORT
+void ecs_iter_to_lua(
+    ecs_world_t *world,
+    lua_State *L,
+    ecs_iter_t *it,
+    ecs_type_t select);
+
 
 /* Get world pointer from registry */
 FLECS_LUA_EXPORT

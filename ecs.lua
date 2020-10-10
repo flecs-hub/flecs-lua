@@ -3,16 +3,37 @@
 
 local ecs = {}
 
----Create a new entity, all parameters are optional
----@param e integer @optional
----@param name string @optional
+---Create a new entity
+---@param e integer
+---@param name string
 ---@param components string
 ---@return integer @entity
 function ecs.new(e, name, components)
 end
 
----Create N new entities with optional components
----@param type string @optional
+--trailing arguments can be ommitted
+ecs.new()
+ecs.new(123)
+ecs.new(123, "name")
+
+--entity id can be ommited
+ecs.new("name")
+ecs.new("name", "component")
+ecs.new(0, "name", "component1, component2")
+
+--name can be nil
+ecs.new(nil, "just_component")
+ecs.new(123, nil, "id, components")
+
+--the last argument cannot be nil
+ecs.new(nil) --invalid
+ecs.new(123, nil) --invalid
+ecs.new(123, "name", nil) --invalid
+ecs.new(123, 0, "component") --invalid: name must be a string or nil
+
+
+---Create N new entities with an optional component
+---@param type integer|string @optional
 ---@param n integer
 ---@return integer[]
 function ecs.bulk_new(type, n)
@@ -131,6 +152,25 @@ end
 ---@param v table
 ---@return integer entity
 function ecs.set(entity, component, v)
+end
+
+---@class ecs_iter_t
+---@field count integer
+---@field columns table
+---@field system integer
+local ecs_iter_t = {}
+
+---Get column from iterator
+---@param it ecs_iter_t
+---@param col integer
+---@return table
+function ecs.column(it, col)
+end
+
+---Returns all columns
+---@param it ecs_iter_t
+---@return table
+function ecs.columns(it)
 end
 
 ---Create an alias for a meta type

@@ -428,3 +428,90 @@ void ecs_lua_to_ptr(
 
     deserialize_type(world, &c, L, idx);
 }
+
+static
+void serialize_column(
+    ecs_world_t *world,
+    lua_State *L,
+    const EcsMetaTypeSerializer *ser,
+    void *ptr,
+    int32_t count)
+{
+    ecs_vector_t *ops = ser->ops;
+    ecs_type_op_t *hdr = ecs_vector_first(ops, ecs_type_op_t);
+    ecs_assert(hdr->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
+    int32_t size = hdr->size;
+
+    lua_createtable(L, count, 0);
+
+    int i;
+    for (i = 0; i < count; i ++)
+    {
+        serialize_type(world, ops, ptr, L);
+        lua_rawseti(L, -2, i + 1);
+
+        ptr = ECS_OFFSET(ptr, size);
+    }
+}
+
+void ecs_iter_to_lua(
+    ecs_world_t *world,
+    lua_State *L,
+    ecs_iter_t *it,
+    ecs_type_t select)
+{
+    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
+    ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INTERNAL_ERROR, NULL);
+
+    /* it */
+    lua_createtable(L, 0, 3);
+
+    /* metatable */
+    lua_createtable(L, 0, 1);
+
+    /* metatable.__ecs_iter */
+    lua_createtable(L, 3, 0);
+
+    lua_pushlightuserdata(L, it);
+    lua_rawseti(L, -2, 1);
+
+    lua_setfield(L, -2, "__ecs_iter");
+    lua_setmetatable(L, -2);
+
+    /* it.count */
+    lua_pushinteger(L, it->count);
+    lua_setfield(L, -2, "count");
+
+    /* it.system */
+    lua_pushinteger(L, it->system);
+    lua_setfield(L, -2, "system");
+
+    /* it.columns[] */
+    lua_createtable(L, it->column_count, 0);
+
+    if(!it->count)
+    {
+        lua_setfield(L, -2, "columns");
+        return;
+    }
+
+    ecs_type_t table_type = ecs_iter_type(it);
+    ecs_entity_t *comps = ecs_vector_first(table_type, ecs_entity_t);
+    int32_t i, count = ecs_vector_count(table_type);
+
+    for(i=0; i < it->column_count; i++)
+    {
+        if(select && !ecs_type_has_entity(world, select, comps[i])) continue;
+
+        const EcsMetaTypeSerializer *ser = ecs_get(world, comps[i], EcsMetaTypeSerializer);
+        ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
+
+        if(!ser) luaL_error(L, "column %d cannot be serialized", i);
+
+        serialize_column(world, L, ser, ecs_table_column(it, i), it->count);
+
+        lua_rawseti(L, -2, i+1);
+    }
+
+    lua_setfield(L, -2, "columns");
+}

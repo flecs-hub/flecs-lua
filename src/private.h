@@ -6,6 +6,8 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx);
+
 typedef struct ecs_lua_ctx
 {
     lua_State *L;
