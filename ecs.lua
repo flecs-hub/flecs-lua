@@ -158,6 +158,10 @@ end
 ---@field count integer
 ---@field columns table
 ---@field system integer
+
+---@field delta_time number
+---@field delta_system_time number
+---@field world_time number
 local ecs_iter_t = {}
 
 ---Get column from iterator

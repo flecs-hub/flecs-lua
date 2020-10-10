@@ -316,7 +316,11 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
 {
     int ktype, vtype, ret, depth = 0;
 
-    ecs_meta_push(c);
+    ret = ecs_meta_push(c);
+
+    ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
+
+    idx = lua_absindex(L, idx);
 
     luaL_checktype(L, idx, LUA_TTABLE);
 
@@ -352,7 +356,6 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             {
                 ecs_lua_dbg("meta_push (nested)");
                 //ecs_meta_push(c);
-                //idx = lua_gettop(L);
                 //lua_pushnil(L);
                 //depth++;
                 int top = lua_gettop(L);
@@ -440,24 +443,14 @@ void serialize_column(
     ecs_world_t *world,
     lua_State *L,
     const EcsMetaTypeSerializer *ser,
-    void *ptr,
+    const void *base,
     int32_t count)
 {
     ecs_vector_t *ops = ser->ops;
     ecs_type_op_t *hdr = ecs_vector_first(ops, ecs_type_op_t);
     ecs_assert(hdr->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
-    int32_t size = hdr->size;
 
-    lua_createtable(L, count, 0);
-
-    int i;
-    for (i = 0; i < count; i ++)
-    {
-        serialize_type(world, ops, ptr, L);
-        lua_rawseti(L, -2, i + 1);
-
-        ptr = ECS_OFFSET(ptr, size);
-    }
+    serialize_elements(world, ser->ops, base, count, hdr->size, L);
 }
 
 void ecs_iter_to_lua(
@@ -491,6 +484,18 @@ void ecs_iter_to_lua(
     /* it.system */
     lua_pushinteger(L, it->system);
     lua_setfield(L, -2, "system");
+    
+    /* it.delta_time */
+    lua_pushnumber(L, it->delta_time);
+    lua_setfield(L, -2, "delta_time");
+
+    /* it.delta_system_time */
+    lua_pushnumber(L, it->delta_system_time);
+    lua_setfield(L, -2, "delta_system_time");
+
+    /* it.world_time */
+    lua_pushnumber(L, it->world_time);
+    lua_setfield(L, -2, "world_time");
 
     /* it.columns[] */
     lua_createtable(L, it->column_count, 0);
@@ -520,4 +525,63 @@ void ecs_iter_to_lua(
     }
 
     lua_setfield(L, -2, "columns");
+}
+
+static
+void deserialize_column(
+    ecs_world_t *world,
+    lua_State *L,
+    int idx,
+    ecs_entity_t type,
+    void *base,
+    size_t stride,
+    int32_t count)
+{
+    ecs_meta_cursor_t c;
+
+    int j;
+    for(j=0; j < count; j++)
+    {
+        c = ecs_meta_cursor(world, type, (char*)base + j * stride);
+
+        lua_rawgeti(L, idx, j + 1); /* columns[i+1][j+1] */
+        deserialize_type(world, &c, L, -1);
+
+        lua_pop(L, 1);
+    }
+}
+
+void ecs_lua_to_iter(
+    ecs_world_t *world,
+    lua_State *L,
+    int idx)
+{
+    ecs_lua__prolog(L);
+    ecs_iter_t *it = ecs_lua__checkiter(L, idx);
+
+    if(!it->count) return;
+
+    ecs_type_t table_type = ecs_iter_type(it);
+    ecs_entity_t *comps = ecs_vector_first(table_type, ecs_entity_t);
+    int32_t i, j, count = ecs_vector_count(table_type);
+
+    luaL_getsubtable(L, idx, "columns");
+    luaL_checktype(L, -1, LUA_TTABLE);
+
+    for(i=0; i < it->column_count; i++)
+    {
+        if(ecs_is_readonly(it, i+1)) continue;
+
+        lua_rawgeti(L, -1, i + 1); /* columns[i+1] */
+
+        ecs_assert(it->count == lua_rawlen(L, -1), ECS_INTERNAL_ERROR, NULL);
+
+        deserialize_column(world, L, -1, comps[i], ecs_table_column(it, i), ecs_column_size(it, i+1), it->count);
+
+        lua_pop(L, 1); /* columns[i+1] */
+    }
+
+    lua_pop(L, 1); /* columns */
+
+    ecs_lua__epilog(L);
 }

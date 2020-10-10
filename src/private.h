@@ -6,6 +6,9 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+#define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
+#define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
+
 ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx);
 
 typedef struct ecs_lua_ctx

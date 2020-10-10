@@ -1,4 +1,5 @@
 local ecs = require "ecs"
+local u = require "util"
 
 ecs.progress_cb(function() ecs.log("progress()!") end)
 
@@ -22,8 +23,14 @@ local sys_id = 0
 local function sys(it)
     local p, v = ecs.columns(it)
 
+    assert(p == it.columns[1])
+    assert(v == it.columns[2])
     assert(p == ecs.column(it, 1))
     assert(v == ecs.column(it, 2))
+
+    assert(it.system == sys_id)
+    assert(not pcall(function () ecs.column(it, 3) end))
+    assert(not pcall(function () ecs.columns(p) end))
 
     for i = 1, it.count do
         assert(p[i].x == i * 10)
@@ -33,9 +40,37 @@ local function sys(it)
         assert(v[i].y == i * 13)
     end
 
-    assert(it.system == sys_id)
-    assert(not pcall(function () ecs.column(it, 3) end))
-    assert(not pcall(function () ecs.columns(p) end))
 end
 
 sys_id = ecs.system(sys, "SYS", ecs.OnUpdate, "Position, Velocity")
+
+local Struct = ecs.struct("LuaStruct", "{int32_t v;}")
+
+local inc = 1
+
+for i, e in ipairs(ents) do
+    ecs.set(e, Struct, { v = inc})
+end
+
+local function sys_readonly(it)
+    local p, v, s = ecs.columns(it)
+
+    inc = inc + 1
+
+    for i = 1, it.count do
+        assert(p[i].x == i * 10)
+        assert(p[i].y == i * 11)
+
+        assert(v[i].x == i * 12)
+        assert(v[i].y == i * 13)
+
+        assert(s[i].v == inc - 1)
+        s[i].v = inc
+
+        --Position is read-only, these have no effect
+        p[i].x = p[i].x + 1
+        p[i].y = p[i].y + 1
+    end
+end
+
+ecs.system(sys_readonly, "sys_readonly", ecs.OnUpdate, "[in] Position, Velocity, LuaStruct")

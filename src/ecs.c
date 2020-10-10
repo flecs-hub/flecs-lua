@@ -1,8 +1,5 @@
 #include "private.h"
 
-#define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
-#define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
-
 #define ECS_LUA__KEEPOPEN 1
 
 typedef struct ecs_lua_system
@@ -83,23 +80,12 @@ static void system_func(ecs_iter_t *it)
 
     ecs_assert(lua_type(L, -1) == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
-    return;
-
     ecs_os_get_time(&time);
 
-    //ecs_lua_to_iter(w, L, -1);
+    ecs_lua_to_iter(w, L, -1);
 
     print_time(&time, "iter deserialization");
 
-#if 0
-    int i, k, col;
-    for(col=0, i=-nargs; i < 0; col++, i++)
-    {
-        luaL_checktype(L, i, LUA_TTABLE);
-        if(it->count == lua_rawlen(L, -1))
-            luaL_error(L, "expected %d elements in column %d, got %d", it->count, -i, lua_rawlen(L, -1));
-    }
-#endif
     luaL_unref(L, LUA_REGISTRYINDEX, it_ref);
     lua_pop(L, 1);
 
