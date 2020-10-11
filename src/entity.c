@@ -179,8 +179,9 @@ int entity_has(lua_State *L)
         if(!to_check) return luaL_argerror(L, 2, "could not find type");
     }
 
-    if(ecs_has_entity(w, e, to_check)) lua_pushboolean(L, 1);
-    else lua_pushboolean(L, 0);
+    int b = ecs_has_entity(w, e, to_check);
+
+    lua_pushboolean(L, b);
 
     return 1;
 }
@@ -202,8 +203,9 @@ int is_alive(lua_State *L)
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
-    if(ecs_is_alive(w, e)) lua_pushboolean(L, 1);
-    else lua_pushboolean(L, 0);
+    int b = ecs_is_alive(w, e);
+
+    lua_pushboolean(L, b);
 
     return 1;
 }
@@ -214,8 +216,9 @@ int exists(lua_State *L)
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
-    if(ecs_exists(w, e)) lua_pushboolean(L, 1);
-    else lua_pushboolean(L, 0);
+    int b = ecs_exists(w, e);
+
+    lua_pushboolean(L, b);
 
     return 1;
 }
@@ -417,20 +420,13 @@ static void pushmutable(
     lua_setmetatable(L, -2);
 }
 
-get_mutable(ecs_world_t *w, lua_State *L, ecs_entity_t e, ecs_entity_t component)
+int get_mutable(ecs_world_t *w, lua_State *L, ecs_entity_t e, ecs_entity_t component)
 {
-
     bool is_added = 0;
     void *ptr = ecs_get_mut_w_entity(w, e, component, &is_added);
 
-    if(!ptr)
-    {
-        lua_pushnil(L);
-        lua_pushboolean(L, 0);
-        return 2;
-    }
-
-    pushmutable(w, L, e, component, ptr);
+    if(!ptr) lua_pushnil(L);
+    else pushmutable(w, L, e, component, ptr);
 
     lua_pushboolean(L, (int)is_added);
 
