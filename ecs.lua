@@ -32,13 +32,6 @@ ecs.new(123, "name", nil) --invalid
 ecs.new(123, 0, "component") --invalid: name must be a string or nil
 
 
----Create N new entities with an optional component
----@param type integer|string @optional
----@param n integer
----@return integer[]
-function ecs.bulk_new(type, n)
-end
-
 ---Delete an entity and all of its components
 ---@param entity string|integer|integer[]
 function ecs.delete(entity)
@@ -175,6 +168,13 @@ end
 ---@param component table
 ---@return integer entity
 function ecs.singleton_set(component)
+end
+
+---Create N new entities with an optional component
+---@param type integer|string @optional
+---@param n integer
+---@return integer[]
+function ecs.bulk_new(type, n)
 end
 
 ---@class ecs_iter_t

@@ -28,8 +28,16 @@ endif
 flecs_lua_inc = include_directories('include')
 
 flecs_lua_src += files(
+    'src/bulk.c',
     'src/ecs.c',
-    'src/meta.c'
+    'src/entity.c',
+    'src/iter.c',
+    'src/meta.c',
+    'src/module.c',
+    'src/os.c',
+    'src/system.c',
+    'src/time.c',
+    'src/world.c'
 )
 
 flecs_lua_lib = library('flecs-lua',
