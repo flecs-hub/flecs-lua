@@ -79,3 +79,26 @@ int lquit(lua_State *L)
 
     return 0;
 }
+
+int dim(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    lua_Integer count = luaL_checkinteger(L, 1);
+
+    ecs_dim(w, count);
+
+    return 0;
+}
+
+int dim_type(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    lua_Integer count = luaL_checkinteger(L, 1);
+    ecs_type_t type = luaL_checkudata(L, 2, "ecs_type_t");
+
+    ecs_dim_type(w, type, count);
+
+    return 0;
+}

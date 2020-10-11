@@ -84,6 +84,7 @@ static const luaL_Reg ecs_lib[] =
     { "add", add_type },
     { "remove", remove_type },
     { "clear", clear_entity },
+    { "get_type", get_type },
 
     { "array", new_array },
     { "struct", new_struct },
@@ -121,6 +122,8 @@ static const luaL_Reg ecs_lib[] =
     { "progress_cb", progress_cb },
     { "world_info", world_info },
     { "quit", lquit },
+    { "dim", dim },
+    { "dim_type", dim_type },
 
 #define XX(const) {#const, NULL },
     ECS_LUA_ENUMS(XX)
@@ -132,6 +135,9 @@ static const luaL_Reg ecs_lib[] =
 int luaopen_ecs(lua_State *L)
 {
     luaL_newlib(L, ecs_lib);
+
+    luaL_newmetatable(L, "ecs_type_t");
+    lua_pop(L, 1);
 
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
     ECS_LUA_ENUMS(XX)

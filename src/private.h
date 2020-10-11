@@ -114,6 +114,7 @@ int exists(lua_State *L);
 int add_type(lua_State *L);
 int remove_type(lua_State *L);
 int clear_entity(lua_State *L);
+int get_type(lua_State *L);
 
 int new_array(lua_State *L);
 int new_struct(lua_State *L);
@@ -152,6 +153,8 @@ int progress(lua_State *L);
 int progress_cb(lua_State *L);
 int world_info(lua_State *L);
 int lquit(lua_State *L);
+int dim(lua_State *L);
+int dim_type(lua_State *L);
 
 
 

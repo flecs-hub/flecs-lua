@@ -17,6 +17,7 @@ local just_comp = ecs.new(nil, "lua_test_comp")
 local id_name_comps = ecs.new(10001, "multiple_comps", "lua_test_struct, lua_test_comp")
 local bulk = ecs.bulk_new(10)
 local bulk_comp = ecs.bulk_new("lua_test_comp", 10)
+local lua_test_comp = ecs.lookup("lua_test_comp")
 
 --last argument cannot be nil
 assert(not pcall(function () ecs.new(nil) end))
@@ -59,6 +60,13 @@ assert(ecs.has(bulk_comp[10], "lua_test_comp"))
 ecs.delete(bulk)
 assert(not ecs.name(bulk[1]))
 assert(not ecs.name(bulk[10]))
+
+local type = ecs.get_type(lua_test_comp)
+local invalid_type = ecs.get_type(bulk[1])
+ecs.dim(400)
+ecs.dim_type(400, type)
+assert(not pcall(function () ecs.dim_type(400, invalid_type) end))
+
 
 ecs.struct("LuaPosition", "{float x; float y; float z;}")
 ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")

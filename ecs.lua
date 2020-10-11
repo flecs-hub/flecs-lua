@@ -3,6 +3,9 @@
 
 local ecs = {}
 
+---@class ecs_type_t
+local ecs_type_t = {}
+
 ---Create a new entity
 ---@param e integer
 ---@param name string
@@ -103,6 +106,12 @@ end
 ---Clear all components
 ---@param e integer entity
 function ecs.clear(e)
+end
+
+---Get the type of an entity
+---@param e integer entity
+---@return ecs_type_t|nil
+function ecs.get_type(e)
 end
 
 ---Create a meta array component
@@ -308,6 +317,17 @@ end
 
 ---Signal that the application should quit
 function ecs.quit()
+end
+
+---Dimension the world for a specified number of entities
+---@param count integer entity
+function ecs.dim(count)
+end
+
+---Dimension a type for a specified number of entities
+---@param count integer entity
+---@param type ecs_type_t
+function ecs.dim_type(count, type)
 end
 
 ecs.MatchDefault = 0
