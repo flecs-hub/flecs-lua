@@ -495,6 +495,14 @@ void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select)
     lua_pushnumber(L, it->world_time);
     lua_setfield(L, -2, "world_time");
 
+    /* it.table_count */
+    lua_pushnumber(L, it->table_count);
+    lua_setfield(L, -2, "table_count");
+
+    /* it.table_offset */
+    lua_pushnumber(L, it->table_offset);
+    lua_setfield(L, -2, "table_offset");
+
     /* it.columns[] */
     lua_createtable(L, it->column_count, 0);
 
