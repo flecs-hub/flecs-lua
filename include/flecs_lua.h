@@ -53,7 +53,7 @@ void ecs_lua_to_ptr(
 
 /* Pushes the iterator onto the stack */
 FLECS_LUA_EXPORT
-void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select);
+void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy);
 
 /* Converts the columns of the iterator at the given index */
 FLECS_LUA_EXPORT
