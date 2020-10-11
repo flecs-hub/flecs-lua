@@ -26,6 +26,14 @@ local time = ecs.get_time()
 print("time = " .. time.sec .. " seconds, " .. time.nanosec .. " nanoseconds")
 print("elapsed: " .. ecs.time_measure(time) .. "seconds")
 
+time.nanosec = 2 << 40
+assert(not pcall(function () ecs.time_measure(time) end))
+
+time.sec = 2 << 34
+time.nanosec = 0
+assert(not pcall(function () ecs.time_measure(time) end))
+
+
 runs = 2
 
 while runs > 0 and ecs.progress(0)  do

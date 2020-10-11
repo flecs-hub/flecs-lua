@@ -2,15 +2,21 @@
 
 static ecs_time_t checktime(lua_State *L, int arg)
 {
-    ecs_time_t time;
-
     lua_getfield(L, arg, "sec");
-    time.sec = luaL_checkinteger(L, -1);
-
+    lua_Integer sec = luaL_checkinteger(L, -1);
+    if(sec > INT32_MAX) luaL_argerror(L, arg, "sec field out of range");
+    
     lua_pop(L, 1);
 
     lua_getfield(L, arg, "nanosec");
-    time.nanosec = luaL_checkinteger(L, -1);
+    lua_Integer nanosec = luaL_checkinteger(L, -1);
+    if(nanosec > INT32_MAX) luaL_argerror(L, arg, "nanosec out of range");
+
+    ecs_time_t time =
+    {
+        .sec = (uint32_t)sec,
+        .nanosec = (uint32_t)nanosec
+    };
 
     return time;
 }
