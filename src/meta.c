@@ -558,7 +558,7 @@ void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
 
     ecs_type_t table_type = ecs_iter_type(it);
     ecs_entity_t *comps = ecs_vector_first(table_type, ecs_entity_t);
-    int32_t i, j, count = ecs_vector_count(table_type);
+    int32_t i, count = ecs_vector_count(table_type);
 
     luaL_getsubtable(L, idx, "columns");
     luaL_checktype(L, -1, LUA_TTABLE);

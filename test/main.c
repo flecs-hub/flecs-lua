@@ -155,7 +155,6 @@ static size_t mem_usage;
 void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
 {
     custom_alloc = 1;
-    size_t *mem;
 
     if(!ptr) osize = 0;
 
