@@ -104,66 +104,6 @@ ECS_STRUCT(EcsLuaWorldInfo,
     XX(OWNED)
 
 
-int new_entity(lua_State *L);
-int delete_entity(lua_State *L);
-int new_tag(lua_State *L);
-int entity_name(lua_State *L);
-int lookup_entity(lua_State *L);
-int lookup_fullpath(lua_State *L);
-int entity_has(lua_State *L);
-int has_role(lua_State *L);
-int is_alive(lua_State *L);
-int exists(lua_State *L);
-int add_type(lua_State *L);
-int remove_type(lua_State *L);
-int clear_entity(lua_State *L);
-int get_type(lua_State *L);
-
-int new_array(lua_State *L);
-int new_struct(lua_State *L);
-int new_alias(lua_State *L);
-
-int get_func(lua_State *L);
-int get_mut(lua_State *L);
-
-int mutable_modified(lua_State *L);
-int set_func(lua_State *L);
-
-int singleton_get(lua_State *L);
-int singleton_get_mut(lua_State *L);
-int mutable_modified(lua_State *L);
-int singleton_set(lua_State *L);
-
-int bulk_new(lua_State *L);
-
-int column(lua_State *L);
-int columns(lua_State *L);
-
-int query_gc(lua_State *L);
-int query_new(lua_State *L);
-int query_iter(lua_State *L);
-int query_next(lua_State *L);
-int query_changed(lua_State *L);
-
-int new_system(lua_State *L);
-int new_module(lua_State *L);
-
-int print_log(lua_State *L);
-int print_err(lua_State *L);
-int print_dbg(lua_State *L);
-int print_warn(lua_State *L);
-int assert_func(lua_State *L);
-
-int get_time(lua_State *L);
-int time_measure(lua_State *L);
-
-int set_target_fps(lua_State *L);
-int progress(lua_State *L);
-int progress_cb(lua_State *L);
-int world_info(lua_State *L);
-int lquit(lua_State *L);
-int dim(lua_State *L);
-int dim_type(lua_State *L);
 
 
 
