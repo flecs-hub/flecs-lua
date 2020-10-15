@@ -6,6 +6,9 @@ local ecs = {}
 ---@class ecs_type_t
 local ecs_type_t = {}
 
+---@class ecs_mutable_t
+local ecs_mutable_t = {}
+
 ---@class ecs_query_t
 local ecs_query_t = {}
 
@@ -162,12 +165,12 @@ end
 ---Get a mutable table to a component
 ---@param entity integer
 ---@param component integer
----@return table, boolean
+---@return ecs_mutable_t, boolean
 function ecs.get_mut(entity, component)
 end
 
 ---Signal that a component has been modified
----@param t table
+---@param t ecs_mutable_t
 function ecs.modified(t)
 end
 
@@ -187,19 +190,20 @@ end
 
 ---Get a mutable table to a singleton component
 ---@param component integer
----@return table, boolean
+---@return ecs_mutable_t, boolean
 function ecs.singleton_get_mut(component)
 end
 
 ---Signal that a singleton component has been modified
----@param component table
+---@param component ecs_mutable_t
 function ecs.singleton_modified(component)
 end
 
 ---Set the value of a singleton component
----@param component table
+---@param component integer
+---@param value table
 ---@return integer entity
-function ecs.singleton_set(component)
+function ecs.singleton_set(component, value)
 end
 
 ---Create N new entities with an optional component
