@@ -286,8 +286,9 @@ int get_type(lua_State *L)
 
     if(type)
     {
-        lua_pushlightuserdata(L, (void*)type); /* it's fine */
-
+        ecs_vector_t **ptr = lua_newuserdata(L, sizeof(ecs_vector_t*));
+        *ptr = (ecs_vector_t*)type;
+        
         luaL_setmetatable(L, "ecs_type_t");
     }
     else lua_pushnil(L);
