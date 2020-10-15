@@ -69,6 +69,7 @@ static int func(lua_State *L)
     return 1;
 }
 
+/* Entity */
 int new_entity(lua_State *L);
 int delete_entity(lua_State *L);
 int new_tag(lua_State *L);
@@ -99,34 +100,45 @@ int singleton_get_mut(lua_State *L);
 int mutable_modified(lua_State *L);
 int singleton_set(lua_State *L);
 
+/* Bulk */
 int bulk_new(lua_State *L);
 
+/* Iterator */
 int column(lua_State *L);
 int columns(lua_State *L);
 
+/* Query */
 int query_gc(lua_State *L);
 int query_new(lua_State *L);
 int query_iter(lua_State *L);
 int query_next(lua_State *L);
 int query_changed(lua_State *L);
 
+/* System */
 int new_system(lua_State *L);
+
+/* Module */
 int new_module(lua_State *L);
 
+/* os_api */
 int print_log(lua_State *L);
 int print_err(lua_State *L);
 int print_dbg(lua_State *L);
 int print_warn(lua_State *L);
 int assert_func(lua_State *L);
 
+/* Time */
 int get_time(lua_State *L);
 int time_measure(lua_State *L);
 
+/* Pipeline */
 int set_target_fps(lua_State *L);
 int progress(lua_State *L);
 int progress_cb(lua_State *L);
-int world_info(lua_State *L);
 int lquit(lua_State *L);
+
+/* World */
+int world_info(lua_State *L);
 int dim(lua_State *L);
 int dim_type(lua_State *L);
 
@@ -172,6 +184,7 @@ static const luaL_Reg ecs_lib[] =
     { "query_changed", query_changed },
 
     { "system", new_system },
+
     { "module", new_module },
 
     { "log", print_log },
@@ -186,8 +199,9 @@ static const luaL_Reg ecs_lib[] =
     { "set_target_fps", set_target_fps },
     { "progress", progress },
     { "progress_cb", progress_cb },
-    { "world_info", world_info },
     { "quit", lquit },
+
+    { "world_info", world_info },
     { "dim", dim },
     { "dim_type", dim_type },
 

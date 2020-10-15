@@ -321,6 +321,10 @@ end
 function ecs.progress_cb(cb)
 end
 
+---Signal that the application should quit
+function ecs.quit()
+end
+
 ---@class world_info_t
 ---@field last_component_id integer
 ---@field last_id integer
@@ -347,10 +351,6 @@ local world_info_t = {}
 ---Get world info
 ---@return world_info_t
 function ecs.world_info()
-end
-
----Signal that the application should quit
-function ecs.quit()
 end
 
 ---Dimension the world for a specified number of entities
