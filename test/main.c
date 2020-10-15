@@ -274,7 +274,6 @@ int main(int argc, char **argv)
     }
 
     ecs_fini(w);
-    lua_close(L);
 
     return ret;
 }

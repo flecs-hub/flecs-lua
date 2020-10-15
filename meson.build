@@ -35,6 +35,7 @@ flecs_lua_src += files(
     'src/meta.c',
     'src/module.c',
     'src/os.c',
+    'src/query.c',
     'src/system.c',
     'src/time.c',
     'src/world.c'

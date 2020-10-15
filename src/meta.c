@@ -524,7 +524,7 @@ static void push_iter_metadata(lua_State *L, ecs_iter_t *it)
     lua_setfield(L, -2, "table_offset");
 }
 
-void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy)
+static void push_iter(lua_State *L, ecs_iter_t *it, bool copy)
 {
     /* it */
     lua_createtable(L, 0, 3);
@@ -547,7 +547,11 @@ void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy)
 
     lua_setfield(L, -2, "__ecs_iter");
     lua_setmetatable(L, -2);
+}
 
+void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy)
+{
+    push_iter(L, it, copy);
 
     push_iter_metadata(L, it);
     push_columns(L, it, select);
@@ -579,6 +583,7 @@ void deserialize_column(
 
 void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
 {
+    ecs_os_dbg("ECS_LUA_TO_ITER");
     ecs_lua__prolog(L);
     ecs_iter_t *it = ecs_lua__checkiter(L, idx);
 
@@ -595,7 +600,14 @@ void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
     {
         if(ecs_is_readonly(it, i+1)) continue;
 
-        lua_rawgeti(L, -1, i + 1); /* columns[i+1] */
+        int type = lua_rawgeti(L, -1, i + 1); /* columns[i+1] */
+
+        if(type == LUA_TNIL)
+        {
+            ecs_lua_dbg(L, "skipping empty column %d, not ?", i+1);
+            lua_pop(L, 1);
+            continue;
+        }
 
         ecs_assert(it->count == lua_rawlen(L, -1), ECS_INTERNAL_ERROR, NULL);
 
@@ -607,4 +619,34 @@ void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
     lua_pop(L, 1); /* columns */
 
     ecs_lua__epilog(L);
+}
+
+void push_query_iter(lua_State *L, ecs_iter_t *it)
+{ecs_os_dbg("QUERY_iter");
+    push_iter(L, it, true);
+    push_iter_metadata(L, it);
+
+    lua_createtable(L, 0, 0);
+    lua_setfield(L, -2, "columns");
+}
+
+/* Progress the query iterator at the given index */
+bool ecs_lua_query_next(lua_State *L, int idx)
+{ecs_os_dbg("QUERY_NEXT");
+    ecs_iter_t *it = ecs_lua__checkiter(L, idx);
+    ecs_world_t *w = it->world;
+
+    /* will return early because newly-returned iterators have it->count = 0 */
+    ecs_lua_to_iter(w, L, idx);
+
+    if(!ecs_query_next(it)) return false;
+
+    push_iter_metadata(L, it);
+
+    lua_pushnil(L);
+    lua_setfield(L, -2, "columns");
+
+    push_columns(L, it, NULL);
+
+    return true;
 }

@@ -11,7 +11,10 @@
 
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L);
 
+bool ecs_lua_query_next(lua_State *L, int idx);
+
 ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx);
+void push_query_iter(lua_State *L, ecs_iter_t *it);
 
 typedef struct ecs_lua_ctx
 {
@@ -135,6 +138,12 @@ int bulk_new(lua_State *L);
 
 int column(lua_State *L);
 int columns(lua_State *L);
+
+int query_gc(lua_State *L);
+int query_new(lua_State *L);
+int query_iter(lua_State *L);
+int query_next(lua_State *L);
+int query_changed(lua_State *L);
 
 int new_system(lua_State *L);
 int new_module(lua_State *L);

@@ -6,6 +6,22 @@ local ecs = {}
 ---@class ecs_type_t
 local ecs_type_t = {}
 
+---@class ecs_query_t
+local ecs_query_t = {}
+
+---@class ecs_iter_t
+---@field count integer
+---@field columns table[]
+---@field system integer
+
+---@field table_count integer
+---@field table_offset integer
+
+---@field delta_time number
+---@field delta_system_time number
+---@field world_time number
+local ecs_iter_t = {}
+
 ---Create a new entity
 ---@param e integer
 ---@param name string
@@ -129,6 +145,13 @@ end
 function ecs.struct(name, descriptor)
 end
 
+---Create an alias for a meta type
+---@param meta_type string @name
+---@param alias string
+---@return integer @entity
+function ecs.alias(meta_type, alias)
+end
+
 ---Get an immutable table to a component
 ---@param entity integer
 ---@param component integer
@@ -186,16 +209,6 @@ end
 function ecs.bulk_new(type, n)
 end
 
----@class ecs_iter_t
----@field count integer
----@field columns table
----@field system integer
-
----@field delta_time number
----@field delta_system_time number
----@field world_time number
-local ecs_iter_t = {}
-
 ---Get column from iterator
 ---@param it ecs_iter_t
 ---@param col integer
@@ -209,11 +222,28 @@ end
 function ecs.columns(it)
 end
 
----Create an alias for a meta type
----@param meta_type string @name
----@param alias string
----@return integer @entity
-function ecs.alias(meta_type, alias)
+---Create a query
+---@param sig string
+---@return ecs_query_t
+function ecs.query_new(sig)
+end
+
+---Create a query iterator
+---@param query ecs_query_t
+---@return ecs_iter_t
+function ecs.query_iter(query)
+end
+
+---Progress the query iterator
+---@param it ecs_iter_t
+---@return boolean
+function ecs.query_next(it)
+end
+
+---Check whether the query data changed since last iteration
+---@param query ecs_query_t
+---@return boolean
+function ecs.query_changed(query)
 end
 
 ---Create a system

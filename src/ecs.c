@@ -105,6 +105,11 @@ static const luaL_Reg ecs_lib[] =
     { "column", column },
     { "columns", columns },
 
+    { "query_new", query_new },
+    { "query_iter", query_iter },
+    { "query_next", query_next },
+    { "query_changed", query_changed },
+
     { "system", new_system },
     { "module", new_module },
 
@@ -137,6 +142,11 @@ int luaopen_ecs(lua_State *L)
     luaL_newlib(L, ecs_lib);
 
     luaL_newmetatable(L, "ecs_type_t");
+    lua_pop(L, 1);
+
+    luaL_newmetatable(L, "ecs_query_t");
+    lua_pushcfunction(L, query_gc);
+    lua_setfield(L, -2, "__gc");
     lua_pop(L, 1);
 
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
@@ -203,9 +213,11 @@ static void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
     return ecs_os_realloc(ptr, nsize);
 }
 
+
+/* Should only be called on ecs_fini() */
 ECS_DTOR(EcsLuaHost, ptr,
 {
-    ecs_lua_exit(ptr->L);
+    lua_close(ptr->L);
     ptr->L = NULL;
 });
 
