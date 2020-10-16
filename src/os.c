@@ -81,3 +81,12 @@ int print_warn(lua_State *L)
 {
     return print_type(L, ECS_LUA__WARN);
 }
+
+int tracing_enable(lua_State *L)
+{
+    int level = luaL_checkinteger(L, 1);
+
+    ecs_tracing_enable(level);
+
+    return 0;
+}

@@ -33,6 +33,7 @@ time.sec = 2 << 34
 time.nanosec = 0
 assert(not pcall(function () ecs.time_measure(time) end))
 
+ecs.tracing_enable(3)
 
 runs = 2
 

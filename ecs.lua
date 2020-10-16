@@ -282,6 +282,11 @@ end
 function ecs.warn(...)
 end
 
+---Enable or disable tracing
+---@param level integer
+function ecs.tracing_enable(level)
+end
+
 ---Similar to the standard assert(), but the assertion
 ---will always succeed when built with -DNDEBUG
 ---@param v any

@@ -125,6 +125,7 @@ int print_log(lua_State *L);
 int print_err(lua_State *L);
 int print_dbg(lua_State *L);
 int print_warn(lua_State *L);
+int tracing_enable(lua_State *L);
 int assert_func(lua_State *L);
 
 /* Time */
@@ -200,6 +201,7 @@ static const luaL_Reg ecs_lib[] =
     { "err", print_err },
     { "dbg", print_dbg },
     { "warn", print_warn },
+    { "tracing_enable", tracing_enable },
     { "assert", assert_func },
 
     { "get_time", get_time },
