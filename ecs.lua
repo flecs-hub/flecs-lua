@@ -305,9 +305,22 @@ end
 function ecs.time_measure(start)
 end
 
----Set target fps
----@param fps number
-function ecs.set_target_fps(fps)
+---Create a new pipeline
+---@param e integer
+---@param name string
+---@param expr string
+---@return integer
+function ecs.pipeline(e, name, expr)
+end
+
+---Set a custom pipeline
+---@param pipeline integer
+function ecs.set_pipeline(pipeline)
+end
+
+---Get the current pipeline
+---@return integer
+function ecs.get_pipeline()
 end
 
 ---Progress the world
@@ -321,9 +334,43 @@ end
 function ecs.progress_cb(cb)
 end
 
+---Set target fps
+---@param fps number
+function ecs.set_target_fps(fps)
+end
+
+---Set time scale
+---@param scale number
+function ecs.set_time_scale(scale)
+end
+
+---Reset world clock
+function ecs.reset_clock()
+end
+
 ---Signal that the application should quit
 function ecs.quit()
 end
+
+---Deactivate systems that are not matched with tables
+function ecs.deactivate_systems()
+end
+
+---Set number of worker threads
+---@param threads integer
+function ecs.set_threads(threads)
+end
+
+---Get current number of threads
+---@return integer
+function ecs.get_threads()
+end
+
+---Get current thread index
+---@return integer
+function ecs.get_thread_index()
+end
+
 
 ---@class world_info_t
 ---@field last_component_id integer

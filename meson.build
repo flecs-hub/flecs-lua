@@ -75,7 +75,8 @@ tests = [
     'meta_limits',
     'meta',
     'system',
-    'module'
+    'module',
+    'pipeline'
 ]
 
 env = environment()

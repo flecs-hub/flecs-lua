@@ -132,10 +132,19 @@ int get_time(lua_State *L);
 int time_measure(lua_State *L);
 
 /* Pipeline */
-int set_target_fps(lua_State *L);
+int new_pipeline(lua_State *L);
+int set_pipeline(lua_State *L);
+int get_pipeline(lua_State *L);
 int progress(lua_State *L);
 int progress_cb(lua_State *L);
+int set_target_fps(lua_State *L);
+int set_time_scale(lua_State *L);
+int reset_clock(lua_State *L);
 int lquit(lua_State *L);
+int deactivate_systems(lua_State *L);
+int set_threads(lua_State *L);
+int get_threads(lua_State *L);
+int get_thread_index(lua_State *L);
 
 /* World */
 int world_info(lua_State *L);
@@ -196,10 +205,19 @@ static const luaL_Reg ecs_lib[] =
     { "get_time", get_time },
     { "time_measure", time_measure },
 
-    { "set_target_fps", set_target_fps },
+    { "pipeline", new_pipeline },
+    { "set_pipeline", set_pipeline },
+    { "get_pipeline", get_pipeline },
     { "progress", progress },
     { "progress_cb", progress_cb },
+    { "set_target_fps", set_target_fps },
+    { "set_time_scale", set_time_scale },
+    { "reset_clock", reset_clock },
     { "quit", lquit },
+    { "deactivate_systems", deactivate_systems },
+    { "set_threads", set_threads },
+    { "get_threads", get_threads },
+    { "get_thread_index", get_thread_index },
 
     { "world_info", world_info },
     { "dim", dim },
