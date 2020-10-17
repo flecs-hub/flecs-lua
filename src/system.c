@@ -21,14 +21,16 @@ static void system_entry_point(ecs_iter_t *it)
     ecs_lua_system *sys = it->param;
     lua_State *L = sys->L;
 
-    ecs_lua__prolog(L);
-    ecs_assert(!strcmp(sys->signature, ecs_get(w, it->system, EcsSignatureExpr)->expr), ECS_INTERNAL_ERROR, NULL);
-
     ecs_time_t time;
     int idx = ecs_get_thread_index(w);
 
+    ecs_assert(idx == 0, ECS_INTERNAL_ERROR, "Lua systems must run on the main thread");
+    ecs_assert(!strcmp(sys->signature, ecs_get(w, it->system, EcsSignatureExpr)->expr), ECS_INTERNAL_ERROR, NULL);
+
     ecs_os_dbg("Lua system: \"%s\", %d columns, count %d, func ref %d",
         ecs_get_name(w, it->system), it->column_count, it->count, sys->func_ref);
+
+    ecs_lua__prolog(L);
 
     int type = lua_rawgeti(L, LUA_REGISTRYINDEX, sys->func_ref);
 
