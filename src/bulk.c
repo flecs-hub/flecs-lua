@@ -30,7 +30,7 @@ int bulk_new(lua_State *L)
 
     entities = ecs_bulk_new_w_type(w, type, count);
 
-    lua_newtable(L);
+    lua_createtable(L, count, 0);
 
     lua_Integer i;
     for(i=0; i < count; i++)
