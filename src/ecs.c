@@ -188,7 +188,7 @@ static const luaL_Reg ecs_lib[] =
     { "column", column },
     { "columns", columns },
 
-    { "query_new", query_new },
+    { "query", query_new },
     { "query_iter", query_iter },
     { "query_next", query_next },
     { "query_changed", query_changed },

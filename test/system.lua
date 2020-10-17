@@ -18,7 +18,7 @@ for i, e in ipairs(ents) do
     ecs.set(e, Velocity, { x = i * 12, y = i * 13})
 end
 
-local q = ecs.query_new("Position, Velocity")
+local q = ecs.query("Position, Velocity")
 local it = ecs.query_iter(q)
 local q_count = 0
 

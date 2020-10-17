@@ -229,7 +229,7 @@ end
 ---Create a query
 ---@param sig string
 ---@return ecs_query_t
-function ecs.query_new(sig)
+function ecs.query(sig)
 end
 
 ---Create a query iterator
