@@ -557,6 +557,22 @@ void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy)
     push_columns(L, it, select);
 }
 
+/* Reset with a new base pointer */
+static void meta_reset(ecs_meta_cursor_t *cursor, void *base)
+{
+    ecs_assert(cursor != NULL, ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(base != NULL, ECS_INVALID_PARAMETER, NULL);
+
+    cursor->depth = 0;
+    cursor->scope[0].start = 1;
+    cursor->scope[0].cur_op = 1;
+    cursor->scope[0].cur_elem = 0;
+    cursor->scope[0].base = base;
+    cursor->scope[0].is_collection = false;
+    cursor->scope[0].count = 0;
+    cursor->scope[0].vector = NULL;
+}
+
 static
 void deserialize_column(
     ecs_world_t *world,
@@ -567,12 +583,12 @@ void deserialize_column(
     size_t stride,
     int32_t count)
 {
-    ecs_meta_cursor_t c;
+    ecs_meta_cursor_t c = ecs_meta_cursor(world, type, base);
 
     int j;
     for(j=0; j < count; j++)
     {
-        c = ecs_meta_cursor(world, type, (char*)base + j * stride);
+        meta_reset(&c, (char*)base + j * stride);
 
         lua_rawgeti(L, idx, j + 1); /* columns[i+1][j+1] */
         deserialize_type(world, &c, L, -1);
