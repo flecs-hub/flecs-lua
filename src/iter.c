@@ -31,7 +31,7 @@ int column(lua_State *L)
 
     if(i < 1 || i > it->column_count) luaL_argerror(L, 2, "invalid column index");
 
-    lua_rawgeti(L, -1, i);
+    lua_geti(L, -1, i);
 
     return 1;
 }
@@ -43,7 +43,7 @@ int columns(lua_State *L)
     int i;
     for(i=1; i <= it->column_count; i++)
     {
-        lua_rawgeti(L, 2, i);
+        lua_geti(L, 2, i);
     }
 
     return it->column_count;
