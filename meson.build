@@ -9,7 +9,7 @@ if get_option('tests').enabled()
 endif
 
 if get_option('lua54') == true
-    subproject('lua-5.4')
+    subproject('lua-54')
 endif
 
 flecs_lua_deps = [
