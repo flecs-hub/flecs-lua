@@ -9,12 +9,19 @@
 #define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
 #define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
 
+/* ecs */
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L);
 
+/* meta */
 bool ecs_lua_query_next(lua_State *L, int idx);
-
-ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx);
 void push_query_iter(lua_State *L, ecs_iter_t *it);
+
+/* iter */
+ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx);
+
+/* misc */
+ecs_type_t checktype(lua_State *L, int arg);
+ecs_filter_t checkfilter(lua_State *L, int idx);
 
 typedef struct ecs_lua_ctx
 {

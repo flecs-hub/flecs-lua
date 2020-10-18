@@ -142,3 +142,21 @@ ecs.clear(id_name_comps)
 assert(not ecs.has(id_name_comps, "lua_test_struct"))
 
 assert(ecs.lookup_fullpath("flecs.lua.LuaWorldInfo") ~= 0)
+
+--Bulk, filters
+
+local ent = ecs.new(nil, "LuaPosition")
+
+assert(ecs.is_alive(ent))
+
+ecs.bulk_delete({ include = ecs.get_type(ent) })
+
+assert(not ecs.is_alive(ent))
+
+
+assert(not pcall(function () ecs.bulk_delete({include_kind = 0xD00D00}) end))
+assert(not pcall(function () ecs.bulk_delete({exclude_kind = ecs.MatchExact + 1}) end))
+assert(not pcall(function () ecs.bulk_delete({include_kind = false}) end))
+assert(not pcall(function () ecs.bulk_delete({exclude_kind = false}) end))
+assert(not pcall(function () ecs.bulk_delete({include = 0xD00D00}) end))
+assert(not pcall(function () ecs.bulk_delete({exclude = 0xD00D00}) end))

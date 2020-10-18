@@ -33,6 +33,7 @@ flecs_lua_src += files(
     'src/entity.c',
     'src/iter.c',
     'src/meta.c',
+    'src/misc.c',
     'src/module.c',
     'src/os.c',
     'src/pipeline.c',

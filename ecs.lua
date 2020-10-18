@@ -6,6 +6,13 @@ local ecs = {}
 ---@class ecs_type_t
 local ecs_type_t = {}
 
+---@class ecs_filter_t
+---@field include ecs_type_t
+---@field exclude ecs_type_t
+---@field include_kind integer @ecs.Match*
+---@field exclude_kind integer @ecs.Match*
+local ecs_filter_t = {}
+
 ---@class ecs_mutable_t
 local ecs_mutable_t = {}
 
@@ -218,6 +225,11 @@ end
 ---@param n integer
 ---@return integer[]
 function ecs.bulk_new(type, n)
+end
+
+---Delete entities matching a filter
+---@param filter ecs_filter_t
+function ecs.bulk_delete(filter)
 end
 
 ---Get column from iterator

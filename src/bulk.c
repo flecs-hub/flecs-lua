@@ -41,3 +41,13 @@ int bulk_new(lua_State *L)
 
     return 1;
 }
+
+int bulk_delete(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_filter_t filter = checkfilter(L, 1);
+
+    ecs_bulk_delete(w, &filter);
+
+    return 0;
+}

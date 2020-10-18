@@ -37,32 +37,6 @@ void ecs_lua_progress(lua_State *L)
     ecs_lua__epilog(L);
 }
 
-static int assert_func(lua_State *L)
-{
-    if(lua_toboolean(L, 1)) return lua_gettop(L);
-
-#ifdef NDEBUG
-    return lua_gettop(L);
-#endif
-
-    luaL_checkany(L, 1);
-    lua_remove(L, 1);
-    lua_pushliteral(L, "assertion failed!");
-    lua_settop(L, 1);
-
-    int level = (int)luaL_optinteger(L, 2, 1);
-    lua_settop(L, 1);
-
-    if(lua_type(L, 1) == LUA_TSTRING && level > 0)
-    {
-        luaL_where(L, level);
-        lua_pushvalue(L, 1);
-        lua_concat(L, 2);
-    }
-
-    return lua_error(L);
-}
-
 static int func(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -104,6 +78,7 @@ int new_prefab(lua_State *L);
 
 /* Bulk */
 int bulk_new(lua_State *L);
+int bulk_delete(lua_State *L);
 
 /* Iterator */
 int column(lua_State *L);
@@ -188,6 +163,7 @@ static const luaL_Reg ecs_lib[] =
     { "prefab", new_prefab },
 
     { "bulk_new", bulk_new },
+    { "bulk_delete", bulk_delete },
 
     { "column", column },
     { "columns", columns },
