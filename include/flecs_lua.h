@@ -27,6 +27,7 @@ void FlecsLuaImport(ecs_world_t *w);
     ECS_IMPORT_COMPONENT(handles, EcsLuaHost);\
 
 /* Reinitialize with a custom lua_State */
+FLECS_LUA_EXPORT
 int ecs_lua_set_state(ecs_world_t *w, lua_State *L);
 
 /* Call progress function callback (if set),
