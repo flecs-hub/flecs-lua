@@ -288,7 +288,7 @@ int get_type(lua_State *L)
     {
         ecs_vector_t **ptr = lua_newuserdata(L, sizeof(ecs_vector_t*));
         *ptr = (ecs_vector_t*)type;
-        
+
         luaL_setmetatable(L, "ecs_type_t");
     }
     else lua_pushnil(L);
@@ -532,12 +532,23 @@ int singleton_set(lua_State *L)
 int new_prefab(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
-    
-    ecs_entity_t e = 0;
-    const char *id = luaL_checkstring(L, 1);
-    const char *sig = luaL_optstring(L, 2, NULL);
 
-    e = ecs_new_prefab(w, e, id, sig);
+    ecs_entity_t e = 0;
+
+    int args = lua_gettop(L);
+
+    if(!args)
+    {
+        e = ecs_new(w, 0);
+        ecs_add_entity(w, e, EcsPrefab);
+    }
+    else if(args <= 2)
+    {
+        const char *id = luaL_checkstring(L, 1);
+        const char *sig = luaL_optstring(L, 2, NULL);
+        e = ecs_new_prefab(w, e, id, sig);
+    }
+    else return luaL_argerror(L, args, "too many arguments");
 
     lua_pushinteger(L, e);
 

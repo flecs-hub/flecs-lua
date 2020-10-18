@@ -79,7 +79,8 @@ tests = [
     'meta',
     'system',
     'module',
-    'pipeline'
+    'pipeline',
+    'prefab'
 ]
 
 env = environment()
