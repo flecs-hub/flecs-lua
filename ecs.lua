@@ -206,6 +206,13 @@ end
 function ecs.singleton_set(component, value)
 end
 
+---Create a prefab
+---@param name string
+---@param signature string
+---@return integer entity
+function ecs.prefab(name, signature)
+end
+
 ---Create N new entities with an optional component
 ---@param type integer|string @optional
 ---@param n integer

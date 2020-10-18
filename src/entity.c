@@ -528,3 +528,18 @@ int singleton_set(lua_State *L)
 
     return 1;
 }
+
+int new_prefab(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+    
+    ecs_entity_t e = 0;
+    const char *id = luaL_checkstring(L, 1);
+    const char *sig = luaL_optstring(L, 2, NULL);
+
+    e = ecs_new_prefab(w, e, id, sig);
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
