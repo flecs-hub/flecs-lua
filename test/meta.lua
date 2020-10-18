@@ -63,4 +63,25 @@ assert(test_struct.i64 == 32)
 local v = { foo = "bar"}
 assert(not pcall(function () ecs.modified(v) end))
 
+local LuaPosition = ecs.struct("LuaPosition", "{float x; float y; float z;}")
+local LuaStruct = ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")
+--local LuaArray = ecs.array("LuaArray", "LuaStruct", 4)
 
+local EcsMetaType = ecs.lookup_fullpath("flecs.meta.MetaType")
+local meta = ecs.get(LuaPosition, EcsMetaType)
+
+assert(meta.size == 12)
+
+--Structs without labels are allowed
+ecs.set(ecs.Singleton, LuaPosition, { 100, 200, 300 })
+
+--Mixed key types are not allowed
+assert(not pcall(function () ecs.set(ecs.Singleton, LuaPosition, { 100, x = 2, 200, 300}) end))
+
+--Too many elements
+assert(not pcall(function () ecs.set(ecs.Singleton, LuaPosition, { 100, 200, 300, 400 }) end))
+
+--Invalid key type
+local lol = {}
+lol[ecs.get_type(LuaPosition)] = 245
+assert(not pcall(function () ecs.set(ecs.Singleton, LuaPosition, lol) end))

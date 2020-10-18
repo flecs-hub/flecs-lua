@@ -314,7 +314,7 @@ void ecs_ptr_to_lua(
 
 static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State *L, int idx)
 {
-    int ktype, vtype, ret, depth = 0;
+    int ktype, vtype, ret, mtype = 0;
 
     ret = ecs_meta_push(c);
 
@@ -331,6 +331,8 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
         ktype = lua_type(L, -2);
         vtype = lua_type(L, -1);
 
+        if(!mtype) mtype = ktype;
+
         if(ktype == LUA_TSTRING)
         {
             const char *key = lua_tostring(L, -2);
@@ -339,6 +341,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             ret = ecs_meta_move_name(c, key);
 
             if(ret) luaL_error(L, "field \"%s\" does not exist", key);
+            if(mtype != ktype) luaL_error(L, "table has mixed key types (string key '%s')", key);
         }
         else if(ktype == LUA_TNUMBER)
         {
@@ -348,7 +351,9 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
             ret = ecs_meta_move(c, key);
 
             if(ret) luaL_error(L, "invalid index %I (Lua [%I])", key, key + 1);
+            if(mtype != ktype) luaL_error(L, "table has mixed key types (int key [%I]", key+1);
         }
+        else luaL_error(L, "invalid key type '%s'", lua_typename(L, ktype));
 
         switch(vtype)
         {
@@ -371,7 +376,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
                     ecs_lua_dbg("  set_int: %lld", integer);
                     ret = ecs_meta_set_int(c, integer);
 
-                    if(ret) luaL_error(L, "integer out of range (%I)", integer);
+                    if(ret) luaL_error(L, "failed to set integer (%I)", integer);
                 }
                 else
                 {
@@ -502,7 +507,7 @@ static void push_iter_metadata(lua_State *L, ecs_iter_t *it)
     /* it.system */
     lua_pushinteger(L, it->system);
     lua_setfield(L, -2, "system");
-    
+
     /* it.delta_time */
     lua_pushnumber(L, it->delta_time);
     lua_setfield(L, -2, "delta_time");
@@ -542,7 +547,7 @@ static void push_iter(lua_State *L, ecs_iter_t *it, bool copy)
         memcpy(ptr, it, sizeof(ecs_iter_t));
     }
     else lua_pushlightuserdata(L, it);
-    
+
     lua_rawseti(L, -2, 1);
 
     lua_setfield(L, -2, "__ecs_iter");
@@ -620,7 +625,7 @@ void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
 
         if(type == LUA_TNIL)
         {
-            ecs_lua_dbg(L, "skipping empty column %d, not ?", i+1);
+            ecs_lua_dbg("skipping empty column %d, not ?", i+1);
             lua_pop(L, 1);
             continue;
         }
