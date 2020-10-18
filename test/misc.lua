@@ -24,7 +24,8 @@ assert(not pcall(function () ecs.assert(false, "failing assert") end))
 local time = ecs.get_time()
 
 print("time = " .. time.sec .. " seconds, " .. time.nanosec .. " nanoseconds")
-print("elapsed: " .. ecs.time_measure(time) .. "seconds")
+print("elapsed: " .. ecs.time_measure(time) .. " seconds")
+print("time__tostring: ", time)
 
 time.nanosec = 2 << 40
 assert(not pcall(function () ecs.time_measure(time) end))

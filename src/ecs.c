@@ -108,6 +108,7 @@ int assert_func(lua_State *L);
 /* Time */
 int get_time(lua_State *L);
 int time_measure(lua_State *L);
+int time__tostring(lua_State *L);
 
 /* Pipeline */
 int new_pipeline(lua_State *L);
@@ -131,7 +132,7 @@ int dim_type(lua_State *L);
 
 static const luaL_Reg ecs_lib[] =
 {
-    { "new", new_entity },    
+    { "new", new_entity },
     { "delete", delete_entity },
     { "tag", new_tag },
     { "name", entity_name },
@@ -222,6 +223,11 @@ int luaopen_ecs(lua_State *L)
     luaL_newmetatable(L, "ecs_query_t");
     lua_pushcfunction(L, query_gc);
     lua_setfield(L, -2, "__gc");
+    lua_pop(L, 1);
+
+    luaL_newmetatable(L, "ecs_time_t");
+    lua_pushcfunction(L, time__tostring);
+    lua_setfield(L, -2, "__tostring");
     lua_pop(L, 1);
 
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
