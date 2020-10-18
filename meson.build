@@ -4,7 +4,9 @@ project('flecs-lua', 'c',
     default_options : 'c_std=c99'
 )
 
-if get_option('tests').enabled()
+tests = get_option('tests')
+
+if tests.enabled()
     add_global_arguments('-DLUA_USE_APICHECK', language : 'c')
 endif
 
@@ -63,7 +65,7 @@ if meson.version().version_compare('>= 0.54.0')
 endif
 
 
-if get_option('tests').disabled()
+if tests.disabled()
     subdir_done()
 endif
 
