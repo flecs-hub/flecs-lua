@@ -547,6 +547,7 @@ int new_prefab(lua_State *L)
         const char *id = luaL_checkstring(L, 1);
         const char *sig = luaL_optstring(L, 2, NULL);
         e = ecs_new_prefab(w, e, id, sig);
+        ecs_set(w, e, EcsName, { .alloc_value = (char*)id });
     }
     else return luaL_argerror(L, args, "too many arguments");
 
