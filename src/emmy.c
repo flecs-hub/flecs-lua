@@ -129,3 +129,21 @@ char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_
 
     return ecs_strbuf_get(&buf);
 }
+
+int emmy_class(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t type = luaL_checkinteger(L, 1);
+    bool b = false;
+
+    if(lua_gettop(L) > 1) b = lua_toboolean(L, 2);
+
+    char *str = ecs_type_to_emmylua(w, type, b);
+
+    lua_pushstring(L, str);
+
+    ecs_os_free(str);
+
+    return 1;
+}

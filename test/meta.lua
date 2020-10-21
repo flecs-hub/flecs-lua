@@ -85,3 +85,6 @@ assert(not pcall(function () ecs.set(ecs.Singleton, LuaPosition, { 100, 200, 300
 local lol = {}
 lol[ecs.get_type(LuaPosition)] = 245
 assert(not pcall(function () ecs.set(ecs.Singleton, LuaPosition, lol) end))
+
+local str = ecs.emmy_class(LuaPosition)
+ecs.log(str)

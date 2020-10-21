@@ -130,6 +130,9 @@ int world_info(lua_State *L);
 int dim(lua_State *L);
 int dim_type(lua_State *L);
 
+/* EmmyLua */
+int emmy_class(lua_State *L);
+
 static const luaL_Reg ecs_lib[] =
 {
     { "new", new_entity },
@@ -205,6 +208,8 @@ static const luaL_Reg ecs_lib[] =
     { "world_info", world_info },
     { "dim", dim },
     { "dim_type", dim_type },
+
+    { "emmy_class", emmy_class },
 
 #define XX(const) {#const, NULL },
     ECS_LUA_ENUMS(XX)

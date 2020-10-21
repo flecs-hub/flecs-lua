@@ -435,6 +435,13 @@ end
 function ecs.dim_type(count, type)
 end
 
+---Create an EmmyLua class annotation
+---@param type_entity integer
+---@param struct_as_table boolean @optional, print member structs' type as table
+---@return string
+function ecs.emmy_class(type_entity, struct_as_table)
+end
+
 ecs.MatchDefault = 0
 ecs.MatchAll = 1
 ecs.MatchAny = 2
