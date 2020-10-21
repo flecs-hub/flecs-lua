@@ -32,6 +32,7 @@ flecs_lua_inc = include_directories('include')
 flecs_lua_src += files(
     'src/bulk.c',
     'src/ecs.c',
+    'src/emmy.c',
     'src/entity.c',
     'src/iter.c',
     'src/meta.c',

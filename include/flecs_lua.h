@@ -60,6 +60,8 @@ void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy)
 FLECS_LUA_EXPORT
 void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx);
 
+/* Create an EmmyLua class annotation */
+char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_table);
 
 /* Get world pointer from registry */
 FLECS_LUA_EXPORT
