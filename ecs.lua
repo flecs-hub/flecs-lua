@@ -245,6 +245,12 @@ end
 function ecs.columns(it)
 end
 
+---Test if column is owned
+---@param it ecs_iter_t
+---@param column integer
+function ecs.is_owned(it, column)
+end
+
 ---Create a query
 ---@param sig string
 ---@return ecs_query_t

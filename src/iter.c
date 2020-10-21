@@ -48,3 +48,15 @@ int columns(lua_State *L)
 
     return it->column_count;
 }
+
+int is_owned(lua_State *L)
+{
+    ecs_iter_t *it = ecs_lua__checkiter(L, 1);
+    lua_Integer col = luaL_checkinteger(L, 2);
+
+    int b = ecs_is_owned(it, col);
+
+    lua_pushboolean(L, b);
+
+    return 1;
+}

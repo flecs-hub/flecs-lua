@@ -41,6 +41,8 @@ local sys_id = 0
 local function sys(it)
     local p, v = ecs.columns(it)
 
+    assert(ecs.is_owned(it, 1))
+    assert(ecs.is_owned(it, 2))
     assert(#it.columns == 2)
     assert(p == it.columns[1])
     assert(v == it.columns[2])

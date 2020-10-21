@@ -83,6 +83,7 @@ int bulk_delete(lua_State *L);
 /* Iterator */
 int column(lua_State *L);
 int columns(lua_State *L);
+int is_owned(lua_State *L);
 
 /* Query */
 int query_gc(lua_State *L);
@@ -171,6 +172,7 @@ static const luaL_Reg ecs_lib[] =
 
     { "column", column },
     { "columns", columns },
+    { "is_owned", is_owned },
 
     { "query", query_new },
     { "query_iter", query_iter },
