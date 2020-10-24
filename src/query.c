@@ -31,13 +31,14 @@ int query_new(lua_State *L)
 }
 
 int query_iter(lua_State *L)
-{
+{ecs_os_dbg("QUERY_iter");
     ecs_world_t *w = ecs_lua_get_world(L);
     ecs_query_t *query = checkquery(L, 1);
 
     ecs_iter_t it = ecs_query_iter(query);
 
-    push_query_iter(L, &it);
+    /* will push with no columns because it->count = 0 */
+    ecs_iter_to_lua(&it, L, NULL, true);
 
     return 1;
 }
@@ -58,6 +59,6 @@ int query_changed(lua_State *L)
     int b = ecs_query_changed(query);
 
     lua_pushboolean(L, b);
-    
+
     return 1;
 }

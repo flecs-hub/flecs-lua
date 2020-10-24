@@ -14,7 +14,6 @@ ecs_lua_ctx *ecs_lua_get_context(lua_State *L);
 
 /* meta */
 bool ecs_lua_query_next(lua_State *L, int idx);
-void push_query_iter(lua_State *L, ecs_iter_t *it);
 
 /* iter */
 ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx);
