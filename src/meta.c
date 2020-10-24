@@ -458,6 +458,51 @@ void serialize_column(
     serialize_elements(world, ser->ops, base, count, hdr->size, L);
 }
 
+static int column__len(lua_State *L)
+{
+    ecs_iter_t *it = lua_touserdata(L, lua_upvalueindex(1));
+
+    lua_pushinteger(L, it->column_count);
+
+    return 1;
+}
+
+static int column__index(lua_State *L)
+{
+    ecs_iter_t *it = lua_touserdata(L, lua_upvalueindex(1));
+    ecs_world_t *world = it->world;
+
+    lua_Integer i = luaL_checkinteger(L, 2) - 1;
+
+    if(i < 0 || i >= it->column_count) luaL_argerror(L, 1, "invalid column index");
+
+    if(!it->count)
+    {
+        lua_pushnil(L);
+        return 1;
+    }
+
+    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
+    ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INTERNAL_ERROR, NULL);
+
+    ecs_type_t table_type = ecs_iter_type(it);
+    ecs_entity_t *comps = ecs_vector_first(table_type, ecs_entity_t);
+
+    const EcsMetaTypeSerializer *ser = ecs_get(world, comps[i], EcsMetaTypeSerializer);
+    ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    if(!ser) luaL_error(L, "column %d cannot be serialized", i + 1);
+
+    lua_settop(L, 1); /* (it.)columns */
+
+    serialize_column(world, L, ser, ecs_table_column(it, i), it->count);
+
+    lua_pushvalue(L, -1);
+    lua_rawseti(L, -3, i+1);
+
+    return 1;
+}
+
 /* expects "it" table at stack top */
 static void push_columns(lua_State *L, ecs_iter_t *it, ecs_type_t select)
 {
@@ -477,22 +522,20 @@ static void push_columns(lua_State *L, ecs_iter_t *it, ecs_type_t select)
     ecs_entity_t *comps = ecs_vector_first(table_type, ecs_entity_t);
 
     /* it.columns[] */
-    lua_createtable(L, it->column_count, 0);
+    lua_createtable(L, it->column_count, 1);
 
-    int32_t i;
-    for(i=0; i < it->column_count; i++)
-    {
-        if(select && !ecs_type_has_entity(world, select, comps[i])) continue;
+    /* metatable */
+    lua_createtable(L, 0, 2);
 
-        const EcsMetaTypeSerializer *ser = ecs_get(world, comps[i], EcsMetaTypeSerializer);
-        ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
+    lua_pushlightuserdata(L, it);
+    lua_pushcclosure(L, column__index, 1);
+    lua_setfield(L, -2, "__index");
 
-        if(!ser) luaL_error(L, "column %d cannot be serialized", i + 1);
+    lua_pushlightuserdata(L, it);
+    lua_pushcclosure(L, column__len, 1);
+    lua_setfield(L, -2, "__len");
 
-        serialize_column(world, L, ser, ecs_table_column(it, i), it->count);
-
-        lua_rawseti(L, -2, i+1);
-    }
+    lua_setmetatable(L, -2);
 
     lua_setfield(L, -2, "columns");
 }
