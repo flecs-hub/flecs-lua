@@ -433,7 +433,7 @@ void serialize_column(
     serialize_elements(world, ser->ops, base, count, hdr->size, L);
 }
 
-static int column__len(lua_State *L)
+static int columns__len(lua_State *L)
 {
     ecs_iter_t *it = lua_touserdata(L, lua_upvalueindex(1));
 
@@ -442,7 +442,7 @@ static int column__len(lua_State *L)
     return 1;
 }
 
-static int column__index(lua_State *L)
+static int columns__index(lua_State *L)
 {
     ecs_iter_t *it = lua_touserdata(L, lua_upvalueindex(1));
     ecs_world_t *world = it->world;
@@ -503,11 +503,11 @@ static void push_columns(lua_State *L, ecs_iter_t *it, ecs_type_t select)
     lua_createtable(L, 0, 2);
 
     lua_pushlightuserdata(L, it);
-    lua_pushcclosure(L, column__index, 1);
+    lua_pushcclosure(L, columns__index, 1);
     lua_setfield(L, -2, "__index");
 
     lua_pushlightuserdata(L, it);
-    lua_pushcclosure(L, column__len, 1);
+    lua_pushcclosure(L, columns__len, 1);
     lua_setfield(L, -2, "__len");
 
     lua_setmetatable(L, -2);
