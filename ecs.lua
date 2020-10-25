@@ -448,6 +448,29 @@ end
 function ecs.emmy_class(type_entity, struct_as_table)
 end
 
+---@class EcsMetaType
+---@field kind integer
+---@field size integer
+---@field alignment integer
+---@field descriptor string
+---@field alias integer
+local EcsMetaType = {}
+
+---@class ecs_type_op_t
+---@field type integer
+---@field kind integer
+---@field size integer
+---@field alignment integer
+---@field count integer
+---@field offset integer
+---@field name string
+local ecs_type_op_t = {}
+
+---@class EcsMetaTypeSerializer
+---@field ops ecs_type_op_t[]
+local EcsMetaTypeSerializer = {}
+
+
 ecs.MatchDefault = 0
 ecs.MatchAll = 1
 ecs.MatchAny = 2
