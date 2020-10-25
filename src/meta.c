@@ -293,19 +293,6 @@ void serialize_type(
     }
 }
 
-void ecs_ptr_to_lua(
-    ecs_world_t *world,
-    lua_State *L,
-    ecs_entity_t type,
-    const void *ptr)
-{
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
-    const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
-    ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
-
-    serialize_type(world, ser->ops, ptr, L);
-}
-
 #ifdef NDEBUG
     #define ecs_lua_dbg(fmt, ...)
 #else
@@ -655,6 +642,19 @@ void deserialize_column(
 
         lua_pop(L, 1);
     }
+}
+
+void ecs_ptr_to_lua(
+    ecs_world_t *world,
+    lua_State *L,
+    ecs_entity_t type,
+    const void *ptr)
+{
+    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
+    const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
+    ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
+
+    serialize_type(world, ser->ops, ptr, L);
 }
 
 void ecs_lua_to_ptr(
