@@ -1,9 +1,9 @@
 #include "private.h"
 
 
-ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx)
+ecs_iter_t *ecs_lua__checkiter(lua_State *L, int arg)
 {
-    if(luaL_getmetafield(L, idx, "__ecs_iter") != LUA_TTABLE) luaL_error(L, "table is not an iterator");
+    if(luaL_getmetafield(L, arg, "__ecs_iter") != LUA_TTABLE) luaL_argerror(L, arg, "table is not an iterator");
 
     lua_rawgeti(L, -1, 1);
     ecs_iter_t *it = lua_touserdata(L, -1);

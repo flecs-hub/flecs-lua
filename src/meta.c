@@ -431,18 +431,6 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
     ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
 }
 
-void ecs_lua_to_ptr(
-    ecs_world_t *world,
-    lua_State *L,
-    int idx,
-    ecs_entity_t type,
-    void *ptr)
-{
-    ecs_meta_cursor_t c = ecs_meta_cursor(world, type, ptr);
-
-    deserialize_type(world, &c, L, idx);
-}
-
 static
 void serialize_column(
     ecs_world_t *world,
@@ -598,18 +586,6 @@ static ecs_iter_t *push_iter_metafield(lua_State *L, ecs_iter_t *it, bool copy)
     return it;
 }
 
-void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy)
-{
-    /* it */
-    lua_createtable(L, 0, 3);
-
-    /* metatable.__ecs_iter */
-    it = push_iter_metafield(L, it, copy);
-
-    push_iter_metadata(L, it);
-    push_columns(L, it, select);
-}
-
 /* Reset with a new base pointer */
 static void meta_reset(ecs_meta_cursor_t *cursor, void *base)
 {
@@ -650,6 +626,30 @@ void deserialize_column(
     }
 }
 
+void ecs_lua_to_ptr(
+    ecs_world_t *world,
+    lua_State *L,
+    int idx,
+    ecs_entity_t type,
+    void *ptr)
+{
+    ecs_meta_cursor_t c = ecs_meta_cursor(world, type, ptr);
+
+    deserialize_type(world, &c, L, idx);
+}
+
+void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy)
+{
+    /* it */
+    lua_createtable(L, 0, 3);
+
+    /* metatable.__ecs_iter */
+    it = push_iter_metafield(L, it, copy);
+
+    push_iter_metadata(L, it);
+    push_columns(L, it, select);
+}
+
 void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
 {
     ecs_os_dbg("ECS_LUA_TO_ITER");
@@ -673,7 +673,7 @@ void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
 
         if(type == LUA_TNIL)
         {
-            ecs_lua_dbg("skipping empty column %d, not ?", i+1);
+            ecs_lua_dbg("skipping empty column %d (not serialized?)", i+1);
             lua_pop(L, 1);
             continue;
         }
