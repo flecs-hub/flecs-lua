@@ -256,6 +256,7 @@ int luaopen_ecs(lua_State *L)
 static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
 {
     lua_State *L = ctx.L;
+    ecs_world_t *world = ctx.world;
 
     ecs_lua_ctx *lctx = lua_newuserdata(L, sizeof(ecs_lua_ctx));
     lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_CONTEXT);
@@ -264,6 +265,12 @@ static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
 
     lctx->error = 0;
     lctx->progress_ref = LUA_NOREF;
+
+    ecs_entity_t MetaTypeSerializer = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
+    ecs_assert(MetaTypeSerializer != 0, ECS_INTERNAL_ERROR, NULL);
+
+    lua_pushinteger(L, MetaTypeSerializer);
+    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_SERIALIZER);
 
     luaL_requiref(L, "ecs", luaopen_ecs, 1);
     lua_pop(L, 1);

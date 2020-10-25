@@ -433,6 +433,26 @@ void serialize_column(
     serialize_elements(world, ser->ops, base, count, hdr->size, L);
 }
 
+static inline ecs_entity_t get_serializer_entity(lua_State *L)
+{
+    int type = lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_SERIALIZER);
+    ecs_assert(type == LUA_TNUMBER, ECS_INTERNAL_ERROR, NULL);
+    lua_Integer s = lua_tointeger(L, -1);
+    lua_pop(L, 1);
+
+    return s;
+}
+
+static const EcsMetaTypeSerializer *get_serializer(lua_State *L, ecs_world_t *world, ecs_entity_t type)
+{
+    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = get_serializer_entity(L);
+
+    const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
+    ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    return ser;
+}
+
 static int columns__len(lua_State *L)
 {
     ecs_iter_t *it = lua_touserdata(L, lua_upvalueindex(1));
@@ -457,14 +477,10 @@ static int columns__index(lua_State *L)
         return 1;
     }
 
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
-    ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INTERNAL_ERROR, NULL);
-
     ecs_type_t table_type = ecs_iter_type(it);
     ecs_entity_t *comps = ecs_vector_first(table_type, ecs_entity_t);
 
-    const EcsMetaTypeSerializer *ser = ecs_get(world, comps[i], EcsMetaTypeSerializer);
-    ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
+    const EcsMetaTypeSerializer *ser = get_serializer(L, world, comps[i]);
 
     if(!ser) luaL_error(L, "column %d cannot be serialized", i + 1);
 
@@ -487,11 +503,6 @@ static void push_columns(lua_State *L, ecs_iter_t *it, ecs_type_t select)
         lua_setfield(L, -2, "columns");
         return;
     }
-
-    ecs_world_t *world = it->world;
-
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
-    ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INTERNAL_ERROR, NULL);
 
     ecs_type_t table_type = ecs_iter_type(it);
     ecs_entity_t *comps = ecs_vector_first(table_type, ecs_entity_t);
@@ -650,9 +661,7 @@ void ecs_ptr_to_lua(
     ecs_entity_t type,
     const void *ptr)
 {
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
-    const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
-    ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
+    const EcsMetaTypeSerializer *ser = get_serializer(L, world, type);
 
     serialize_type(world, ser->ops, ptr, L);
 }
