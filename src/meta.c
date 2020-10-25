@@ -433,7 +433,7 @@ void serialize_column(
     serialize_elements(world, ser->ops, base, count, hdr->size, L);
 }
 
-static inline ecs_entity_t get_serializer_entity(lua_State *L)
+static inline ecs_entity_t get_serializer_id(lua_State *L)
 {
     int type = lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_SERIALIZER);
     ecs_assert(type == LUA_TNUMBER, ECS_INTERNAL_ERROR, NULL);
@@ -445,9 +445,37 @@ static inline ecs_entity_t get_serializer_entity(lua_State *L)
 
 static const EcsMetaTypeSerializer *get_serializer(lua_State *L, ecs_world_t *world, ecs_entity_t type)
 {
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = get_serializer_entity(L);
+    //return ecs_get_w_entity(world, type, get_serializer_id(L));
+    int ret = lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_TYPES);
+    ecs_assert(ret == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
-    const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
+    ret = lua_rawgeti(L, -1, type);
+
+    ecs_ref_t *ref;
+    ecs_entity_t MetaTypeSerializer;
+
+    if(ret != LUA_TNIL)
+    {
+        ecs_assert(ret == LUA_TUSERDATA, ECS_INTERNAL_ERROR, NULL);
+
+        ref = lua_touserdata(L, -1);
+        MetaTypeSerializer = ref->component;
+
+        lua_pop(L, 2);
+    }
+    else
+    {
+        lua_pop(L, 1); /* -nil */
+        ref = lua_newuserdata(L, sizeof(ecs_ref_t));
+        lua_rawseti(L, -2, type);
+
+        MetaTypeSerializer = get_serializer_id(L);
+        *ref = (ecs_ref_t){ .entity = type, .component = MetaTypeSerializer };
+
+        lua_pop(L, 1); /* -types */
+    }
+
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, ref, type, MetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     return ser;
@@ -602,14 +630,14 @@ static void meta_reset(ecs_meta_cursor_t *cursor, void *base)
 
 static ecs_meta_cursor_t ecs_lua_cursor(lua_State *L, ecs_world_t *world, ecs_entity_t type, void *base)
 {
-    int ltype = lua_getfield(L, LUA_REGISTRYINDEX, "ecs_cursors");
-    ecs_assert(ltype == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+    int ret = lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_CURSORS);
+    ecs_assert(ret == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
-    ltype = lua_rawgeti(L, -1, type);
+    ret = lua_rawgeti(L, -1, type);
 
     ecs_meta_cursor_t c;
 
-    if(ltype == LUA_TUSERDATA)
+    if(ret == LUA_TUSERDATA)
     {
         ecs_meta_cursor_t *ptr = lua_touserdata(L, -1);
         lua_pop(L, 2);

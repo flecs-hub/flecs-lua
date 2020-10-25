@@ -4,4 +4,5 @@
 /subprojects/lua-5.4.1
 /subprojects/packagecache
 /build/
+/release/
 .vscode

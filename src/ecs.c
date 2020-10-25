@@ -242,7 +242,10 @@ int luaopen_ecs(lua_State *L)
     lua_pop(L, 1);
 
     lua_createtable(L, 128, 0);
-    lua_setfield(L, LUA_REGISTRYINDEX, "ecs_cursors");
+    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_CURSORS);
+
+    lua_createtable(L, 128, 0);
+    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_TYPES);
 
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
     ECS_LUA_ENUMS(XX)

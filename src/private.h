@@ -9,6 +9,12 @@
 const int ecs_lua__ser;
 #define ECS_LUA_SERIALIZER (&ecs_lua__ser)
 
+const int ecs_lua__cursors;
+#define ECS_LUA_CURSORS (&ecs_lua__cursors)
+
+const int ecs_lua__types;
+#define ECS_LUA_TYPES (&ecs_lua__types)
+
 #define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
 #define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
 
