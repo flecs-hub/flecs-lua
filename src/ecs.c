@@ -238,7 +238,7 @@ int luaopen_ecs(lua_State *L)
     lua_pop(L, 1);
 
     lua_createtable(L, 128, 0);
-    lua_setfield(L, LUA_REGISTRYINDEX, "ecs_cursor");
+    lua_setfield(L, LUA_REGISTRYINDEX, "ecs_cursors");
 
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
     ECS_LUA_ENUMS(XX)
@@ -267,7 +267,7 @@ static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
     return lctx;
 }
 
-void ecs_lua_exit(lua_State *L)
+static void ecs_lua_exit(lua_State *L)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
 

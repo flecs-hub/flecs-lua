@@ -591,7 +591,7 @@ static void meta_reset(ecs_meta_cursor_t *cursor, void *base)
 
 static ecs_meta_cursor_t ecs_lua_cursor(lua_State *L, ecs_world_t *world, ecs_entity_t type, void *base)
 {
-    int ltype = lua_getfield(L, LUA_REGISTRYINDEX, "ecs_cursor");
+    int ltype = lua_getfield(L, LUA_REGISTRYINDEX, "ecs_cursors");
     ecs_assert(ltype == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
     ltype = lua_rawgeti(L, -1, type);
