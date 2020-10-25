@@ -1,10 +1,14 @@
 #include "private.h"
 
+static const int ecs_lua__key;
+
+#define ECS_LUA_CONTEXT (&ecs_lua__key)
+
 #define ECS_LUA__KEEPOPEN 1
 
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L)
 {
-    lua_getfield(L, LUA_REGISTRYINDEX, "ecs_lua");
+    lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_CONTEXT);
     ecs_lua_ctx *p = lua_touserdata(L, -1);
     lua_pop(L, 1);
     return p;
@@ -254,7 +258,7 @@ static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
     lua_State *L = ctx.L;
 
     ecs_lua_ctx *lctx = lua_newuserdata(L, sizeof(ecs_lua_ctx));
-    lua_setfield(L, LUA_REGISTRYINDEX, "ecs_lua");
+    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_CONTEXT);
 
     memcpy(lctx, &ctx, sizeof(ecs_lua_ctx));
 
