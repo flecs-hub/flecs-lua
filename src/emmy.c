@@ -108,6 +108,12 @@ char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_
                 lua_type = primitive_type_name(op->is.primitive);
                 break;
             }
+            case EcsOpEnum:
+            case EcsOpBitmask:
+            {
+                lua_type = "integer";
+                break;
+            }
             default: break;
         }
 
