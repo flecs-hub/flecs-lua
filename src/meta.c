@@ -299,19 +299,23 @@ void serialize_type(
     #define ecs_lua_dbg(fmt, ...) //ecs_os_dbg(fmt, __VA_ARGS__)
 #endif
 
-static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State *L, int idx)
+static void deserialize_type(lua_State *L, int idx, ecs_meta_cursor_t *c)
 {
-    int ktype, vtype, ret, mtype = 0;
-
-    ret = ecs_meta_push(c);
-
-    ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
+    int ktype, vtype, ret, mtype;
 
     idx = lua_absindex(L, idx);
 
-    luaL_checktype(L, idx, LUA_TTABLE);
+    vtype = lua_type(L, idx);
+    mtype = 0;
 
-    lua_pushnil(L);
+    if(vtype == LUA_TTABLE)
+    {
+        ret = ecs_meta_push(c);
+        ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
+
+        lua_pushnil(L);
+    }
+    else luaL_checktype(L, idx, LUA_TTABLE);
 
     while(lua_next(L, idx))
     {
@@ -351,7 +355,7 @@ static void deserialize_type(ecs_world_t *world, ecs_meta_cursor_t *c, lua_State
                 //lua_pushnil(L);
                 //depth++;
                 int top = lua_gettop(L);
-                deserialize_type(world, c, L, top);
+                deserialize_type(L, top, c);
                 break;
             }
             case LUA_TNUMBER:
@@ -677,7 +681,7 @@ void deserialize_column(
         meta_reset(&c, (char*)base + j * stride);
 
         lua_rawgeti(L, idx, j + 1); /* columns[i+1][j+1] */
-        deserialize_type(world, &c, L, -1);
+        deserialize_type(L, -1, &c);
 
         lua_pop(L, 1);
     }
@@ -703,7 +707,7 @@ void ecs_lua_to_ptr(
 {
     ecs_meta_cursor_t c = ecs_lua_cursor(L, world, type, ptr);
 
-    deserialize_type(world, &c, L, idx);
+    deserialize_type(L, idx, &c);
 }
 
 void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy)
