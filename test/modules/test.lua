@@ -30,15 +30,21 @@ local x = ecs.module("LuaTest", function ()
     assert(not pcall (function () ecs.system(m.random_id, "Func", ecs.OnUpdate) end))
     assert(m.imported == 0)
 
-    m.imported = 1
+    m.imported = m.imported + 1
 end)
 
 assert(x ~=0)
-print("module name: " .. ecs.name(x) .. ", symbol: " .. ecs.symbol(x))
+print("module name: " .. ecs.name(x) .. ", symbol: " .. ecs.symbol(x) .. ", fullpath: " .. ecs.fullpath(x))
 assert(ecs.name(x) == "test")
 assert(ecs.symbol(x) == "LuaTest")
+assert(ecs.lookup_fullpath("lua.test") == x)
+assert(ecs.lookup_fullpath("Lua.Test") == 0)
 
 assert(not pcall(function () ecs.module("bad_module", function () ecs.system(nil) end) end))
 
+
+local x2 = ecs.module("LuaTest", function () error("this shouldn't be called") end)
+
+assert(x2 == x)
 
 return m

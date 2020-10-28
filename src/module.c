@@ -29,6 +29,7 @@ int new_module(lua_State *L)
 
     luaL_checktype(L, 2, LUA_TFUNCTION);
 
+    ctx->error = 0;
     ecs_lua_module m = { .ctx = ctx, .name = name };
 
     void *orig = ecs_get_context(w);
