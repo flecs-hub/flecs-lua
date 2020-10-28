@@ -98,3 +98,17 @@ local function sys_readonly(it)
 end
 
 ecs.system(sys_readonly, "sys_readonly", ecs.OnUpdate, "[in] Position, Velocity, LuaStruct")
+
+
+local function sys_empty(it)
+    local e = ecs.columns(it)
+
+    assert(not pcall(function () return it.entities[1] > 0 end))
+
+    for i = 1, it.count do
+        assert(it.entities[i] > 0)
+        assert(it.entities[i] == e[i])
+    end
+end
+
+local em = ecs.system(sys_empty, "sys_empty", ecs.OnUpdate)
