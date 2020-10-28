@@ -4,6 +4,7 @@ typedef struct ecs_lua_module
 {
     ecs_lua_ctx *ctx;
     const char *name;
+    int imported;
 }ecs_lua_module;
 
 static void import_entry_point(ecs_world_t *w)
@@ -11,6 +12,8 @@ static void import_entry_point(ecs_world_t *w)
     ecs_lua_module *m = ecs_get_context(w);
     ecs_lua_ctx *ctx = m->ctx;
     lua_State *L = ctx->L;
+
+    m->imported = 1;
 
     ecs_new_module(w, 0, m->name, 4, 4);
 
@@ -34,7 +37,11 @@ int new_module(lua_State *L)
     ecs_entity_t e = ecs_import(w, import_entry_point, name, NULL, 0);
     ecs_set_context(w, orig);
 
-    ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+    if(m.imported)
+    {
+        lua_pushvalue(L, 1);
+        luaL_ref(L, LUA_REGISTRYINDEX);
+    }
 
     if(ctx->error) return lua_error(L);
 
