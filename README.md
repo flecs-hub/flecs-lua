@@ -73,7 +73,7 @@ local m = {}
 function m.system(it)
     local p = ecs.column(it, 1)
 
-    for i, it.count do
+    for i = 1, it.count do
         p[i].x = p[i].x + 1
         p[i].y = p[i].y + 1
     end
