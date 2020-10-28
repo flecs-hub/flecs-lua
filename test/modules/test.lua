@@ -16,7 +16,7 @@ end
 
 m.imported = 0
 
-local x = ecs.module("test", function ()
+local x = ecs.module("LuaTest", function ()
 
     local private = ecs.new()
 
@@ -34,7 +34,9 @@ local x = ecs.module("test", function ()
 end)
 
 assert(x ~=0)
+print("module name: " .. ecs.name(x) .. ", symbol: " .. ecs.symbol(x))
 assert(ecs.name(x) == "test")
+assert(ecs.symbol(x) == "LuaTest")
 
 assert(not pcall(function () ecs.module("bad_module", function () ecs.system(nil) end) end))
 

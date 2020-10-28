@@ -78,6 +78,12 @@ end
 function ecs.name(e)
 end
 
+---Get the symbol name of an entity
+---@param e integer
+---@return string|nil @entity symbol name
+function ecs.symbol(e)
+end
+
 ---Look up an entity by name
 ---@param name string
 ---@return string @entity name

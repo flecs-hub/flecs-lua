@@ -137,6 +137,19 @@ int entity_name(lua_State *L)
     return 1;
 }
 
+int entity_symbol(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    const EcsName *name = ecs_get(w, e, EcsName);
+
+    lua_pushstring(L, name->symbol);
+
+    return 1;
+}
+
 int lookup_entity(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
