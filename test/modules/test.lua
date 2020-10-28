@@ -16,7 +16,7 @@ end
 
 m.imported = 0
 
-ecs.module("test", function ()
+local x = ecs.module("test", function ()
 
     local private = ecs.new()
 
@@ -32,6 +32,11 @@ ecs.module("test", function ()
 
     m.imported = 1
 end)
+
+assert(x ~=0)
+assert(ecs.name(x) == "test")
+
+assert(not pcall(function () ecs.module("bad_module", function () ecs.system(nil) end) end))
 
 
 return m
