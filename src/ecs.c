@@ -102,12 +102,14 @@ int new_system(lua_State *L);
 /* Module */
 int new_module(lua_State *L);
 
-/* os_api */
+/* Log */
 int print_log(lua_State *L);
 int print_err(lua_State *L);
 int print_dbg(lua_State *L);
 int print_warn(lua_State *L);
 int tracing_enable(lua_State *L);
+
+/* Misc */
 int assert_func(lua_State *L);
 
 /* Time */
