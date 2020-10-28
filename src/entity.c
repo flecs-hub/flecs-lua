@@ -150,6 +150,21 @@ int entity_symbol(lua_State *L)
     return 1;
 }
 
+int entity_fullpath(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    char *path = ecs_get_fullpath(w, e);
+
+    lua_pushstring(L, path);
+
+    ecs_os_free(path);
+
+    return 1;
+}
+
 int lookup_entity(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);

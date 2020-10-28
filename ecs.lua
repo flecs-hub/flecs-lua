@@ -84,6 +84,12 @@ end
 function ecs.symbol(e)
 end
 
+---Get the full path for an entity
+---@param e integer
+---@return string|nil
+function ecs.fullpath(e)
+end
+
 ---Look up an entity by name
 ---@param name string
 ---@return string @entity name
