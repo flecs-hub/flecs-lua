@@ -526,6 +526,18 @@ static int columns__index(lua_State *L)
     return 1;
 }
 
+static int entities__index(lua_State *L)
+{
+    ecs_iter_t *it = ecs_lua__checkiter(L, 1);
+    lua_Integer i = luaL_checkinteger(L, 2);
+
+    if(i < 1 || i > it->count) return 0;
+
+    lua_pushinteger(L, it->entities[i-1]);
+
+    return 1;
+}
+
 /* expects "it" table at stack top */
 static void push_columns(lua_State *L, ecs_iter_t *it, ecs_type_t select)
 {
@@ -588,6 +600,21 @@ static void push_iter_metadata(lua_State *L, ecs_iter_t *it)
     /* it.table_offset */
     lua_pushnumber(L, it->table_offset);
     lua_setfield(L, -2, "table_offset");
+
+    /* it.entities */
+    lua_createtable(L, 0, 1);
+
+    /* metatable */
+    lua_createtable(L, 0, 2);
+
+    lua_pushlightuserdata(L, it);
+    lua_setfield(L, -2, "__ecs_iter");
+
+    lua_pushcfunction(L, entities__index);
+    lua_setfield(L, -2, "__index");
+
+    lua_setmetatable(L, -2);
+    lua_setfield(L, -2, "entities");
 }
 
 /* expects table at stack top */
@@ -596,10 +623,7 @@ static ecs_iter_t *push_iter_metafield(lua_State *L, ecs_iter_t *it, bool copy)
     /* metatable */
     lua_createtable(L, 0, 1);
 
-    /* metatable.__ecs_iter */
-    lua_createtable(L, 3, 0);
-
-    /* __ecs_iter[1] = ecs_iter_t *it */
+    /* metatable.__ecs_iter = it */
     if(copy)
     {
         ecs_iter_t *ptr = lua_newuserdata(L, sizeof(ecs_iter_t));
@@ -607,8 +631,6 @@ static ecs_iter_t *push_iter_metafield(lua_State *L, ecs_iter_t *it, bool copy)
         it = ptr;
     }
     else lua_pushlightuserdata(L, it);
-
-    lua_rawseti(L, -2, 1);
 
     lua_setfield(L, -2, "__ecs_iter");
     lua_setmetatable(L, -2);

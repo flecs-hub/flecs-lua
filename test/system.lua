@@ -88,6 +88,8 @@ local function sys_readonly(it)
         assert(s[i].v == inc - 1)
         s[i].v = inc
 
+        assert(it.entities[i] > 0)
+
         --Position is read-only, these have no effect
         p[i].x = p[i].x + 1
         p[i].y = p[i].y + 1

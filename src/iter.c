@@ -3,11 +3,11 @@
 
 ecs_iter_t *ecs_lua__checkiter(lua_State *L, int arg)
 {
-    if(luaL_getmetafield(L, arg, "__ecs_iter") != LUA_TTABLE) luaL_argerror(L, arg, "table is not an iterator");
+    if(luaL_getmetafield(L, arg, "__ecs_iter") == LUA_TNIL)
+        luaL_argerror(L, arg, "table is not an iterator");
 
-    lua_rawgeti(L, -1, 1);
     ecs_iter_t *it = lua_touserdata(L, -1);
-    lua_pop(L, 2);
+    lua_pop(L, 1);
 
     return it;
 }
