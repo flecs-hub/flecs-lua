@@ -531,7 +531,12 @@ static int entities__index(lua_State *L)
     ecs_iter_t *it = ecs_lua__checkiter(L, 1);
     lua_Integer i = luaL_checkinteger(L, 2);
 
-    if(i < 1 || i > it->count) return 0;
+    if(i < 1 || i > it->count)
+    {
+        if(!it->count) return luaL_error(L, "no matched entities");
+
+        return luaL_error(L, "invalid index (%I)", i, it->count);
+    }
 
     lua_pushinteger(L, it->entities[i-1]);
 

@@ -74,7 +74,7 @@ for i, e in ipairs(ents) do
 end
 
 local function sys_readonly(it)
-    local p, v, s = ecs.columns(it)
+    local p, v, s, e = ecs.columns(it)
 
     inc = inc + 1
 
@@ -89,6 +89,7 @@ local function sys_readonly(it)
         s[i].v = inc
 
         assert(it.entities[i] > 0)
+        assert(it.entities[i] == e[i])
 
         --Position is read-only, these have no effect
         p[i].x = p[i].x + 1

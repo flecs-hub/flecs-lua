@@ -46,7 +46,9 @@ int columns(lua_State *L)
         lua_geti(L, 2, i);
     }
 
-    return it->column_count;
+    lua_getfield(L, 1, "entities");
+
+    return it->column_count + 1;
 }
 
 int is_owned(lua_State *L)

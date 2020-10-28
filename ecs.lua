@@ -239,9 +239,10 @@ end
 function ecs.column(it, col)
 end
 
----Returns all columns
+---Returns all columns, the last return value
+---is the array of matched entities
 ---@param it ecs_iter_t
----@return table
+---@return any
 function ecs.columns(it)
 end
 
