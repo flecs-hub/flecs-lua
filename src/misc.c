@@ -22,7 +22,7 @@ ecs_filter_t checkfilter(lua_State *L, int arg)
     if(include_type != LUA_TNIL)
     {
         if(include_type != LUA_TUSERDATA) luaL_argerror(L, arg, "expected ecs_type_t for 'include'");
-          
+
         filter.include = checktype(L, -4);
     }
 
@@ -32,7 +32,7 @@ ecs_filter_t checkfilter(lua_State *L, int arg)
 
         filter.exclude = checktype(L, -3);
     }
-    
+
     if(include_kind_type != LUA_TNIL)
     {
         if(!lua_isinteger(L, -2)) luaL_argerror(L, arg, "expected integer for 'include_kind'");
@@ -82,4 +82,9 @@ int assert_func(lua_State *L)
     }
 
     return lua_error(L);
+}
+
+int ecs_lua__readonly(lua_State *L)
+{
+    return luaL_error(L, "Attempt to modify read-only table");
 }

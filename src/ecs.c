@@ -237,6 +237,15 @@ int luaopen_ecs(lua_State *L)
     luaL_newmetatable(L, "ecs_type_t");
     lua_pop(L, 1);
 
+    luaL_newmetatable(L, "ecs_readonly");
+    lua_pushcfunction(L, ecs_lua__readonly);
+    lua_setfield(L, -2, "__newindex");
+    lua_pushcfunction(L, ecs_lua__readonly);
+    lua_setfield(L, -2, "__usedindex");
+    lua_pushboolean(L, false);
+    lua_setfield(L, -2, "__metatable");
+    lua_pop(L, 1);
+
     luaL_newmetatable(L, "ecs_query_t");
     lua_pushcfunction(L, query_gc);
     lua_setfield(L, -2, "__gc");

@@ -30,6 +30,7 @@ ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx);
 /* misc */
 ecs_type_t checktype(lua_State *L, int arg);
 ecs_filter_t checkfilter(lua_State *L, int idx);
+int ecs_lua__readonly(lua_State *L);
 
 typedef struct ecs_lua_ctx
 {
