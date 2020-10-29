@@ -3,8 +3,7 @@
 typedef struct ecs_lua_system
 {
     lua_State *L;
-    int func_ref, sig_ref;
-    const char *signature;
+    int func_ref;
 }ecs_lua_system;
 
 static void print_time(ecs_time_t *time, const char *str)
@@ -25,12 +24,6 @@ static void system_entry_point(ecs_iter_t *it)
     int idx = ecs_get_thread_index(w);
 
     ecs_assert(idx == 0, ECS_INTERNAL_ERROR, "Lua systems must run on the main thread");
-
-    if(sys->signature)
-    {
-        const char *expr = ecs_get(w, it->system, EcsSignatureExpr)->expr;
-        ecs_assert(!strcmp(sys->signature, expr), ECS_INTERNAL_ERROR, NULL);
-    }
 
     ecs_os_dbg("Lua system: \"%s\", %d columns, count %d, func ref %d",
         ecs_get_name(w, it->system), it->column_count, it->count, sys->func_ref);
@@ -95,11 +88,6 @@ int new_system(lua_State *L)
 
     lua_pushvalue(L, 1);
     sys->func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-
-    lua_pushvalue(L, 4);
-    sys->sig_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-
-    sys->signature = signature;
 
     ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
     ecs_set(w, e, EcsContext, { sys });
