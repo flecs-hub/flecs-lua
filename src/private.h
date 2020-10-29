@@ -41,6 +41,9 @@ typedef struct ecs_lua_ctx
     int error;
     int progress_ref;
     ecs_world_t *world;
+
+    ecs_entity_t serializer_id;
+    ecs_entity_t metatype_id;
 }ecs_lua_ctx;
 
 ECS_STRUCT(EcsLuaWorldInfo,

@@ -290,6 +290,11 @@ static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
     ecs_entity_t MetaTypeSerializer = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     ecs_assert(MetaTypeSerializer != 0, ECS_INTERNAL_ERROR, NULL);
 
+    lctx->serializer_id = MetaTypeSerializer;
+
+    lctx->metatype_id = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
+    ecs_assert(lctx->metatype_id != 0, ECS_INTERNAL_ERROR, NULL);
+
     lua_pushinteger(L, MetaTypeSerializer);
     lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_SERIALIZER);
 
