@@ -36,6 +36,16 @@ end
 print("count :" .. q_count)
 assert(q_count == 1)
 
+ecs.subquery(q, "Position")
+
+it = ecs.query_iter(q)
+
+while ecs.query_next(it) do
+    local p = ecs.columns(it)
+end
+
+assert(it.count == 10)
+
 local sys_id = 0
 
 local function sys(it)

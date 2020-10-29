@@ -94,6 +94,7 @@ int is_owned(lua_State *L);
 /* Query */
 int query_gc(lua_State *L);
 int query_new(lua_State *L);
+int subquery_new(lua_State *L);
 int query_iter(lua_State *L);
 int query_next(lua_State *L);
 int query_changed(lua_State *L);
@@ -186,6 +187,7 @@ static const luaL_Reg ecs_lib[] =
     { "is_owned", is_owned },
 
     { "query", query_new },
+    { "subquery", subquery_new },
     { "query_iter", query_iter },
     { "query_next", query_next },
     { "query_changed", query_changed },

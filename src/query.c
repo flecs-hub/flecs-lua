@@ -33,6 +33,21 @@ int query_new(lua_State *L)
     return 1;
 }
 
+int subquery_new(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_query_t *parent = checkquery(L, 1);
+    const char *sig = luaL_checkstring(L, 2);
+
+    ecs_query_t *query = ecs_subquery_new(w, parent, sig);
+
+    ecs_query_t **ptr = lua_newuserdata(L, sizeof(ecs_query_t*));
+    *ptr = query;
+
+    return 1;
+}
+
 int query_iter(lua_State *L)
 {ecs_os_dbg("QUERY_iter");
     ecs_world_t *w = ecs_lua_get_world(L);

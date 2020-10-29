@@ -270,6 +270,13 @@ end
 function ecs.query(sig)
 end
 
+---Create a subquery
+---@param query ecs_query_t
+---@param sig string
+---@return ecs_query_t
+function ecs.subquery(query, sig)
+end
+
 ---Create a query iterator
 ---@param query ecs_query_t
 ---@return ecs_iter_t
