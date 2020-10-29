@@ -63,14 +63,45 @@ assert(test_struct.i64 == 32)
 local v = { foo = "bar"}
 assert(not pcall(function () ecs.modified(v) end))
 
+local MetaType = ecs.lookup_fullpath("flecs.meta.MetaType")
+local MetaTypeSerializer = ecs.lookup_fullpath("flecs.meta.EcsMetaTypeSerializer")
+local ecs_type_op = ecs.lookup_fullpath("flecs.meta.ecs_type_op_t")
+
+
 local LuaPosition = ecs.struct("LuaPosition", "{float x; float y; float z;}")
-local LuaStruct = ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")
---local LuaArray = ecs.array("LuaArray", "LuaStruct", 4)
+local LuaStruct = ecs.struct("LuaStruct", "{ uint8_t blah[6]; LuaPosition position;}")
+local LuaArray = ecs.array("LuaArray", "LuaStruct", 4)
 
-local EcsMetaType = ecs.lookup_fullpath("flecs.meta.MetaType")
-local meta = ecs.get(LuaPosition, EcsMetaType)
+---@type EcsMetaType
+local meta = ecs.get(LuaStruct, MetaType)
 
-assert(meta.size == 12)
+---@type EcsMetaTypeSerializer
+local ser = ecs.get(LuaStruct, MetaTypeSerializer)
+
+for i, op in pairs(ser.ops) do
+  print(string.format("ops[%s].kind = %d", i, op.kind))
+end
+
+local sizeof_LuaStruct = meta.size
+
+meta = ecs.get(LuaArray, MetaType)
+
+assert(meta.size == sizeof_LuaStruct * 4)
+
+local data =
+{
+  [1] = { blah = { 100 }, position = {  10, 20, 30 } },
+  [2] = { { 111 }, { 11, 22, 33 }},
+}
+
+ecs.set(ecs.Singleton, LuaArray, data)
+
+data = ecs.get(ecs.Singleton, LuaArray)
+
+assert(data[1].blah[1] == 100)
+assert(data[2].blah[1] == 111)
+assert(data[1].position.y == 20)
+assert(data[2].position.y == 22)
 
 --Structs without labels are allowed
 ecs.set(ecs.Singleton, LuaPosition, { 100, 200, 300 })
