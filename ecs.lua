@@ -332,6 +332,12 @@ end
 function ecs.assert(v, message)
 end
 
+---Get the size of a component
+---@param component integer
+---@return integer
+function ecs.sizeof(component)
+end
+
 ---@class ecs_time_t
 ---@field sec integer
 ---@field nanosec integer

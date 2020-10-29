@@ -83,6 +83,7 @@ for i, op in pairs(ser.ops) do
 end
 
 local sizeof_LuaStruct = meta.size
+assert(sizeof_LuaStruct == ecs.sizeof(LuaStruct))
 
 meta = ecs.get(LuaArray, MetaType)
 

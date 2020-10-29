@@ -84,6 +84,20 @@ int assert_func(lua_State *L)
     return lua_error(L);
 }
 
+int sizeof_component(lua_State *L)
+{
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+    ecs_world_t *w = ctx->world;
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    const EcsComponent *ptr = ecs_get(w, e, EcsComponent);
+
+    lua_pushinteger(L, ptr->size);
+
+    return 1;
+}
+
 int ecs_lua__readonly(lua_State *L)
 {
     return luaL_error(L, "Attempt to modify read-only table");

@@ -113,6 +113,7 @@ int tracing_enable(lua_State *L);
 
 /* Misc */
 int assert_func(lua_State *L);
+int sizeof_component(lua_State *L);
 
 /* Time */
 int get_time(lua_State *L);
@@ -198,7 +199,9 @@ static const luaL_Reg ecs_lib[] =
     { "dbg", print_dbg },
     { "warn", print_warn },
     { "tracing_enable", tracing_enable },
+
     { "assert", assert_func },
+    { "sizeof", sizeof_component },
 
     { "get_time", get_time },
     { "time_measure", time_measure },
