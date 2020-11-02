@@ -218,8 +218,6 @@ int main(int argc, char **argv)
 
     init_globals();
 
-    ecs_world_t *w = ecs_init();
-
     ecs_os_set_api_defaults();
     ecs_os_api_t os_api = ecs_os_api;
     os_api.abort_ = test_abort;
@@ -228,6 +226,8 @@ int main(int argc, char **argv)
     os_api.log_debug_ = test_debug;
     os_api.log_warning_ = test_warn;*/
     ecs_os_set_api(&os_api);
+
+    ecs_world_t *w = ecs_init();
 
     ECS_IMPORT(w, FlecsLua);
 
