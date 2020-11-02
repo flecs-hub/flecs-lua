@@ -8,7 +8,7 @@ int main(void)
     ECS_LUA_ENUMS(XX)
 #undef XX
 
-#define XX(const) printf("ecs.%s = %lld\n", #const, ECS_##const);
+#define XX(const) printf("ecs.%s = 0x%llX\n", #const, ECS_##const);
     ECS_LUA_MACROS(XX)
 #undef XX
 
