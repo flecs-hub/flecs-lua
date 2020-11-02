@@ -304,6 +304,20 @@ int clear_entity(lua_State *L)
     return 0;
 }
 
+int new_type(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    const char *name = luaL_checkstring(L, 1);
+    const char *expr = luaL_checkstring(L, 2);
+
+    ecs_entity_t e = ecs_new_type(w, 0, name, expr);
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
 int get_type(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -320,6 +334,20 @@ int get_type(lua_State *L)
         luaL_setmetatable(L, "ecs_type_t");
     }
     else lua_pushnil(L);
+
+    return 1;
+}
+
+int get_case(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t sw = luaL_checkinteger(L, 2);
+
+    ecs_entity_t cs = ecs_get_case(w, e, sw);
+
+    lua_pushinteger(L, cs);
 
     return 1;
 }

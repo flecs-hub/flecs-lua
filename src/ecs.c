@@ -63,7 +63,9 @@ int exists(lua_State *L);
 int add_type(lua_State *L);
 int remove_type(lua_State *L);
 int clear_entity(lua_State *L);
+int new_type(lua_State *L);
 int get_type(lua_State *L);
+int get_case(lua_State *L);
 
 int new_array(lua_State *L);
 int new_struct(lua_State *L);
@@ -161,7 +163,9 @@ static const luaL_Reg ecs_lib[] =
     { "add", add_type },
     { "remove", remove_type },
     { "clear", clear_entity },
+    { "type", new_type },
     { "get_type", get_type },
+    { "get_case", get_case },
 
     { "array", new_array },
     { "struct", new_struct },

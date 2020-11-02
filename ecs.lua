@@ -146,10 +146,24 @@ end
 function ecs.clear(e)
 end
 
+---Declare a type
+---@param name string
+---@param expr string
+---@return integer entity
+function ecs.type(name, expr)
+end
+
 ---Get the type of an entity
 ---@param e integer entity
 ---@return ecs_type_t|nil
 function ecs.get_type(e)
+end
+
+---Get case for switch
+---@param e integer entity
+---@param sw integer switch
+---@return integer
+function ecs.get_case(e, sw)
 end
 
 ---Create a meta array component
