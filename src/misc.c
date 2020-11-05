@@ -98,6 +98,16 @@ int sizeof_component(lua_State *L)
     return 1;
 }
 
+int createtable(lua_State *L)
+{
+    int narr = luaL_optinteger(L, 1, 0);
+    int nrec = luaL_optinteger(L, 2, 0);
+
+    lua_createtable(L, narr, nrec);
+
+    return 1;
+}
+
 int ecs_lua__readonly(lua_State *L)
 {
     return luaL_error(L, "Attempt to modify read-only table");

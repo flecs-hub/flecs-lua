@@ -44,3 +44,9 @@ end
 
 local wi = ecs.world_info()
 assert(wi.frame_count_total == 2)
+
+ecs.createtable()
+
+ecs.createtable(10)
+
+ecs.createtable(10, 10)

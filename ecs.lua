@@ -359,6 +359,13 @@ end
 function ecs.sizeof(component)
 end
 
+---Preallocate a table with array/record elements
+---@param narr integer optional
+---@param nrec integer optional
+---@return table
+function ecs.createtable(narr, nrec)
+end
+
 ---@class ecs_time_t
 ---@field sec integer
 ---@field nanosec integer
