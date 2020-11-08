@@ -207,7 +207,9 @@ end
 function ecs.modified(t)
 end
 
----Set the value of a component
+---Set the value of a component,
+---equivalent to ecs.get_mut() + ecs.modified(),
+---it does not trigger the `copy` component action
 ---@param entity integer
 ---@param component integer
 ---@param v table
