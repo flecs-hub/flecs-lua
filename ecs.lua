@@ -52,7 +52,7 @@ ecs.new(0, "name", "component1, component2")
 
 --name can be nil
 ecs.new(nil, "just_component")
-ecs.new(123, nil, "id, components")
+ecs.new(123, nil, "component1, component2")
 
 --the last argument cannot be nil
 ecs.new(nil) --invalid
