@@ -280,6 +280,11 @@ end
 function ecs.is_owned(it, column)
 end
 
+---Create generic for loop iterator for a query/iterator
+---@param q_it ecs_query_t|ecs_iter_t
+function ecs.each(q_it)
+end
+
 ---Create a query
 ---@param sig string
 ---@return ecs_query_t
@@ -385,11 +390,10 @@ function ecs.time_measure(start)
 end
 
 ---Create a new pipeline
----@param e integer
 ---@param name string
 ---@param expr string
 ---@return integer
-function ecs.pipeline(e, name, expr)
+function ecs.pipeline(name, expr)
 end
 
 ---Set a custom pipeline

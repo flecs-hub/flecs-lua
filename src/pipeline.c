@@ -4,11 +4,10 @@ int new_pipeline(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
 
-    ecs_entity_t e = luaL_checkinteger(L, 1);
     const char *name = luaL_checkstring(L, 2);
-    const char *expr = luaL_checkstring(L, 3);
-    
-    e = ecs_new_pipeline(w, e, name, expr);
+    const char *expr = luaL_checkstring(L, 2);
+
+    ecs_entity_t e = ecs_new_pipeline(w, 0, name, expr);
 
     ecs_set(w, e, EcsName, { .alloc_value = (char*)name});
 
@@ -58,7 +57,7 @@ int progress(lua_State *L)
 
     int b = ecs_progress(w, delta_time);
 
-    lua_pushboolean(L, b); 
+    lua_pushboolean(L, b);
 
     return 1;
 }

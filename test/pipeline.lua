@@ -2,8 +2,8 @@ local ecs = require "ecs"
 
 ecs.progress_cb(function () end)
 
-local P1 = ecs.pipeline(0, "P1", "flecs.pipeline.OnUpdate, flecs.pipeline.PostUpdate")
-local P2 = ecs.pipeline(0, "P2", "flecs.pipeline.OnUpdate")
+local P1 = ecs.pipeline("P1", "flecs.pipeline.OnUpdate, flecs.pipeline.PostUpdate")
+local P2 = ecs.pipeline("P2", "flecs.pipeline.OnUpdate")
 
 ecs.set_pipeline(P1)
 assert(ecs.get_pipeline() == P1)
