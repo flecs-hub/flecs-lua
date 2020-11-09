@@ -49,7 +49,7 @@ ECS_STRUCT(lua_test_struct,
 
     char ca[4];
 
-    char *cptr;
+    char *str;
     void *vptr;
     uintptr_t uptr;
 
@@ -94,6 +94,7 @@ static void init_globals(void)
 
         .ca = { 10, 20, 30, 40 },
 
+        .str = "test string",
         .vptr = &g,
         .uptr = (uintptr_t)&g,
 
@@ -212,6 +213,42 @@ static void test_warn(const char *fmt, va_list args)
     test_msg("WARN", fmt, args);
 }
 
+ECS_CTOR(lua_test_struct, ptr,
+{
+    ptr->str = NULL;
+});
+
+ECS_DTOR(lua_test_struct, ptr,
+{
+    ecs_os_free(ptr->str);
+    ptr->str = NULL;
+});
+
+ECS_COPY(lua_test_struct, dst, src,
+{
+    if(dst->str)
+    {
+        ecs_os_free(dst->str);
+        dst->str = NULL;
+    }
+
+    if(src->str) dst->str = ecs_os_strdup(src->str);
+    else dst->str = NULL;
+
+    void *t = dst->str;
+    memcpy(dst, src, sizeof(lua_test_struct));
+    dst->str = t;
+});
+
+ECS_MOVE(lua_test_struct, dst, src,
+{
+    ecs_os_free(dst->str);
+
+    memcpy(dst, src, sizeof(lua_test_struct));
+
+    src->str = NULL;
+});
+
 int main(int argc, char **argv)
 {
     if(argc < 2) return 1;
@@ -239,13 +276,23 @@ int main(int argc, char **argv)
     ECS_META(w, lua_test_mapi32);
     ECS_META(w, lua_test_struct);
 
+
+    ecs_set_component_actions(w, lua_test_struct,
+    {
+        .ctor = ecs_ctor(lua_test_struct),
+        .dtor = ecs_dtor(lua_test_struct),
+        .copy = ecs_copy(lua_test_struct),
+        .move = ecs_move(lua_test_struct)
+    });
+
+
     ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
 
-    ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g);
-    ecs_set_ptr(w, ecs_entity(lua_test_struct), lua_test_struct, &g);
+    ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g.s);
+    ecs_set_ptr(w, ecs_entity(lua_test_struct), lua_test_struct, &g.s);
 
     //const EcsLuaHost *host = ecs_singleton_get(w, EcsLuaHost);
     //lua_State *L = host->L;
@@ -261,7 +308,7 @@ int main(int argc, char **argv)
     if(ret)
     {
         const char *err = lua_tostring(L, 1);
-        printf("script error: %s\n", err);
+        ecs_os_err("script error: %s\n", err);
     }
 
     int runs = 2;
