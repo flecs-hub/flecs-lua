@@ -24,6 +24,7 @@ assert(test_struct.f64 == 1024)
 
 assert(test_struct.ca[1] == 10 and test_struct.ca[4] == 40)
 
+assert(test_struct.str == "test string")
 assert(test_struct.vptr == test_struct.uptr)
 
 assert(test_struct.enumeration == 465)
@@ -37,6 +38,7 @@ assert(test_struct.comp2.comp.u16a[2] == 200)
 --Modify values and check for roundtrip
 test_struct.b = false
 test_struct.i64 = 420
+test_struct.str = "lua string"
 test_struct.comp2.comp.u16a[2] = 344
 test_struct.enumeration = 500
 test_struct.bitmask = (1 | 2 | 3)
@@ -48,11 +50,21 @@ test_struct = ecs.singleton_get(tstruct)
 
 assert(test_struct.b == false)
 assert(test_struct.i64 == 420)
+assert(test_struct.str == "lua string")
 assert(test_struct.vptr == test_struct.uptr)
 assert(test_struct.comp2.comp.u16a[2] == 344)
 assert(test_struct.enumeration == 500)
 assert(test_struct.bitmask == (1 | 2 | 3))
 assert(test_struct.comp2.comp.foo == 1048333)
+
+
+test_struct = ecs.singleton_get_mut(tstruct)
+
+--Free string by setting it to 0
+test_struct.str = 0
+ecs.singleton_modified(test_struct)
+test_struct = ecs.singleton_get(tstruct)
+assert(test_struct.str == nil) --NULL strings are not serialized
 
 
 --Partial declaration
