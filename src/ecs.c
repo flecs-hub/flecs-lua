@@ -60,11 +60,12 @@ int entity_has(lua_State *L);
 int has_role(lua_State *L);
 int is_alive(lua_State *L);
 int exists(lua_State *L);
-int add_type(lua_State *L);
-int remove_type(lua_State *L);
+int entity_add(lua_State *L);
+int entity_remove(lua_State *L);
 int clear_entity(lua_State *L);
 int new_type(lua_State *L);
 int get_type(lua_State *L);
+int get_parent(lua_State *L);
 int get_case(lua_State *L);
 
 int new_array(lua_State *L);
@@ -161,9 +162,10 @@ static const luaL_Reg ecs_lib[] =
     { "has_role", has_role },
     { "is_alive", is_alive },
     { "exists", exists },
-    { "add", add_type },
-    { "remove", remove_type },
+    { "add", entity_add },
+    { "remove", entity_remove },
     { "clear", clear_entity },
+    { "get_parent", get_parent },
     { "type", new_type },
     { "get_type", get_type },
     { "get_case", get_case },

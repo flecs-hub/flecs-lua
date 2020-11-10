@@ -159,6 +159,13 @@ end
 function ecs.get_type(e)
 end
 
+---Get parent for entity with component
+---@param e integer entity
+---@param c integer optional component
+---@return integer parent
+function ecs.get_parent(e, c)
+end
+
 ---Get case for switch
 ---@param e integer entity
 ---@param sw integer switch

@@ -36,6 +36,9 @@ assert(not pcall(function () ecs.new(333, "too", "many", "args") end))
 --invalid component strings cause a hard abort()
 --assert(not pcall(function () ecs.new(0, "name", "no_such_component") end))
 
+--existing entity redefined with different name
+assert(not pcall(function () ecs.new(5120, "diff_name") end))
+
 assert(only_id == 4096)
 assert(ecs.name(only_id) == nil)
 assert(ecs.name(only_name) == "name_only")
@@ -91,10 +94,10 @@ assert(not ecs.has(id_name_comp, arr))
 assert(not pcall(function () ecs.has(id_name_comp, "does_not_exist") end))
 
 local parent = ecs.new()
-local child = ecs.new(ecs.CHILDOF | parent)
+local child = 16666
+ecs.add(child, ecs.CHILDOF | parent)
 
-assert(ecs.has_role(child, ecs.CHILDOF))
-assert(not ecs.has_role(parent, ecs.CHILDOF))
+assert(ecs.get_parent(child) == parent)
 
 ecs.clear(parent)
 ecs.delete(child)

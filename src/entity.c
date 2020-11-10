@@ -33,7 +33,7 @@ int new_entity(lua_State *L)
 
     if(!args)
     {
-        e = ecs_new(w, 0);
+        e = ecs_new_id(w);
     }
     else if(args == 1) /* entity | name(string) */
     {
@@ -52,13 +52,13 @@ int new_entity(lua_State *L)
             e = luaL_checkinteger(L, 1);
             name = luaL_checkstring(L, 2);
         }
-        else /* name (string|nil), component */
+        else /* name (string|nil), components */
         {
             name = checkname(L, 1);
             components = luaL_checkstring(L, 2);
         }
     }
-    else if(args == 3) /* entity, name (string|nil), component */
+    else if(args == 3) /* entity, name (string|nil), components */
     {
         e = luaL_checkinteger(L, 1);
         name = checkname(L, 2);
@@ -66,7 +66,37 @@ int new_entity(lua_State *L)
     }
     else return luaL_error(L, "too many arguments");
 
-    if(args) e = ecs_new_entity(w, e, name, components);
+    if(e && name)
+    {/* ecs.new(123, "name") is idempotent, components are ignored */
+        const char *existing = ecs_get_name(w, e);
+
+        if(existing)
+        {
+            if(!strcmp(existing, name))
+            {
+                lua_pushinteger(L, e);
+                return 1;
+            }
+
+            return luaL_error(L, "entity redefined with different name");
+        }
+    }
+
+    if(!e && name)
+    {/* ecs.new("name") is idempontent, components are ignored */
+        e = ecs_lookup(w, name);
+
+        if(e)
+        {
+            lua_pushinteger(L, e);
+            return 1;
+        }
+    }
+
+    /* create an entity, the following functions will take the same id */
+    if(!e && args) e = ecs_new_w_entity(w, e);
+
+    if(components) ecs_add_type(w, e, ecs_type_from_str(w, components));
 
     if(name) ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
 
@@ -114,10 +144,13 @@ int new_tag(lua_State *L)
 
     const char *name = luaL_checkstring(L, 1);
 
-    ecs_entity_t e = 0;
+    ecs_entity_t e = ecs_lookup(w, name);
 
-    e = ecs_new_entity(w, e, name, NULL);
-    ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+    if(!e)
+    {
+        e = ecs_new_id(w);
+        ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+    }
 
     lua_pushinteger(L, e);
 
@@ -251,28 +284,28 @@ int exists(lua_State *L)
     return 1;
 }
 
-int add_type(lua_State *L)
+int entity_add(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t entity_add = 0;
+    ecs_entity_t to_add = 0;
 
-    if(lua_isinteger(L, 2)) entity_add = luaL_checkinteger(L, 2);
+    if(lua_isinteger(L, 2)) to_add = luaL_checkinteger(L, 2);
     else
     {
         const char *name = luaL_checkstring(L, 2);
-        entity_add = ecs_lookup_fullpath(w, name);
+        to_add = ecs_lookup_fullpath(w, name);
 
-        if(!entity_add) return luaL_argerror(L, 2, "could not find type");
+        if(!to_add) return luaL_argerror(L, 2, "could not find type");
     }
 
-    ecs_add_entity(w, e, entity_add);
+    ecs_add_entity(w, e, to_add);
 
     return 0;
 }
 
-int remove_type(lua_State *L)
+int entity_remove(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
 
@@ -334,6 +367,22 @@ int get_type(lua_State *L)
         luaL_setmetatable(L, "ecs_type_t");
     }
     else lua_pushnil(L);
+
+    return 1;
+}
+
+int get_parent(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = 0;
+
+    if(lua_gettop(L) == 2) c = luaL_checkinteger(L, 2);
+
+    ecs_entity_t parent = ecs_get_parent_w_entity(w, e, c);
+
+    lua_pushinteger(L, parent);
 
     return 1;
 }
@@ -595,14 +644,14 @@ int new_prefab(lua_State *L)
 
     if(!args)
     {
-        e = ecs_new(w, 0);
+        e = ecs_new_id(w);
         ecs_add_entity(w, e, EcsPrefab);
     }
     else if(args <= 2)
     {
         const char *id = luaL_checkstring(L, 1);
         const char *sig = luaL_optstring(L, 2, NULL);
-        e = ecs_new_prefab(w, e, id, sig);
+        e = ecs_new_prefab(w, 0, id, sig);
         ecs_set(w, e, EcsName, { .alloc_value = (char*)id });
     }
     else return luaL_argerror(L, args, "too many arguments");
