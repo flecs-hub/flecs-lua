@@ -14,8 +14,6 @@ ecs_iter_t *ecs_lua__checkiter(lua_State *L, int arg)
 
 ecs_iter_t *get_iter_columns(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
-
     ecs_iter_t *it = ecs_lua__checkiter(L, 1);
 
     luaL_getsubtable(L, 1, "columns");

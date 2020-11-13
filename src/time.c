@@ -50,8 +50,6 @@ static void pushtime(lua_State *L, ecs_time_t *time)
 
 int get_time(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
-
     ecs_time_t time = {0};
 
     ecs_os_get_time(&time);
@@ -63,8 +61,6 @@ int get_time(lua_State *L)
 
 int time_measure(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
-
     ecs_time_t start = checktime(L, 1);
 
     double time = ecs_time_measure(&start);

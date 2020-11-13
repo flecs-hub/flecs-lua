@@ -68,7 +68,7 @@ char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_
     ecs_type_op_t *ops = (ecs_type_op_t*)ecs_vector_first(ser->ops, ecs_type_op_t);
     int32_t count = ecs_vector_count(ser->ops);
 
-    ecs_assert(ops[1].kind = EcsOpPush, ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(ops[1].kind == EcsOpPush, ECS_INVALID_PARAMETER, NULL);
 
     int i, depth = 1;
 
