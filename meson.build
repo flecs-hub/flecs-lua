@@ -43,6 +43,7 @@ flecs_lua_src += files(
     'src/query.c',
     'src/system.c',
     'src/time.c',
+    'src/timer.c',
     'src/world.c'
 )
 
@@ -81,7 +82,8 @@ tests = [
     'system',
     'module',
     'pipeline',
-    'prefab'
+    'prefab',
+    'timer'
 ]
 
 env = environment()

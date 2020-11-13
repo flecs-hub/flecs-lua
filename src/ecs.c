@@ -120,6 +120,16 @@ int get_time(lua_State *L);
 int time_measure(lua_State *L);
 int time__tostring(lua_State *L);
 
+/* Timer */
+int set_timeout(lua_State *L);
+int get_timeout(lua_State *L);
+int set_interval(lua_State *L);
+int get_interval(lua_State *L);
+int start_timer(lua_State *L);
+int stop_timer(lua_State *L);
+int set_rate_filter(lua_State *L);
+int set_tick_source(lua_State *L);
+
 /* Pipeline */
 int new_pipeline(lua_State *L);
 int set_pipeline(lua_State *L);
@@ -210,6 +220,15 @@ static const luaL_Reg ecs_lib[] =
 
     { "get_time", get_time },
     { "time_measure", time_measure },
+
+    { "set_timeout", set_timeout },
+    { "get_timeout", get_timeout },
+    { "set_interval", set_interval },
+    { "get_interval", get_interval },
+    { "start_timer", start_timer },
+    { "stop_timer", stop_timer },
+    { "set_rate_filter", set_rate_filter },
+    { "set_tick_source", set_tick_source },
 
     { "pipeline", new_pipeline },
     { "set_pipeline", set_pipeline },

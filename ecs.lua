@@ -396,6 +396,56 @@ end
 function ecs.time_measure(start)
 end
 
+---Set timer timeout
+---@param timer integer
+---@param timeout integer
+---@return integer
+function ecs.set_timeout(timer, timeout)
+end
+
+---Get timer timeout
+---@param timer integer
+---@return number
+function ecs.get_timeout(timer)
+end
+
+---Set timer interval
+---@param timer integer
+---@param interval integer
+---@return integer
+function ecs.set_interval(timer, interval)
+end
+
+---Get timer interval
+---@param timer integer
+---@return number
+function ecs.get_interval(timer)
+end
+
+---Start timer
+---@param timer integer
+function ecs.start_timer(timer)
+end
+
+---Stop timer
+---@param timer integer
+function ecs.stop_timer(timer)
+end
+
+---Set rate filter
+---@param filter integer
+---@param rate integer
+---@param source integer
+---@return integer
+function ecs.set_rate_filter(filter, rate, source)
+end
+
+---Assign tick source to system
+---@param system integer
+---@param tick_source integer
+function ecs.set_tick_source(system, tick_source)
+end
+
 ---Create a new pipeline
 ---@param name string
 ---@param expr string
