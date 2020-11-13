@@ -41,11 +41,6 @@ void ecs_lua_progress(lua_State *L)
     ecs_lua__epilog(L);
 }
 
-static int func(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_get_world(L);
-    return 1;
-}
 
 /* Entity */
 int new_entity(lua_State *L);

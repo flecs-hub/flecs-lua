@@ -50,7 +50,6 @@ int subquery_new(lua_State *L)
 
 int query_iter(lua_State *L)
 {ecs_os_dbg("QUERY_iter");
-    ecs_world_t *w = ecs_lua_get_world(L);
     ecs_query_t *query = checkquery(L, 1);
 
     ecs_iter_t it = ecs_query_iter(query);
