@@ -3,7 +3,7 @@
 static
 void serialize_type(
     ecs_world_t *world,
-    ecs_vector_t *ser,
+    const ecs_vector_t *ser,
     const void *base,
     lua_State *L);
 
@@ -250,7 +250,7 @@ void serialize_type_op(
 static
 void serialize_type(
     ecs_world_t *world,
-    ecs_vector_t *ser,
+    const ecs_vector_t *ser,
     const void *base,
     lua_State *L)
 {
@@ -515,7 +515,10 @@ static int columns__index(lua_State *L)
 
     lua_settop(L, 1); /* (it.)columns */
 
-    serialize_column(world, L, ser, ecs_table_column(it, i), it->count);
+    const void *base = ecs_table_column(it, i);
+
+    if(!ecs_is_owned(it, i)) serialize_type(world, ser->ops, base, L);
+    else serialize_column(world, L, ser, base, it->count);
 
     lua_pushvalue(L, -1);
     lua_rawseti(L, -3, i+1);
@@ -541,7 +544,7 @@ static int entities__index(lua_State *L)
 }
 
 /* expects "it" table at stack top */
-static void push_columns(lua_State *L, ecs_iter_t *it, ecs_type_t select)
+static void push_columns(lua_State *L, ecs_iter_t *it)
 {
     if(!it->count)
     {
@@ -731,25 +734,27 @@ void ecs_lua_to_ptr(
     deserialize_type(L, idx, &c);
 }
 
-void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy)
+void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, bool copy)
 {
     /* it */
-    lua_createtable(L, 0, 3);
+    lua_createtable(L, 0, 16);
 
     /* metatable.__ecs_iter */
     it = push_iter_metafield(L, it, copy);
 
     push_iter_metadata(L, it);
-    push_columns(L, it, select);
+    push_columns(L, it);
 }
 
-void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
+ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
 {
     ecs_os_dbg("ECS_LUA_TO_ITER");
     ecs_lua__prolog(L);
     ecs_iter_t *it = ecs_lua__checkiter(L, idx);
+    ecs_world_t *world = it->world;
 
-    if(!it->count) return;
+    /* newly-returned iterators have it->count = 0 */
+    if(!it->count) return it;
 
     luaL_getsubtable(L, idx, "columns");
     luaL_checktype(L, -1, LUA_TTABLE);
@@ -770,7 +775,13 @@ void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
 
         ecs_assert(it->count == lua_rawlen(L, -1), ECS_INTERNAL_ERROR, NULL);
 
-        deserialize_column(world, L, -1, ecs_column_entity(it, i+1), ecs_table_column(it, i), ecs_column_size(it, i+1), it->count);
+        int32_t count = it->count;
+        ecs_entity_t column_entity = ecs_column_entity(it, i+1);
+        void *base = ecs_table_column(it, i);
+
+        if(!ecs_is_owned(it, i)) ecs_lua_to_ptr(world, L, -1, column_entity, base);
+
+        deserialize_column(world, L, -1, column_entity, base, ecs_column_size(it, i+1), count);
 
         lua_pop(L, 1); /* columns[i+1] */
     }
@@ -778,25 +789,32 @@ void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx)
     lua_pop(L, 1); /* columns */
 
     ecs_lua__epilog(L);
+
+    return it;
 }
 
-/* Progress the query iterator at the given index */
-bool ecs_lua_query_next(lua_State *L, int idx)
-{ecs_os_dbg("QUERY_NEXT");
-    ecs_iter_t *it = ecs_lua__checkiter(L, idx);
-    ecs_world_t *w = it->world;
-
-    /* will return early because newly-returned iterators have it->count = 0 */
-    ecs_lua_to_iter(w, L, idx);
-
-    if(!ecs_query_next(it)) return false;
+void ecs_lua_iter_update(lua_State *L, int idx, ecs_iter_t *it)
+{
+    lua_pushvalue(L, idx);
 
     push_iter_metadata(L, it);
 
     lua_pushnil(L);
     lua_setfield(L, -2, "columns");
 
-    push_columns(L, it, NULL);
+    push_columns(L, it);
+
+    lua_pop(L, 1);
+}
+
+/* Progress the query iterator at the given index */
+bool ecs_lua_query_next(lua_State *L, int idx)
+{ecs_os_dbg("QUERY_NEXT");
+    ecs_iter_t *it = ecs_lua_to_iter(L, idx);
+
+    if(!ecs_query_next(it)) return false;
+
+    ecs_lua_iter_update(L, idx, it);
 
     return true;
 }

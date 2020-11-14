@@ -80,6 +80,14 @@ int singleton_set(lua_State *L);
 
 int new_prefab(lua_State *L);
 
+/* Hierarchy */
+int get_child_count(lua_State *L);
+int scope_iter(lua_State *L);
+int scope_next(lua_State *L);
+int set_scope(lua_State *L);
+int get_scope(lua_State *L);
+int set_name_prefix(lua_State *L);
+
 /* Bulk */
 int bulk_new(lua_State *L);
 int bulk_delete(lua_State *L);
@@ -190,6 +198,13 @@ static const luaL_Reg ecs_lib[] =
     { "singleton_set", singleton_set },
 
     { "prefab", new_prefab },
+
+    { "get_child_count", get_child_count },
+    { "scope_iter", scope_iter },
+    { "scope_next", scope_next },
+    { "set_scope", set_scope },
+    { "get_scope", get_scope },
+    { "set_name_prefix", set_name_prefix },
 
     { "bulk_new", bulk_new },
     { "bulk_delete", bulk_delete },

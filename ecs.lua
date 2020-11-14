@@ -23,10 +23,8 @@ local ecs_query_t = {}
 ---@field count integer
 ---@field columns table[]
 ---@field system integer
-
 ---@field table_count integer
 ---@field table_offset integer
-
 ---@field delta_time number
 ---@field delta_system_time number
 ---@field world_time number
@@ -253,6 +251,42 @@ end
 ---@param signature string
 ---@return integer entity
 function ecs.prefab(name, signature)
+end
+
+---Get child count for entity
+---@param entity integer
+---@return integer
+function ecs.get_child_count(entity)
+end
+
+---Create a scope iterator
+---@param parent integer
+---@param filter ecs_filter_t @optional
+---@return ecs_iter_t
+function ecs.scope_iter(parent, filter)
+end
+
+---Progress the scope iterator
+---@param it ecs_iter_t
+---@return boolean
+function ecs.scope_next(it)
+end
+
+---Set the current scope, returns previous scope
+---@param scope integer
+---@return integer
+function ecs.set_scope(scope)
+end
+
+---Get the current scope
+---@return integer
+function ecs.get_scope()
+end
+
+---Set name prefix for newly created entities
+---@param prefix string
+---@return string
+function ecs.set_name_prefix(prefix)
 end
 
 ---Create N new entities with an optional component
@@ -517,7 +551,6 @@ end
 ---@field last_id integer
 ---@field min_id integer
 ---@field max_id integer
-
 ---@field delta_time_raw number
 ---@field delta_time number
 ---@field time_scale number
@@ -528,7 +561,6 @@ end
 ---@field world_time_total number
 ---@field world_time_total_raw number
 ---@field sleep_err number
-
 ---@field frame_count_total integer
 ---@field merge_count_total integer
 ---@field pipeline_build_count_total integer

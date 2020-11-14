@@ -36,7 +36,7 @@ static void system_entry_point(ecs_iter_t *it)
 
     ecs_os_get_time(&time);
 
-    ecs_iter_to_lua(it, L, NULL, false);
+    ecs_iter_to_lua(it, L, false);
 
     print_time(&time, "iter serialization");
 
@@ -59,7 +59,7 @@ static void system_entry_point(ecs_iter_t *it)
 
     ecs_os_get_time(&time);
 
-    ecs_lua_to_iter(w, L, -1);
+    ecs_lua_to_iter(L, -1);
 
     print_time(&time, "iter deserialization");
 

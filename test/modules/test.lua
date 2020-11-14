@@ -47,4 +47,6 @@ local x2 = ecs.module("LuaTest", function () error("this shouldn't be called") e
 
 assert(x2 == x)
 
+m.id = x
+
 return m

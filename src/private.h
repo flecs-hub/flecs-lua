@@ -24,6 +24,9 @@ ecs_lua_ctx *ecs_lua_get_context(lua_State *L);
 /* meta */
 bool ecs_lua_query_next(lua_State *L, int idx);
 
+/* Update iterator, usually called after ecs_lua_to_iter() + ecs_*_next() */
+void ecs_lua_iter_update(lua_State *L, int idx, ecs_iter_t *it);
+
 /* iter */
 ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx);
 

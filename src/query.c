@@ -55,7 +55,7 @@ int query_iter(lua_State *L)
     ecs_iter_t it = ecs_query_iter(query);
 
     /* will push with no columns because it->count = 0 */
-    ecs_iter_to_lua(&it, L, NULL, true);
+    ecs_iter_to_lua(&it, L, true);
 
     return 1;
 }

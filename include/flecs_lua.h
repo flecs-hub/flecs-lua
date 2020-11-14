@@ -54,11 +54,11 @@ void ecs_lua_to_ptr(
 
 /* Pushes the iterator onto the stack */
 FLECS_LUA_API
-void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, ecs_type_t select, bool copy);
+void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, bool copy);
 
 /* Converts the columns of the iterator at the given index */
 FLECS_LUA_API
-void ecs_lua_to_iter(ecs_world_t *world, lua_State *L, int idx);
+ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx);
 
 /* Create an EmmyLua class annotation */
 char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_table);

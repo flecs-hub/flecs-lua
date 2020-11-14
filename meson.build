@@ -34,6 +34,7 @@ flecs_lua_src += files(
     'src/ecs.c',
     'src/emmy.c',
     'src/entity.c',
+    'src/hierarchy.c',
     'src/iter.c',
     'src/log.c',
     'src/meta.c',
