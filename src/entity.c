@@ -211,6 +211,36 @@ int lookup_entity(lua_State *L)
     return 1;
 }
 
+int lookup_child(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t parent = luaL_checkinteger(L, 1);
+    const char *name = luaL_checkstring(L, 2);
+
+    ecs_entity_t e = ecs_lookup_child(w, parent, name);
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
+int lookup_path(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t parent = luaL_checkinteger(L, 1);
+    const char *path = luaL_checkstring(L, 2);
+    const char *sep = luaL_optstring(L, 3, ".");
+    const char *prefix = luaL_optstring(L, 4, NULL);
+
+    ecs_entity_t e = ecs_lookup_path_w_sep(w, parent, path, sep, prefix);
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
 int lookup_fullpath(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -222,6 +252,31 @@ int lookup_fullpath(lua_State *L)
     lua_pushinteger(L, e);
 
     return 1;
+}
+
+int lookup_symbol(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    const char *name = luaL_checkstring(L, 1);
+
+    ecs_entity_t e = ecs_lookup_symbol(w, name);
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
+int use_alias(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    const char *name = luaL_checkstring(L, 2);
+
+    ecs_use(w, e, name);
+
+    return 0;
 }
 
 int entity_has(lua_State *L)

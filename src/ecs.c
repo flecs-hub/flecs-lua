@@ -50,7 +50,11 @@ int entity_name(lua_State *L);
 int entity_symbol(lua_State *L);
 int entity_fullpath(lua_State *L);
 int lookup_entity(lua_State *L);
+int lookup_child(lua_State *L);
+int lookup_path(lua_State *L);
 int lookup_fullpath(lua_State *L);
+int lookup_symbol(lua_State *L);
+int use_alias(lua_State *L);
 int entity_has(lua_State *L);
 int has_role(lua_State *L);
 int is_alive(lua_State *L);
@@ -174,7 +178,11 @@ static const luaL_Reg ecs_lib[] =
     { "symbol", entity_symbol },
     { "fullpath", entity_fullpath },
     { "lookup", lookup_entity },
+    { "lookup_child", lookup_child },
+    { "lookup_path", lookup_path },
     { "lookup_fullpath", lookup_fullpath },
+    { "lookup_symbol", lookup_symbol },
+    { "use", use_alias },
     { "has", entity_has },
     { "has_role", has_role },
     { "is_alive", is_alive },

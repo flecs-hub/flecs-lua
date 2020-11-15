@@ -97,10 +97,38 @@ end
 function ecs.lookup(name)
 end
 
+---Look up a child entity by name
+---@param entity integer
+---@param name string
+---@return integer
+function ecs.lookup_child(entity, name)
+end
+
+---Lookup an entity from a path
+---@param parent integer
+---@param path string
+---@param sep string @optional
+---@param prefix string @optional
+---@return integer
+function ecs.lookup_path(parent, path, sep, prefix)
+end
+
 ---Lookup an entity from a full path
 ---@param name string
 ---@return string @entity name
 function ecs.lookup_fullpath(name)
+end
+
+---Look up an entity by its symbol name
+---@param name string
+---@return integer
+function ecs.lookup_symbol(name)
+end
+
+---Add alias for entity to global scope
+---@param entity integer
+---@param name string
+function ecs.use(entity, name)
 end
 
 ---Test if an entity has a component, type or tag

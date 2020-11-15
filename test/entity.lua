@@ -144,7 +144,22 @@ assert(ecs.has(id_name_comps, ecs.lookup("lua_test_struct")))
 ecs.clear(id_name_comps)
 assert(not ecs.has(id_name_comps, ecs.lookup("lua_test_struct")))
 
-assert(ecs.lookup_fullpath("flecs.lua.LuaWorldInfo") ~= 0)
+--Lookup
+local LuaWorldInfo = ecs.lookup_fullpath("flecs.lua.LuaWorldInfo")
+assert(LuaWorldInfo ~= 0)
+
+ecs.add(ecs.new("named"), ecs.CHILDOF | entity)
+assert(ecs.lookup_child(entity, "named") ~= 0)
+
+assert(ecs.lookup("lua_world_info") == 0)
+ecs.use(LuaWorldInfo, "lua_world_info")
+assert(ecs.lookup("lua_world_info") ~= 0)
+
+local FlecsLua = ecs.lookup_symbol("FlecsLua")
+assert(FlecsLua ~= 0)
+
+assert(ecs.lookup_path(FlecsLua, "LuaWorldInfo") ~= 0)
+
 
 --Bulk, filters
 
