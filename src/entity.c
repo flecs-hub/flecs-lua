@@ -337,6 +337,17 @@ int clear_entity(lua_State *L)
     return 0;
 }
 
+int delete_children(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t parent = lua_tointeger(L, 1);
+
+    ecs_delete_children(w, parent);
+
+    return 0;
+}
+
 int new_type(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);

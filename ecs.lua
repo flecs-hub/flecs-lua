@@ -144,6 +144,11 @@ end
 function ecs.clear(e)
 end
 
+---Delete children of an entity
+---@param parent integer @entity
+function ecs.delete_children(parent)
+end
+
 ---Declare a type
 ---@param name string
 ---@param expr string
