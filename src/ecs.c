@@ -74,6 +74,9 @@ int get_mut(lua_State *L);
 int mutable_modified(lua_State *L);
 int set_func(lua_State *L);
 
+int new_ref(lua_State *L);
+int get_ref(lua_State *L);
+
 int singleton_get(lua_State *L);
 int singleton_get_mut(lua_State *L);
 int mutable_modified(lua_State *L);
@@ -193,6 +196,8 @@ static const luaL_Reg ecs_lib[] =
     { "get_mut", get_mut },
     { "modified", mutable_modified },
     { "set", set_func },
+    { "ref", new_ref },
+    { "get_ref", get_ref },
 
     { "singleton_get", singleton_get },
     { "singleton_get_mut", singleton_get_mut },
@@ -279,6 +284,9 @@ int luaopen_ecs(lua_State *L)
     luaL_newlib(L, ecs_lib);
 
     luaL_newmetatable(L, "ecs_type_t");
+    lua_pop(L, 1);
+
+    luaL_newmetatable(L, "ecs_ref_t");
     lua_pop(L, 1);
 
     luaL_newmetatable(L, "ecs_readonly");

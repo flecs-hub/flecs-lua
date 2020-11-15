@@ -6,6 +6,9 @@ local ecs = {}
 ---@class ecs_type_t
 local ecs_type_t = {}
 
+---@class ecs_ref_t
+local ecs_ref_t = {}
+
 ---@class ecs_filter_t
 ---@field include ecs_type_t
 ---@field exclude ecs_type_t
@@ -225,6 +228,21 @@ end
 ---@param v table
 ---@return integer entity
 function ecs.set(entity, component, v)
+end
+
+---Create a new reference
+---@param entity integer
+---@param component integer
+---@return ecs_ref_t
+function ecs.ref(entity, component)
+end
+
+---Get an immutable reference to a component
+---@param ref ecs_ref_t
+---@param entity integer @optional
+---@param component integer @optional
+---@return table|nil
+function ecs.get_ref(ref, entity, component)
 end
 
 ---Get an immutable table to a singleton component

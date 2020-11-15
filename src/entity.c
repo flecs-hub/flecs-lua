@@ -607,6 +607,36 @@ int set_func(lua_State *L)
     return 1;
 }
 
+int new_ref(lua_State *L)
+{
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = luaL_checkinteger(L, 2);
+
+    ecs_ref_t *ref = lua_newuserdata(L, sizeof(ecs_ref_t));
+    luaL_setmetatable(L, "ecs_ref_t");
+
+    *ref = (ecs_ref_t){ .entity = e, .component = c };
+
+    return 1;
+}
+
+int get_ref(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_ref_t *ref = luaL_checkudata(L, 1, "ecs_ref_t");
+    ecs_entity_t e = luaL_optinteger(L, 2, 0);
+    ecs_entity_t c = 0;
+
+    if(e) c = luaL_checkinteger(L, 3);
+
+    const void *ptr = ecs_get_ref_w_entity(w, ref, e, c);
+
+    ecs_ptr_to_lua(w, L, ref->component, ptr);
+
+    return 1;
+}
+
 int singleton_get(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);

@@ -90,6 +90,17 @@ local meta = ecs.get(LuaStruct, MetaType)
 ---@type EcsMetaTypeSerializer
 local ser = ecs.get(LuaStruct, MetaTypeSerializer)
 
+local ref = ecs.ref(ecs.Singleton, tstruct)
+
+test_struct = ecs.get_ref(ref)
+assert(test_struct ~= nil)
+
+test_struct = ecs.get_ref(ref, ecs.Singleton, tstruct)
+assert(test_struct ~= nil)
+
+assert(not pcall(function () ecs.get_ref(ref, ecs.Singleton) end))
+
+
 for i, op in pairs(ser.ops) do
   print(string.format("ops[%s].kind = %d", i, op.kind))
 end
