@@ -105,9 +105,9 @@ end
 
 ---Test if an entity has a component, type or tag
 ---@param e integer @entity
----@param type string|integer
+---@param to_check integer|ecs_type_t
 ---@return boolean
-function ecs.has(e, type)
+function ecs.has(e, to_check)
 end
 
 ---Test if an entity has a role
@@ -132,14 +132,14 @@ end
 
 ---Add a component, type or tag to an entity
 ---@param e integer entity
----@param type string|integer
-function ecs.add(e, type)
+---@param to_add integer|ecs_type_t
+function ecs.add(e, to_add)
 end
 
 ---Remove a component, type or tag from an entity
 ---@param e integer @entity
----@param type string|integer
-function ecs.remove(e, type)
+---@param to_remove integer|ecs_type_t
+function ecs.remove(e, to_remove)
 end
 
 ---Clear all components

@@ -229,18 +229,18 @@ int entity_has(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t to_check = 0;
+    int b;
 
-    if(lua_isinteger(L, 2)) to_check = luaL_checkinteger(L, 2);
+    if(lua_isinteger(L, 2))
+    {
+        ecs_entity_t to_check = luaL_checkinteger(L, 2);
+        b = ecs_has_entity(w, e, to_check);
+    }
     else
     {
-        const char *name = luaL_checkstring(L, 2);
-        to_check = ecs_lookup_fullpath(w, name);
-
-        if(!to_check) return luaL_argerror(L, 2, "could not find type");
+        ecs_type_t type = checktype(L, 2);
+        b = ecs_has_type(w, e, type);
     }
-
-    int b = ecs_has_entity(w, e, to_check);
 
     lua_pushboolean(L, b);
 
@@ -289,18 +289,17 @@ int entity_add(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t to_add = 0;
 
-    if(lua_isinteger(L, 2)) to_add = luaL_checkinteger(L, 2);
+    if(lua_isinteger(L, 2))
+    {
+        ecs_entity_t to_add = luaL_checkinteger(L, 2);
+        ecs_add_entity(w, e, to_add);
+    }
     else
     {
-        const char *name = luaL_checkstring(L, 2);
-        to_add = ecs_lookup_fullpath(w, name);
-
-        if(!to_add) return luaL_argerror(L, 2, "could not find type");
+        ecs_type_t type = checktype(L, 2);
+        ecs_add_type(w, e, type);
     }
-
-    ecs_add_entity(w, e, to_add);
 
     return 0;
 }
@@ -310,18 +309,17 @@ int entity_remove(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t to_remove = 0;
 
-    if(lua_isinteger(L, 2)) to_remove = luaL_checkinteger(L, 2);
+    if(lua_isinteger(L, 2))
+    {
+        ecs_entity_t to_remove = luaL_checkinteger(L, 2);
+        ecs_remove_entity(w, e, to_remove);
+    }
     else
     {
-        const char *name = luaL_checkstring(L, 2);
-        to_remove = ecs_lookup_fullpath(w, name);
-
-        if(!to_remove) return luaL_argerror(L, 2, "could not find type");
+        ecs_type_t type = checktype(L, 2);
+        ecs_remove_type(w, e, type);
     }
-
-    ecs_remove_entity(w, e, to_remove);
 
     return 0;
 }
