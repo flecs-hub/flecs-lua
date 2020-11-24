@@ -66,6 +66,14 @@ int delete_children(lua_State *L);
 int new_type(lua_State *L);
 int get_type(lua_State *L);
 int get_parent(lua_State *L);
+
+int add_trait(lua_State *L);
+int remove_trait(lua_State *L);
+int has_trait(lua_State *L);
+int set_trait(lua_State *L);
+int set_trait_tag(lua_State *L);
+int get_trait(lua_State *L);
+int get_trait_tag(lua_State *L);
 int get_case(lua_State *L);
 
 int new_array(lua_State *L);
@@ -104,6 +112,7 @@ int bulk_delete(lua_State *L);
 int column(lua_State *L);
 int columns(lua_State *L);
 int is_owned(lua_State *L);
+int column_entity(lua_State *L);
 
 /* Query */
 int query_gc(lua_State *L);
@@ -194,6 +203,14 @@ static const luaL_Reg ecs_lib[] =
     { "get_parent", get_parent },
     { "type", new_type },
     { "get_type", get_type },
+
+    { "add_trait", add_trait },
+    { "remove_trait", remove_trait },
+    { "has_trait", has_trait },
+    { "set_trait", set_trait },
+    { "set_trait_tag", set_trait_tag },
+    { "get_trait", get_trait },
+    { "get_trait_tag", get_trait_tag },
     { "get_case", get_case },
 
     { "array", new_array },
@@ -227,6 +244,7 @@ static const luaL_Reg ecs_lib[] =
     { "column", column },
     { "columns", columns },
     { "is_owned", is_owned },
+    { "column_entity", column_entity },
 
     { "query", query_new },
     { "subquery", subquery_new },

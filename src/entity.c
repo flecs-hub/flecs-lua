@@ -146,11 +146,7 @@ int new_tag(lua_State *L)
 
     ecs_entity_t e = ecs_lookup(w, name);
 
-    if(!e)
-    {
-        e = ecs_new_id(w);
-        ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
-    }
+    if(!e) e = ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
 
     lua_pushinteger(L, e);
 
@@ -451,6 +447,113 @@ int get_parent(lua_State *L)
     return 1;
 }
 
+int add_trait(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = luaL_checkinteger(L, 2);
+    ecs_entity_t t = luaL_checkinteger(L, 3);
+
+    ecs_add_trait(w, e, c, t);
+
+    return 0;
+}
+
+int remove_trait(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = luaL_checkinteger(L, 2);
+    ecs_entity_t t = luaL_checkinteger(L, 3);
+
+    ecs_remove_trait(w, e, c, t);
+
+    return 0;
+}
+
+int has_trait(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = luaL_checkinteger(L, 2);
+    ecs_entity_t t = luaL_checkinteger(L, 3);
+
+    int b = ecs_has_trait(w, e, c, t);
+
+    lua_pushboolean(L, b);
+
+    return 1;
+}
+
+int set_trait(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = luaL_checkinteger(L, 2);
+    ecs_entity_t t = luaL_checkinteger(L, 3);
+
+    void *ptr = ecs_get_mut_w_entity(w, e, ecs_trait(c, t), NULL);
+
+    ecs_lua_to_ptr(w, L, 4, t, ptr);
+
+    ecs_modified_w_entity(w, e, ecs_trait(c, t));
+
+    return 0;
+}
+
+int set_trait_tag(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t t = luaL_checkinteger(L, 2);
+    ecs_entity_t c = luaL_checkinteger(L, 3);
+
+    void *ptr = ecs_get_mut_w_entity(w, e, ecs_trait(c, t), NULL);
+
+    ecs_lua_to_ptr(w, L, 4, t, ptr);
+
+    ecs_modified_w_entity(w, e, ecs_trait(c, t));
+
+    return 0;
+}
+
+int get_trait(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = luaL_checkinteger(L, 2);
+    ecs_entity_t t = luaL_checkinteger(L, 3);
+
+    const void *ptr = ecs_get_w_entity(w, e, ecs_trait(c, t));
+
+    if(ptr) ecs_ptr_to_lua(w, L, t, ptr);
+    else lua_pushnil(L);
+
+    return 1;
+}
+
+int get_trait_tag(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t t = luaL_checkinteger(L, 2);
+    ecs_entity_t c = luaL_checkinteger(L, 3);
+
+    const void *ptr = ecs_get_w_entity(w, e, ecs_trait(c, t));
+
+    if(ptr) ecs_ptr_to_lua(w, L, t, ptr);
+    else lua_pushnil(L);
+
+    return 1;
+}
+
 int get_case(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
@@ -483,7 +586,9 @@ int new_array(lua_State *L)
 
     ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
 
-    ecs_entity_t component = ecs_set(w, 0, EcsName, {.alloc_value = (char*)name});
+    ecs_entity_t component = ecs_new_component_id(w);
+
+    ecs_set(w, component, EcsName, {.alloc_value = (char*)name});
 
     ecs_set(w, component, EcsMetaType, {.kind = EcsArrayType, .descriptor = desc});
 
@@ -507,7 +612,9 @@ int new_struct(lua_State *L)
 
     ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
 
-    ecs_entity_t component = ecs_set(w, 0, EcsName, {.alloc_value = (char*)name});
+    ecs_entity_t component = ecs_new_component_id(w);
+
+    ecs_set(w, component, EcsName, {.alloc_value = (char*)name});
 
     ecs_set(w, component, EcsMetaType, {.kind = EcsStructType, .descriptor = desc});
 

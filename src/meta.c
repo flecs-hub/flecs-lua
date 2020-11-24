@@ -254,6 +254,8 @@ void serialize_type(
     const void *base,
     lua_State *L)
 {
+    ecs_assert(base != NULL, ECS_INVALID_PARAMETER, NULL);
+
     ecs_type_op_t *ops = (ecs_type_op_t*)ecs_vector_first(ser, ecs_type_op_t);
     int32_t count = ecs_vector_count(ser);
 
@@ -509,7 +511,8 @@ static int columns__index(lua_State *L)
         return 1;
     }
 
-    const EcsMetaTypeSerializer *ser = get_serializer(L, world, ecs_column_entity(it, i+1));
+    ecs_entity_t type = ecs_get_typeid(world, ecs_column_entity(it, i+1));
+    const EcsMetaTypeSerializer *ser = get_serializer(L, world, type);
 
     if(!ser) luaL_error(L, "column %d cannot be serialized", i + 1);
 
@@ -776,12 +779,11 @@ ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
         ecs_assert(it->count == lua_rawlen(L, -1), ECS_INTERNAL_ERROR, NULL);
 
         int32_t count = it->count;
-        ecs_entity_t column_entity = ecs_column_entity(it, i+1);
+        ecs_entity_t column_entity = ecs_get_typeid(world, ecs_column_entity(it, i+1)); //ecs_column_entity(it, i+1);
         void *base = ecs_table_column(it, i);
 
         if(!ecs_is_owned(it, i)) ecs_lua_to_ptr(world, L, -1, column_entity, base);
-
-        deserialize_column(world, L, -1, column_entity, base, ecs_column_size(it, i+1), count);
+        else deserialize_column(world, L, -1, column_entity, base, ecs_column_size(it, i+1), count);
 
         lua_pop(L, 1); /* columns[i+1] */
     }

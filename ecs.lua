@@ -200,11 +200,66 @@ end
 function ecs.get_parent(e, c)
 end
 
+---Add a trait to an entity
+---@param e integer
+---@param component integer
+---@param trait integer
+function ecs.add_trait(e, component, trait)
+end
+
+---Remove a trait from an entity
+---@param e integer
+---@param component integer
+---@param trait integer
+function ecs.remove_trait(e, component, trait)
+end
+
+---Test if an entity has a trait
+---@param e integer
+---@param component integer
+---@param trait integer
+---@return boolean
+function ecs.has_trait(e, component, trait)
+end
+
+---Set trait for component
+---@param e integer
+---@param component integer
+---@param trait integer
+---@param v table
+function ecs.set_trait(e, component, trait, v)
+end
+
+---Set tag trait for component,
+---this can only be used with traits that are not components
+---@param e integer
+---@param component integer
+---@param trait integer
+---@param v table
+function ecs.set_trait_tag(e, trait, component, v)
+end
+
+---Get trait for component
+---@param e integer
+---@param component integer
+---@param trait integer
+---@return any
+function ecs.get_trait(e, component, trait)
+end
+
+---Get trait tag for component
+---@param e integer
+---@param component integer
+---@param trait integer
+---@return any
+function ecs.get_trait_tag(e, trait, component)
+end
+
 ---Get case for switch
----@param e integer entity
+---@param entity integer
 ---@param sw integer switch
 ---@return integer
-function ecs.get_case(e, sw)
+function ecs.get_case(entity, sw)
 end
 
 ---Create a meta array component
@@ -370,6 +425,13 @@ end
 ---@param it ecs_iter_t
 ---@param column integer
 function ecs.is_owned(it, column)
+end
+
+---Obtain the entity id of the signature column
+---@param it ecs_iter_t
+---@param column integer
+---@return integer
+function ecs.column_entity(it, column)
 end
 
 ---Create generic for loop iterator for a query/iterator
