@@ -518,7 +518,7 @@ static int columns__index(lua_State *L)
 
     lua_settop(L, 1); /* (it.)columns */
 
-    const void *base = ecs_table_column(it, i);
+    const void *base = ecs_column_w_size(it, 0, i+1);
 
     if(!ecs_is_owned(it, i)) serialize_type(world, ser->ops, base, L);
     else serialize_column(world, L, ser, base, it->count);
@@ -780,7 +780,7 @@ ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
 
         int32_t count = it->count;
         ecs_entity_t column_entity = ecs_get_typeid(world, ecs_column_entity(it, i+1)); //ecs_column_entity(it, i+1);
-        void *base = ecs_table_column(it, i);
+        void *base = ecs_column_w_size(it, 0, i+1);
 
         if(!ecs_is_owned(it, i)) ecs_lua_to_ptr(world, L, -1, column_entity, base);
         else deserialize_column(world, L, -1, column_entity, base, ecs_column_size(it, i+1), count);
