@@ -438,8 +438,6 @@ void FlecsLuaImport(ecs_world_t *w)
 
     ECS_EXPORT_COMPONENT(EcsLuaHost);
 
-    ecs_assert(sizeof(EcsLuaWorldInfo) == sizeof(ecs_world_info_t), ECS_INTERNAL_ERROR, NULL);
-
     lua_State *L = lua_newstate(Allocf, NULL);
 
     ecs_lua_ctx param = { .L = L, .world = w};

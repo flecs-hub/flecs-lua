@@ -56,16 +56,16 @@ ECS_STRUCT(EcsLuaWorldInfo,
     ecs_entity_t min_id;
     ecs_entity_t max_id;
 
-    float delta_time_raw;
-    float delta_time;
-    float time_scale;
-    float target_fps;
-    float frame_time_total;
-    float system_time_total;
-    float merge_time_total;
-    float world_time_total;
-    float world_time_total_raw;
-    float sleep_err;
+    double delta_time_raw;
+    double delta_time;
+    double time_scale;
+    double target_fps;
+    double frame_time_total;
+    double system_time_total;
+    double merge_time_total;
+    double world_time_total;
+    double world_time_total_raw;
+    double sleep_err;
 
     int32_t frame_count_total;
     int32_t merge_count_total;
