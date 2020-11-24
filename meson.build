@@ -83,6 +83,7 @@ tests = [
     'system',
     'module',
     'pipeline',
+    'trait',
     'prefab',
     'timer'
 ]
