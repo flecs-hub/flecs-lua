@@ -68,7 +68,7 @@ function ecs.delete(entity)
 end
 
 ---Create a tag
----@param name integer
+---@param name string
 ---@return integer @entity
 function ecs.tag(name)
 end
