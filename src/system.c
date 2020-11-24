@@ -49,7 +49,12 @@ static void system_entry_point(ecs_iter_t *it)
 
     print_time(&time, "system");
 
-    if(ret) ecs_os_err("error running system \"%s\" (%d): %s", ecs_get_name(w, it->system), ret, lua_tostring(L, 1));
+    if(ret)
+    {
+        const char *name = ecs_get_name(w, it->system);
+        const char *err = lua_tostring(L, 2); /* 1 is the iterator */
+        ecs_os_err("error running system \"%s\" (%d): %s", name, ret, err);
+    }
 
     ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
 
