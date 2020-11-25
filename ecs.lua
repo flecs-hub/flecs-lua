@@ -193,6 +193,12 @@ end
 function ecs.get_type(e)
 end
 
+---Get the typeid of an entity
+---@param entity integer
+---@return integer
+function ecs.get_typeid(entity)
+end
+
 ---Get parent for entity with component
 ---@param e integer entity
 ---@param c integer optional component

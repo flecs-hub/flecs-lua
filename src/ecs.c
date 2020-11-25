@@ -65,6 +65,7 @@ int clear_entity(lua_State *L);
 int delete_children(lua_State *L);
 int new_type(lua_State *L);
 int get_type(lua_State *L);
+int get_typeid(lua_State *L);
 int get_parent(lua_State *L);
 
 int add_trait(lua_State *L);
@@ -203,6 +204,7 @@ static const luaL_Reg ecs_lib[] =
     { "get_parent", get_parent },
     { "type", new_type },
     { "get_type", get_type },
+    { "get_typeid", get_typeid },
 
     { "add_trait", add_trait },
     { "remove_trait", remove_trait },

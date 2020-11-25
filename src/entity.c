@@ -431,6 +431,19 @@ int get_type(lua_State *L)
     return 1;
 }
 
+int get_typeid(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    ecs_entity_t typeid = ecs_get_typeid(w, e);
+
+    lua_pushinteger(L, typeid);
+
+    return 1;
+}
+
 int get_parent(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);

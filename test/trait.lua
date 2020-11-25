@@ -10,8 +10,8 @@ local ExpiryTimer = ecs.struct("ExpiryTimer", "{float expiry_time; float t;}");
 local e = ecs.new()
 
 ecs.add(e, HealthBuff)
+--ecs.set(e, HealthBuff, { x = 10 })
 ecs.set_trait(e, HealthBuff, ExpiryTimer, { expiry_time = 5, t = 0 })
-ecs.set(e, HealthBuff, { x = 0})
 
 local exp = ecs.get_trait(e, HealthBuff, ExpiryTimer)
 assert(exp)
@@ -25,8 +25,11 @@ local function ExpireComponents(it)
     local et = ecs.column(it, 1)
 
     local trait = ecs.column_entity(it, 1)
-    --ecs.has()
     local comp = trait & ((1 << 31) - 1)
+    trait = ecs.get_typeid(trait)
+
+    assert(trait == ExpiryTimer)
+    assert(comp == HealthBuff)
 
     iter_count = iter_count + 1
 
@@ -35,13 +38,21 @@ local function ExpireComponents(it)
         print("t = " .. et[i].t .. ", delta: " .. it.delta_time)
         print("expiry: " .. et[i].expiry_time)
         print("entity" .. it.entities[i])
+       -- assert(ecs.has(e, HealthBuff))
+
         et[i].t = et[i].t + it.delta_time;
 
         if(et[i].t >= et[i].expiry_time) then
+
             print("removing...")
+
             removed = true
+
             ecs.remove(it.entities[i], comp)
             ecs.remove(it.entities[i], trait)
+
+         --   assert(not ecs.has(e, HealthBuff))
+            assert(not ecs.has(e, ExpiryTimer))
         end
     end
 end
@@ -56,5 +67,8 @@ ecs.progress(1)
 ecs.progress(1)
 
 
---assert(removed == true)
+assert(not ecs.has(e, HealthBuff))
+assert(not ecs.has(e, ExpiryTimer))
+
+assert(removed == true)
 print("iter_count: " .. iter_count)
