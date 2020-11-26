@@ -485,6 +485,15 @@ end
 function ecs.system(func, name, phase, signature)
 end
 
+---Create a trigger for a single component
+---@param func function
+---@param name string
+---@param kind integer @OnAdd or OnRemove
+---@param component string
+---@return integer @entity
+function ecs.trigger(func, name, kind, component)
+end
+
 ---Create a module
 ---@param name string
 ---@param cb function import callback

@@ -125,6 +125,7 @@ int query_changed(lua_State *L);
 
 /* System */
 int new_system(lua_State *L);
+int new_trigger(lua_State *L);
 
 /* Module */
 int new_module(lua_State *L);
@@ -255,6 +256,7 @@ static const luaL_Reg ecs_lib[] =
     { "query_changed", query_changed },
 
     { "system", new_system },
+    { "trigger", new_trigger },
 
     { "module", new_module },
 

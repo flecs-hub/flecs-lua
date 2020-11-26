@@ -765,7 +765,7 @@ ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
     int32_t i;
     for(i=1; i <= it->column_count; i++)
     {
-        if(ecs_is_readonly(it, i)) continue;
+        if(it->query && ecs_is_readonly(it, i)) continue;
 
         int type = lua_rawgeti(L, -1, i); /* columns[i] */
 

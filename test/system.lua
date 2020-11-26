@@ -94,3 +94,21 @@ local function sys_empty(it)
 end
 
 local em = ecs.system(sys_empty, "sys_empty", ecs.OnUpdate)
+
+local function trigger(it)
+    local s = ecs.column(it, 1)
+
+    for i=1, it.count do
+        local e = it.entities[i]
+        print("LuaStruct added for entity: " .. e)
+    end
+end
+
+ecs.trigger(trigger, "OnAdd", ecs.OnAdd, "LuaStruct")
+
+assert(not pcall(function () ecs.trigger(trigger, "name", ecs.OnAdd) end))
+assert(not pcall(function () ecs.trigger(trigger, "name", ecs.OnUpdate, "LuaStruct") end))
+
+ecs.add(ecs.new(), Struct)
+ecs.add(ecs.new(), Struct)
+ecs.add(ecs.new(), Struct)

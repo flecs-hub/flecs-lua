@@ -4,6 +4,7 @@ typedef struct ecs_lua_system
 {
     lua_State *L;
     int func_ref;
+    bool trigger;
 }ecs_lua_system;
 
 static void print_time(ecs_time_t *time, const char *str)
@@ -14,6 +15,7 @@ static void print_time(ecs_time_t *time, const char *str)
 #endif
 }
 
+/* Also used for triggers */
 static void system_entry_point(ecs_iter_t *it)
 {
     ecs_world_t *w = it->world;
@@ -25,8 +27,9 @@ static void system_entry_point(ecs_iter_t *it)
 
     ecs_assert(idx == 0, ECS_INTERNAL_ERROR, "Lua systems must run on the main thread");
 
-    ecs_os_dbg("Lua system: \"%s\", %d columns, count %d, func ref %d",
-        ecs_get_name(w, it->system), it->column_count, it->count, sys->func_ref);
+    ecs_os_dbg("Lua %s: \"%s\", %d columns, count %d, func ref %d",
+        sys->trigger ? "trigger" : "system", ecs_get_name(w, it->system),
+        it->column_count, it->count, sys->func_ref);
 
     ecs_lua__prolog(L);
 
@@ -74,7 +77,7 @@ static void system_entry_point(ecs_iter_t *it)
     ecs_lua__epilog(L);
 }
 
-int new_system(lua_State *L)
+int new_whatever(lua_State *L, bool trigger)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
     ecs_world_t *w = ctx->world;
@@ -84,7 +87,16 @@ int new_system(lua_State *L)
     ecs_entity_t phase = luaL_optinteger(L, 3, 0);
     const char *signature = luaL_optstring(L, 4, NULL);
 
-    ecs_entity_t e = ecs_new_system(w, 0, name, phase, signature, system_entry_point);
+    ecs_entity_t e;
+
+    if(trigger)
+    {
+        if(phase != EcsOnAdd && phase != EcsOnRemove) return luaL_argerror(L, 3, "invalid kind");
+        if(signature == NULL) return luaL_argerror(L, 4, "");
+
+        e = ecs_new_trigger(w, 0, name, phase, signature, system_entry_point);
+    }
+    else e = ecs_new_system(w, 0, name, phase, signature, system_entry_point);
 
     ecs_lua_system *sys = lua_newuserdata(L, sizeof(ecs_lua_system));
     luaL_ref(L, LUA_REGISTRYINDEX);
@@ -93,6 +105,7 @@ int new_system(lua_State *L)
 
     lua_pushvalue(L, 1);
     sys->func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    sys->trigger = trigger;
 
     ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
     ecs_set(w, e, EcsContext, { sys });
@@ -100,4 +113,14 @@ int new_system(lua_State *L)
     lua_pushinteger(L, e);
 
     return 1;
+}
+
+int new_system(lua_State *L)
+{
+    return new_whatever(L, false);
+}
+
+int new_trigger(lua_State *L)
+{
+    return new_whatever(L, true);
 }
