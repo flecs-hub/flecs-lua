@@ -674,7 +674,7 @@ function ecs.get_thread_index()
 end
 
 
----@class world_info_t
+---@class ecs_world_info_t
 ---@field last_component_id integer
 ---@field last_id integer
 ---@field min_id integer
@@ -693,11 +693,38 @@ end
 ---@field merge_count_total integer
 ---@field pipeline_build_count_total integer
 ---@field systems_ran_frame integer
-local world_info_t = {}
+local ecs_world_info_t = {}
+
+---@class ecs_world_stats_t
+---@field entity_count integer
+---@field component_count integer
+---@field query_count integer
+---@field system_count integer
+---@field table_count integer
+---@field empty_table_count integer
+---@field singleton_table_count integer
+---@field max_entities_per_table integer
+---@field max_components_per_table integer
+---@field max_columns_per_table integer
+---@field max_matched_queries_per_table integer
+---@field new_count integer
+---@field bulk_new_count integer
+---@field delete_count integer
+---@field clear_count integer
+---@field add_count integer
+---@field remove_count integer
+---@field set_count integer
+---@field discard_count integer
+local ecs_world_stats_t = {}
 
 ---Get world info
 ---@return world_info_t
 function ecs.world_info()
+end
+
+---Get world stats
+---@return ecs_world_stats_t
+function ecs.world_stats()
 end
 
 ---Dimension the world for a specified number of entities

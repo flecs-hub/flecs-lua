@@ -36,6 +36,44 @@ int world_info(lua_State *L)
     return 1;
 }
 
+int world_stats(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaWorldInfo");
+    ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
+
+    ecs_world_stats_t ws;
+    ecs_get_world_stats(w, &ws);
+
+    EcsLuaWorldStats world_stats =
+    {
+        .entity_count = ws.entity_count,
+        .component_count = ws.component_count,
+        .query_count = ws.query_count,
+        .system_count = ws.system_count,
+        .table_count = ws.table_count,
+        .empty_table_count = ws.empty_table_count,
+        .singleton_table_count = ws.singleton_table_count,
+        .max_entities_per_table = ws.max_entities_per_table,
+        .max_components_per_table = ws.max_components_per_table,
+        .max_columns_per_table = ws.max_columns_per_table,
+        .max_matched_queries_per_table = ws.max_matched_queries_per_table,
+        .new_count = ws.new_count,
+        .bulk_new_count = ws.bulk_new_count,
+        .delete_count = ws.delete_count,
+        .clear_count = ws.clear_count,
+        .add_count = ws.add_count,
+        .remove_count = ws.remove_count,
+        .set_count = ws.set_count,
+        .discard_count = ws.discard_count,
+    };
+
+    ecs_ptr_to_lua(w, L, e, &world_stats);
+
+    return 1;
+}
+
 int dim(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);

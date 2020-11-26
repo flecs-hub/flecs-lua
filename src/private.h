@@ -74,6 +74,30 @@ ECS_STRUCT(EcsLuaWorldInfo,
 });
 
 
+ECS_STRUCT(EcsLuaWorldStats,
+{
+    int32_t entity_count;
+    int32_t component_count;
+    int32_t query_count;
+    int32_t system_count;
+    int32_t table_count;
+    int32_t empty_table_count;
+    int32_t singleton_table_count;
+    int32_t max_entities_per_table;
+    int32_t max_components_per_table;
+    int32_t max_columns_per_table;
+    int32_t max_matched_queries_per_table;
+
+    int32_t new_count;
+    int32_t bulk_new_count;
+    int32_t delete_count;
+    int32_t clear_count;
+    int32_t add_count;
+    int32_t remove_count;
+    int32_t set_count;
+    int32_t discard_count;
+});
+
 #define ECS_LUA_ENUMS(XX) \
     XX(MatchDefault) \
     XX(MatchAll) \

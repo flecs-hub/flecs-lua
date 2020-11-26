@@ -50,3 +50,10 @@ ecs.createtable()
 ecs.createtable(10)
 
 ecs.createtable(10, 10)
+
+local ws = ecs.world_stats()
+assert(ws.entity_count ~= 0)
+
+--local e = ecs.lookup_fullpath("flecs.lua.LuaWorldStats")
+--print(ecs.emmy_class(e))
+

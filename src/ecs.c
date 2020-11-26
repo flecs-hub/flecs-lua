@@ -174,6 +174,7 @@ int get_thread_index(lua_State *L);
 
 /* World */
 int world_info(lua_State *L);
+int world_stats(lua_State *L);
 int dim(lua_State *L);
 int dim_type(lua_State *L);
 
@@ -297,6 +298,7 @@ static const luaL_Reg ecs_lib[] =
     { "get_thread_index", get_thread_index },
 
     { "world_info", world_info },
+    { "world_stats", world_stats },
     { "dim", dim },
     { "dim_type", dim_type },
 
@@ -439,6 +441,7 @@ void FlecsLuaImport(ecs_world_t *w)
     ECS_COMPONENT(w, EcsLuaHost);
 
     ECS_META(w, EcsLuaWorldInfo);
+    ECS_META(w, EcsLuaWorldStats);
 
     ECS_EXPORT_COMPONENT(EcsLuaHost);
 
