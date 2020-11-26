@@ -77,7 +77,7 @@ static void system_entry_point(ecs_iter_t *it)
     ecs_lua__epilog(L);
 }
 
-int new_whatever(lua_State *L, bool trigger)
+static int new_whatever(lua_State *L, bool trigger)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L);
     ecs_world_t *w = ctx->world;
