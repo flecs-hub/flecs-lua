@@ -26,9 +26,8 @@ local function ExpireComponents(it)
 
     local trait = ecs.column_entity(it, 1)
     local comp = trait & ((1 << 31) - 1)
-    trait = ecs.get_typeid(trait)
 
-    assert(trait == ExpiryTimer)
+    assert(ecs.get_typeid(trait) == ExpiryTimer)
     assert(comp == HealthBuff)
 
     iter_count = iter_count + 1
@@ -37,22 +36,18 @@ local function ExpireComponents(it)
 
         print("t = " .. et[i].t .. ", delta: " .. it.delta_time)
         print("expiry: " .. et[i].expiry_time)
-        print("entity" .. it.entities[i])
-       -- assert(ecs.has(e, HealthBuff))
 
         et[i].t = et[i].t + it.delta_time;
 
         if(et[i].t >= et[i].expiry_time) then
 
-            print("removing...")
-
+            assert(removed == false)
             removed = true
+
+            print("removing...")
 
             ecs.remove(it.entities[i], comp)
             ecs.remove(it.entities[i], trait)
-
-         --   assert(not ecs.has(e, HealthBuff))
-            assert(not ecs.has(e, ExpiryTimer))
         end
     end
 end
