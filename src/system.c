@@ -147,7 +147,7 @@ int set_system_context(lua_State *L)
     ecs_world_t *w = ecs_lua_get_world(L);
 
     ecs_entity_t system = luaL_checkinteger(L, 1);
-    if(lua_gettop(L) == 1) lua_pushnil(L);
+    if(lua_gettop(L) < 2) lua_pushnil(L);
 
     EcsContext *ctx = ecs_get_mut(w, system, EcsContext, NULL);
     ecs_lua_system *sys = (ecs_lua_system*)ctx->ctx;
