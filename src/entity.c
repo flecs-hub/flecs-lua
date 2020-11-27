@@ -597,7 +597,7 @@ int new_array(lua_State *L)
 
     char *desc = ecs_strbuf_get(&buf);
 
-    ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
+    ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
 
     ecs_entity_t component = ecs_new_component_id(w);
 
@@ -623,7 +623,7 @@ int new_struct(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
 
-    ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
+    ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
 
     ecs_entity_t component = ecs_new_component_id(w);
 
@@ -647,7 +647,7 @@ int new_alias(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     const char *alias = luaL_checkstring(L, 2);
 
-    ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
+    ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
 
     ecs_entity_t type_entity = ecs_lookup_fullpath(w, name);
 

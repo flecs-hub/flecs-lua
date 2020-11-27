@@ -424,8 +424,8 @@ static void ecs_lua_exit(lua_State *L)
 
 int ecs_lua_set_state(ecs_world_t *w, lua_State *L)
 {
-    ecs_entity_t ecs_entity(EcsLuaHost) = ecs_lookup_fullpath(w, "flecs.lua.LuaHost");
-    ecs_assert(ecs_entity(EcsLuaHost) != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_entity_t ecs_typeid(EcsLuaHost) = ecs_lookup_fullpath(w, "flecs.lua.LuaHost");
+    ecs_assert(ecs_typeid(EcsLuaHost) != 0, ECS_INTERNAL_ERROR, NULL);
 
     EcsLuaHost *host = ecs_singleton_get_mut(w, EcsLuaHost);
 
