@@ -36,7 +36,16 @@ void ecs_lua_progress(lua_State *L)
 
     if(type != LUA_TFUNCTION) return;
 
-    lua_pcall(L, 0, 0, 0);
+    int ret = lua_pcall(L, 0, 0, 0);
+
+    if(ret)
+    {
+        const char *err = lua_tostring(L, lua_gettop(L));
+        ecs_os_err("progress() cb error (%d): %s", ret, err);
+        lua_pop(L, 1);
+    }
+
+    ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
 
     ecs_lua__epilog(L);
 }
@@ -126,6 +135,8 @@ int query_changed(lua_State *L);
 /* System */
 int new_system(lua_State *L);
 int new_trigger(lua_State *L);
+int run_system(lua_State *L);
+int set_system_context(lua_State *L);
 
 /* Module */
 int new_module(lua_State *L);
@@ -258,6 +269,8 @@ static const luaL_Reg ecs_lib[] =
 
     { "system", new_system },
     { "trigger", new_trigger },
+    { "run", run_system },
+    { "set_system_context", set_system_context },
 
     { "module", new_module },
 

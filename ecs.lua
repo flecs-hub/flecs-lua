@@ -31,6 +31,7 @@ local ecs_query_t = {}
 ---@field delta_time number
 ---@field delta_system_time number
 ---@field world_time number
+---@field interrupted_by integer
 local ecs_iter_t = {}
 
 ---Create a new entity
@@ -492,6 +493,21 @@ end
 ---@param component string
 ---@return integer @entity
 function ecs.trigger(func, name, kind, component)
+end
+
+---Run a specific system manually
+---@param system integer
+---@param delta_time number
+---@param param any @optional
+---@return integer
+function ecs.run(system, delta_time, param)
+end
+
+---Set system context, sets ecs_iter_t.param
+---@param system integer
+---@param param any
+---@return integer
+function ecs.set_system_context(system, param)
 end
 
 ---Create a module

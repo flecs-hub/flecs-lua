@@ -81,9 +81,22 @@ end
 
 ecs.system(sys_readonly, "sys_readonly", ecs.OnUpdate, "[in] Position, Velocity, LuaStruct")
 
+local custom_context = false
 
 local function sys_empty(it)
     local e = ecs.columns(it)
+
+    if it.param ~= nil then
+        assert(it.param[1] == "foo")
+
+        if(it.param[3] == true) then
+            it.interrupted_by = 400
+        end
+
+        if(it.param[2] == "custom_context") then
+            custom_context = true
+        end
+    end
 
     assert(not pcall(function () return it.entities[1] > 0 end))
 
@@ -94,6 +107,27 @@ local function sys_empty(it)
 end
 
 local em = ecs.system(sys_empty, "sys_empty", ecs.OnUpdate)
+
+ecs.set_system_context(em, { "foo", "custom_context" })
+
+ecs.run(em, 1.0)
+assert(custom_context == true)
+
+--ecs.run() temporarily overrides it.param
+assert(ecs.run(em, 1.0) == 0)
+assert(ecs.run(em, 1.0, {"foo", "bar"}) == 0)
+assert(ecs.run(em, 1.0, {"foo", "bar", true}) == 400)
+
+--make sure it.param is still set
+custom_context = false
+ecs.run(em, 1.0)
+assert(custom_context == true)
+
+--unset
+custom_context = false
+ecs.set_system_context(em, nil)
+ecs.run(em, 1.0)
+assert(custom_context == false)
 
 local function trigger(it)
     local s = ecs.column(it, 1)

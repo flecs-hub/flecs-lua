@@ -49,6 +49,14 @@ typedef struct ecs_lua_ctx
     ecs_entity_t metatype_id;
 }ecs_lua_ctx;
 
+typedef struct ecs_lua_system
+{
+    lua_State *L;
+    int func_ref;
+    int param_ref;
+    bool trigger;
+}ecs_lua_system;
+
 ECS_STRUCT(EcsLuaWorldInfo,
 {
     ecs_entity_t last_component_id;

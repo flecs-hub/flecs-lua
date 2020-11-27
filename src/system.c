@@ -1,12 +1,5 @@
 #include "private.h"
 
-typedef struct ecs_lua_system
-{
-    lua_State *L;
-    int func_ref;
-    bool trigger;
-}ecs_lua_system;
-
 static void print_time(ecs_time_t *time, const char *str)
 {
 #ifndef NDEBUG
@@ -55,7 +48,7 @@ static void system_entry_point(ecs_iter_t *it)
     if(ret)
     {
         const char *name = ecs_get_name(w, it->system);
-        const char *err = lua_tostring(L, 2); /* 1 is the iterator */
+        const char *err = lua_tostring(L, lua_gettop(L));
         ecs_os_err("error running system \"%s\" (%d): %s", name, ret, err);
     }
 
@@ -105,6 +98,7 @@ static int new_whatever(lua_State *L, bool trigger)
 
     lua_pushvalue(L, 1);
     sys->func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    sys->param_ref = LUA_NOREF;
     sys->trigger = trigger;
 
     ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
@@ -123,4 +117,46 @@ int new_system(lua_State *L)
 int new_trigger(lua_State *L)
 {
     return new_whatever(L, true);
+}
+
+int run_system(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t system = luaL_checkinteger(L, 1);
+    lua_Number delta_time = luaL_checknumber(L, 2);
+
+    const EcsContext *ctx = ecs_get(w, system, EcsContext);
+    ecs_lua_system sys = *(ecs_lua_system*)ctx->ctx;
+
+    int tmp = sys.param_ref;
+
+    if(!lua_isnoneornil(L, 3)) sys.param_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    ecs_entity_t ret = ecs_run(w, system, delta_time, &sys);
+
+    if(tmp != sys.param_ref) luaL_unref(L, LUA_REGISTRYINDEX, sys.param_ref);
+
+    lua_pushinteger(L, ret);
+
+    return 1;
+}
+
+int set_system_context(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    ecs_entity_t system = luaL_checkinteger(L, 1);
+    if(lua_gettop(L) == 1) lua_pushnil(L);
+
+    EcsContext *ctx = ecs_get_mut(w, system, EcsContext, NULL);
+    ecs_lua_system *sys = (ecs_lua_system*)ctx->ctx;
+
+    luaL_unref(L, LUA_REGISTRYINDEX, sys->param_ref);
+
+    sys->param_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    ecs_modified(w, system, EcsContext);
+
+    return 0;
 }

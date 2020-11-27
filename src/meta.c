@@ -599,12 +599,26 @@ static void push_iter_metadata(lua_State *L, ecs_iter_t *it)
     lua_setfield(L, -2, "world_time");
 
     /* it.table_count */
-    lua_pushnumber(L, it->table_count);
+    lua_pushinteger(L, it->table_count);
     lua_setfield(L, -2, "table_count");
 
     /* it.table_offset */
-    lua_pushnumber(L, it->table_offset);
+    lua_pushinteger(L, it->table_offset);
     lua_setfield(L, -2, "table_offset");
+
+    /* it.interrupted_by */
+    lua_pushinteger(L, it->interrupted_by);
+    lua_setfield(L, -2, "interrupted_by");
+
+    if(it->system)
+    {
+        ecs_lua_system *sys = it->param;
+
+        if(sys->param_ref >= 0) lua_rawgeti(L, LUA_REGISTRYINDEX, sys->param_ref);
+        else lua_pushnil(L);
+
+        lua_setfield(L, -2, "param");
+    }
 
     /* it.entities */
     lua_createtable(L, 0, 1);
@@ -755,6 +769,10 @@ ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
     ecs_lua__prolog(L);
     ecs_iter_t *it = ecs_lua__checkiter(L, idx);
     ecs_world_t *world = it->world;
+
+    if(lua_getfield(L, idx, "interrupted_by") == LUA_TNUMBER) it->interrupted_by = lua_tointeger(L, -1);
+
+    lua_pop(L, 1);
 
     /* newly-returned iterators have it->count = 0 */
     if(!it->count) return it;
