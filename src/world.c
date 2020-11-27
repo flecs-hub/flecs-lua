@@ -39,7 +39,7 @@ int world_info(lua_State *L)
 int world_stats(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
-
+#if 0
     ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaWorldInfo");
     ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
 
@@ -70,6 +70,8 @@ int world_stats(lua_State *L)
     };
 
     ecs_ptr_to_lua(w, L, e, &world_stats);
+#endif
+    lua_pushnil(L);
 
     return 1;
 }
