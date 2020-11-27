@@ -292,7 +292,7 @@ int main(int argc, char **argv)
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
 
     ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g.s);
-    ecs_set_ptr(w, ecs_entity(lua_test_struct), lua_test_struct, &g.s);
+    ecs_set_ptr(w, ecs_typeid(lua_test_struct), lua_test_struct, &g.s);
 
     //const EcsLuaHost *host = ecs_singleton_get(w, EcsLuaHost);
     //lua_State *L = host->L;
