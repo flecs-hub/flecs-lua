@@ -132,6 +132,13 @@ int query_iter(lua_State *L);
 int query_next(lua_State *L);
 int query_changed(lua_State *L);
 
+/* Snapshot */
+int snapshot_take(lua_State *L);
+int snapshot_restore(lua_State *L);
+int snapshot_iter(lua_State *L);
+int snapshot_next(lua_State *L);
+int snapshot_gc(lua_State *L);
+
 /* System */
 int new_system(lua_State *L);
 int new_trigger(lua_State *L);
@@ -272,6 +279,11 @@ static const luaL_Reg ecs_lib[] =
     { "run", run_system },
     { "set_system_context", set_system_context },
 
+    { "snapshot", snapshot_take },
+    { "snapshot_restore", snapshot_restore },
+    { "snapshot_iter", snapshot_iter },
+    { "snapshot_next", snapshot_next },
+
     { "module", new_module },
 
     { "log", print_log },
@@ -345,6 +357,11 @@ int luaopen_ecs(lua_State *L)
 
     luaL_newmetatable(L, "ecs_query_t");
     lua_pushcfunction(L, query_gc);
+    lua_setfield(L, -2, "__gc");
+    lua_pop(L, 1);
+
+    luaL_newmetatable(L, "ecs_snapshot_t");
+    lua_pushcfunction(L, snapshot_gc);
     lua_setfield(L, -2, "__gc");
     lua_pop(L, 1);
 

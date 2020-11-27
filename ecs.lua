@@ -22,6 +22,9 @@ local ecs_mutable_t = {}
 ---@class ecs_query_t
 local ecs_query_t = {}
 
+---@class ecs_snapshot_t
+local ecs_snapshot_t = {}
+
 ---@class ecs_iter_t
 ---@field count integer
 ---@field columns table[]
@@ -508,6 +511,31 @@ end
 ---@param param any
 ---@return integer
 function ecs.set_system_context(system, param)
+end
+
+---Create a snapshot
+---@param it ecs_iter_t @optional
+---@param next_action fuction @optional
+---@return ecs_snapshot_t
+function ecs.snapshot(it, next_action)
+end
+
+---Restore a snapshot
+---@param snapshot ecs_snapshot_t
+function ecs.snapshot_restore(snapshot)
+end
+
+---Create a snapshot iterator
+---@param snapshot ecs_snapshot_t
+---@param filter ecs_filter_t
+---@return ecs_iter_t
+function ecs.snapshot_iter(snapshot, filter)
+end
+
+---Progress snapshot iterator
+---@param it ecs_iter_t
+---@return boolean
+function ecs.snapshot_next(it)
 end
 
 ---Create a module
