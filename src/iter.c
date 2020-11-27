@@ -76,3 +76,28 @@ int column_entity(lua_State *L)
 
     return 1;
 }
+
+int filter_iter(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_filter_t filter = checkfilter(L, 1);
+
+    ecs_iter_t it = ecs_filter_iter(w, &filter);
+
+    ecs_iter_to_lua(&it, L, true);
+
+    return 1;
+}
+
+int filter_next(lua_State *L)
+{
+    ecs_iter_t *it = ecs_lua_to_iter(L, 1);
+
+    int b = ecs_filter_next(it);
+
+    if(b) ecs_lua_iter_update(L, 1, it);
+
+    lua_pushboolean(L, b);
+
+    return 1;
+}

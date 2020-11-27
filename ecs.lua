@@ -449,6 +449,17 @@ end
 function ecs.each(q_it)
 end
 
+---Create a filter iterator
+---@param filter ecs_filter_t
+function ecs.filter_iter(filter)
+end
+
+---Progress the filter iterator
+---@param it ecs_iter_t
+---@return boolean
+function ecs.fiter_next(it)
+end
+
 ---Create a query
 ---@param sig string
 ---@return ecs_query_t
