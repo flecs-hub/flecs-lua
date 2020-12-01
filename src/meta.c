@@ -751,7 +751,7 @@ void ecs_lua_to_ptr(
     deserialize_type(L, idx, &c);
 }
 
-void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, bool copy)
+ecs_iter_t *ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, bool copy)
 {
     /* it */
     lua_createtable(L, 0, 16);
@@ -761,6 +761,8 @@ void ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, bool copy)
 
     push_iter_metadata(L, it);
     push_columns(L, it);
+
+    return it;
 }
 
 ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
