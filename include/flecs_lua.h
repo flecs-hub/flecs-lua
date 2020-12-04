@@ -52,6 +52,15 @@ void ecs_lua_to_ptr(
     ecs_entity_t type,
     void *ptr);
 
+/* Update the value at the given index */
+FLECS_LUA_API
+void ecs_lua_update_type(
+    ecs_world_t *world,
+    lua_State *L,
+    int idx,
+    ecs_entity_t type,
+    void *ptr);
+
 /* Pushes the iterator onto the stack */
 FLECS_LUA_API
 ecs_iter_t *ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, bool copy);

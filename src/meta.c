@@ -295,11 +295,64 @@ void serialize_type(
     }
 }
 
-#ifdef NDEBUG
-    #define ecs_lua_dbg(fmt, ...)
-#else
-    #define ecs_lua_dbg(fmt, ...) //ecs_os_dbg(fmt, __VA_ARGS__)
-#endif
+static
+void update_type(
+    ecs_world_t *world,
+    const ecs_vector_t *ser,
+    const void *base,
+    lua_State *L,
+    int idx)
+{
+    ecs_assert(base != NULL, ECS_INVALID_PARAMETER, NULL);
+
+    ecs_type_op_t *ops = (ecs_type_op_t*)ecs_vector_first(ser, ecs_type_op_t);
+    int32_t count = ecs_vector_count(ser);
+
+    lua_pushvalue(L, idx);
+
+    int i, depth = 0;
+
+    for(i=0; i < count; i++)
+    {
+        ecs_type_op_t *op = &ops[i];
+
+        switch(op->kind)
+        {
+            case EcsOpHeader: break;
+            case EcsOpPush:
+            {
+                depth++;
+                if(depth > 1)
+                {
+                    ecs_assert(op->name != NULL, ECS_INVALID_PARAMETER, NULL);
+                    int t = lua_getfield(L, -1, op->name);
+                    if(t != LUA_TTABLE)
+                    {
+                        lua_pop(L, 1);
+                        lua_newtable(L);
+                        lua_pushvalue(L, -1);
+                        lua_setfield(L, -3, op->name);
+                    }
+                }
+                break;
+            }
+            case EcsOpPop:
+            {
+                if(depth > 1) lua_pop(L, 1);
+                depth--;
+                break;
+            }
+            default:
+            {
+                serialize_type_op(world, op, base, L);
+                if(op->name) lua_setfield(L, -2, op->name);
+                break;
+            }
+        }
+    }
+
+    lua_pop(L, 1);
+}
 
 static void deserialize_type(lua_State *L, int idx, ecs_meta_cursor_t *c)
 {
@@ -749,6 +802,18 @@ void ecs_lua_to_ptr(
     ecs_meta_cursor_t c = ecs_lua_cursor(L, world, type, ptr);
 
     deserialize_type(L, idx, &c);
+}
+
+void ecs_lua_update_type(
+    ecs_world_t *world,
+    lua_State *L,
+    int idx,
+    ecs_entity_t type,
+    void *ptr)
+{
+    const EcsMetaTypeSerializer *ser = get_serializer(L, world, type);
+
+    update_type(world, ser->ops, ptr, L, idx);
 }
 
 ecs_iter_t *ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, bool copy)

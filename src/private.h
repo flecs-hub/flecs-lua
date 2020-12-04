@@ -18,6 +18,12 @@ const int ecs_lua__types;
 #define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
 #define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
 
+#ifdef NDEBUG
+    #define ecs_lua_dbg(fmt, ...)
+#else
+    #define ecs_lua_dbg(fmt, ...) //ecs_os_dbg(fmt, __VA_ARGS__)
+#endif
+
 /* ecs */
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L);
 
