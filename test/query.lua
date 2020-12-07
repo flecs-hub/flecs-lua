@@ -5,6 +5,7 @@ ecs.progress_cb(function() ecs.log("progress()!") end)
 
 local Position = ecs.struct("Position", "{float x; float y;}")
 local Velocity = ecs.struct("Velocity", "{float x; float y;}")
+local Foo = ecs.struct("Foo", "{float z;}")
 local ents = ecs.bulk_new(10)
 
 for i, e in ipairs(ents) do
@@ -40,3 +41,23 @@ while ecs.query_next(it) do
 end
 
 assert(it.count == 10)
+
+q = ecs.query("Position, Velocity")
+
+q_count = 0
+for p, v, e in ecs.each(q) do
+    q_count = q_count + 1
+end
+
+print("each() count :" .. q_count)
+assert(q_count >= 10)
+
+--Empty query
+q = ecs.query("Foo")
+
+q_count = 0
+for p, v, e in ecs.each(q) do
+    q_count = q_count + 1
+end
+
+assert(q_count == 0)

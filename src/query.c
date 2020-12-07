@@ -103,6 +103,8 @@ static void each_reset_columns(ecs_lua_each_t *each)
 
     each->i = 0;
 
+    if(!it->count) return;
+
     int i;
     for(i=1; i <= it->column_count; i++, col++)
     {
@@ -183,12 +185,15 @@ int each_func(lua_State *L)
 {ecs_lua_dbg("ecs.each()");
     ecs_query_t *q = NULL;
     ecs_iter_t *it;
+    int iter_idx = 1;
 
     if(lua_type(L, 1) == LUA_TUSERDATA)
     {
         q = checkquery(L, 1);
         ecs_iter_t iter = ecs_query_iter(q);
+        ecs_query_next(&iter);
         it = ecs_iter_to_lua(&iter, L, true);
+        iter_idx = lua_gettop(L);
     }
     else it = ecs_lua__checkiter(L, 1);
 
@@ -210,7 +215,7 @@ int each_func(lua_State *L)
     lua_pushcclosure(L, next_func, it->column_count + 1);
 
     /* it */
-    lua_pushvalue(L, 1);
+    lua_pushvalue(L, iter_idx);
 
     lua_pushinteger(L, 1);
 
