@@ -21,6 +21,37 @@ end
 local sys_id = 0
 
 local function sys(it)
+    local count = 0
+    for p, v, e in ecs.each(it) do
+        count = count + 1
+        u.print_r(p)
+        assert(p.x == count * 10)
+        assert(p.y == count * 11)
+        assert(v.x == count * 12)
+        assert(v.y == count * 13)
+
+        p.x = p.x + 1
+        p.y = p.y + 2
+        v.x = v.x + 3
+        v.y = v.y + 4
+    end
+
+    --verify, restore values
+    count = 0
+    for p, v, e in ecs.each(it) do
+        count = count + 1
+        u.print_r(p)
+        assert(p.x == count * 10 + 1)
+        assert(p.y == count * 11 + 2)
+        assert(v.x == count * 12 + 3)
+        assert(v.y == count * 13 + 4)
+
+        p.x = p.x - 1
+        p.y = p.y - 2
+        v.x = v.x - 3
+        v.y = v.y - 4
+    end
+
     local p, v = ecs.columns(it)
 
     assert(ecs.is_owned(it, 1))

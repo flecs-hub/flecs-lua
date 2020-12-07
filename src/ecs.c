@@ -131,6 +131,7 @@ int subquery_new(lua_State *L);
 int query_iter(lua_State *L);
 int query_next(lua_State *L);
 int query_changed(lua_State *L);
+int each_func(lua_State *L);
 
 /* Snapshot */
 int snapshot_take(lua_State *L);
@@ -273,6 +274,7 @@ static const luaL_Reg ecs_lib[] =
     { "query_iter", query_iter },
     { "query_next", query_next },
     { "query_changed", query_changed },
+    { "each", each_func },
 
     { "system", new_system },
     { "trigger", new_trigger },

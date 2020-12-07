@@ -444,11 +444,6 @@ end
 function ecs.column_entity(it, column)
 end
 
----Create generic for loop iterator for a query/iterator
----@param q_it ecs_query_t|ecs_iter_t
-function ecs.each(q_it)
-end
-
 ---Create a filter iterator
 ---@param filter ecs_filter_t
 function ecs.filter_iter(filter)
@@ -489,6 +484,13 @@ end
 ---@param query ecs_query_t
 ---@return boolean
 function ecs.query_changed(query)
+end
+
+---Create generic for loop iterator for a query/iterator
+---Jumping out of the loop will leave the last iteration's
+---components unmodified.
+---@param q_it ecs_query_t|ecs_iter_t
+function ecs.each(q_it)
 end
 
 ---Create a system
