@@ -74,6 +74,8 @@ assert(not pcall(function () ecs.dim_type(400, invalid_type) end))
 ecs.struct("LuaPosition", "{float x; float y; float z;}")
 ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")
 
+assert(not pcall(function() ecs.struct("LuaPosition", "{float x; float y; float z;}") end))
+
 local alias = ecs.alias("LuaStruct", "LuaAlias")
 assert(ecs.name(alias) == "LuaAlias")
 ecs.add(alias, type)
@@ -81,9 +83,13 @@ ecs.add(alias, lua_test_comp)
 assert(ecs.has(alias, lua_test_comp))
 assert(not pcall(function() ecs.alias("error", "newname") end))
 assert(not pcall(function() ecs.alias("name_only", "newname") end))
+assert(not pcall(function() ecs.alias("LuaStruct", "LuaAlias") end))
+assert(not pcall(function() ecs.alias("name_only", "LuaAlias") end))
 
 local arr = ecs.array("LuaArray", "LuaStruct", 4)
 assert(ecs.name(arr) == "LuaArray")
+
+assert(not pcall(function() ecs.array("LuaArray", "LuaStruct", 4) end))
 
 assert(not ecs.has(id_name_comp, arr))
 

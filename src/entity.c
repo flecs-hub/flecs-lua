@@ -591,6 +591,8 @@ int new_array(lua_State *L)
 
     if(count < 0 || count > INT32_MAX) luaL_error(L, "element count out of range (%I)", count);
 
+    if(ecs_lookup_fullpath(w, name) || ecs_lookup(w, name)) luaL_argerror(L, 1, "component already exists");
+
     ecs_strbuf_t buf = ECS_STRBUF_INIT;
 
     ecs_strbuf_append(&buf, "(%s,%lld)", element, count);
@@ -625,6 +627,8 @@ int new_struct(lua_State *L)
 
     ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
 
+    if(ecs_lookup_fullpath(w, name) || ecs_lookup(w, name)) luaL_argerror(L, 1, "component already exists");
+
     ecs_entity_t component = ecs_new_component_id(w);
 
     ecs_set(w, component, EcsName, {.alloc_value = (char*)name});
@@ -651,11 +655,15 @@ int new_alias(lua_State *L)
 
     ecs_entity_t type_entity = ecs_lookup_fullpath(w, name);
 
-    if(!type_entity) return luaL_argerror(L, 1, "unknown name");
+    if(!type_entity) return luaL_argerror(L, 1, "component does not exist");
+
+    if(!ecs_has(w, type_entity, EcsComponent)) return luaL_argerror(L, 1, "not a component");
 
     const EcsMetaType *p = ecs_get(w, type_entity, EcsMetaType);
 
     if(!p) return luaL_argerror(L, 1, "missing descriptor");
+
+    if(ecs_lookup_fullpath(w, alias) || ecs_lookup(w, alias)) return luaL_argerror(L, 2, "alias already exists");
 
     EcsMetaType meta = *p;
 
