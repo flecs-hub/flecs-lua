@@ -1,5 +1,23 @@
 #include "private.h"
 
+typedef struct ecs_lua_col_t
+{
+    ecs_entity_t type;
+    size_t stride;
+    bool readback, update;
+    void *ptr;
+    const EcsMetaTypeSerializer *ser;
+    ecs_meta_cursor_t *cursor;
+}ecs_lua_col_t;
+
+typedef struct ecs_lua_each_t
+{
+    ecs_iter_t *it;
+    int32_t i;
+    bool from_query, read_prev;
+    ecs_lua_col_t cols[];
+}ecs_lua_each_t;
+
 static
 void serialize_type(
     ecs_world_t *world,
@@ -903,4 +921,132 @@ bool ecs_lua_query_next(lua_State *L, int idx)
     ecs_lua_iter_update(L, idx, it);
 
     return true;
+}
+
+static void each_reset_columns(lua_State *L, ecs_lua_each_t *each)
+{
+    ecs_iter_t *it = each->it;
+    ecs_lua_col_t *col = each->cols;
+
+    each->i = 0;
+
+    if(!it->count) return;
+
+    int i;
+    for(i=1; i <= it->column_count; i++, col++)
+    {
+        col->type = ecs_get_typeid(it->world, ecs_column_entity(it, i));
+        col->stride = ecs_column_size(it, i);
+        col->ptr = ecs_column_w_size(it, 0, i);
+        col->ser = get_serializer(L, it->world, col->type);
+        col->cursor = ecs_lua_cursor(L, it->world, col->type, col->ptr);
+
+        if(it->query && ecs_is_readonly(it, i)) col->readback = false;
+        else col->readback = true;
+
+        col->update = true;
+    }
+}
+
+static int next_func(lua_State *L)
+{
+    ecs_lua_each_t *each = lua_touserdata(L, lua_upvalueindex(1));
+    ecs_lua_col_t *col = each->cols;
+    ecs_iter_t *it = each->it;
+    int idx, j, i = each->i;
+    bool end = false;
+    void *ptr;
+
+    ecs_lua_dbg("each() i: %d", i);
+
+    if(!each->read_prev) goto skip_readback;
+
+    for(j=0; j < it->column_count; j++, col++)
+    {
+        if(!col->readback) continue;
+
+        ecs_lua_dbg("each() readback: %d", i-1);
+
+        idx = lua_upvalueindex(j+2);
+        ptr = ECS_OFFSET(col->ptr, col->stride * (i - 1));
+
+        meta_reset(col->cursor, ptr);
+        deserialize_type(L, idx, col->cursor);
+    }
+
+    col = each->cols;
+
+skip_readback:
+
+    each->read_prev = true;
+
+    if(i == it->count)
+    {
+        if(each->from_query)
+        {
+            if(ecs_lua_query_next(L, 1)) each_reset_columns(L, each);
+            else end = true;
+        }
+        else end = true;
+    }
+
+    if(end) return 0;
+
+    for(j=0; j < it->column_count; j++, col++)
+    {// optimization: shared components should be read back at the end
+        if(!col->update) continue;
+
+        idx = lua_upvalueindex(j+2);
+        ptr = ECS_OFFSET(col->ptr, col->stride * i);
+
+        lua_pushvalue(L, idx);
+        update_type(it->world, col->ser->ops, ptr, L, idx);
+    }
+
+    lua_pushinteger(L, it->entities[i]);
+
+    each->i++;
+
+    return it->column_count + 1;
+}
+
+int each_func(lua_State *L)
+{ecs_lua_dbg("ecs.each()");
+    ecs_query_t *q = NULL;
+    ecs_iter_t *it;
+    int iter_idx = 1;
+
+    if(lua_type(L, 1) == LUA_TUSERDATA)
+    {
+        q = checkquery(L, 1);
+        ecs_iter_t iter = ecs_query_iter(q);
+        ecs_query_next(&iter);
+        it = ecs_iter_to_lua(&iter, L, true);
+        iter_idx = lua_gettop(L);
+    }
+    else it = ecs_lua__checkiter(L, 1);
+
+    size_t size = sizeof(ecs_lua_each_t) + it->column_count * sizeof(ecs_lua_col_t);
+    ecs_lua_each_t *each = lua_newuserdata(L, size);
+
+    each->it = it;
+    each->from_query = q ? true : false;
+    each->read_prev = false;
+
+    each_reset_columns(L, each);
+
+    int i;
+    for(i=0; i < it->column_count; i++)
+    {
+        lua_newtable(L);
+    }
+
+    lua_pushcclosure(L, next_func, it->column_count + 1);
+
+    /* it */
+    lua_pushvalue(L, iter_idx);
+
+    lua_pushinteger(L, 1);
+
+    return 3;
 }
