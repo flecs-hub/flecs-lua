@@ -121,9 +121,9 @@ static void each_reset_columns(ecs_lua_each_t *each)
 
 static int next_func(lua_State *L)
 {
-    ecs_iter_t *it = ecs_lua__checkiter(L, 1);
     ecs_lua_each_t *each = lua_touserdata(L, lua_upvalueindex(1));
     ecs_lua_col_t *col = each->cols;
+    ecs_iter_t *it = each->it;
     int idx, j, i = each->i;
     bool end = false;
     void *ptr;
@@ -168,15 +168,14 @@ skip_readback:
 
         idx = lua_upvalueindex(j+2);
         ptr = ECS_OFFSET(col->ptr, col->stride * i);
-//        char *n = lua_typename(L, lua_type(L, idx));
 
         lua_pushvalue(L, idx);
         ecs_lua_update_type(it->world, L, idx, col->type, ptr);
     }
 
-    each->i++;
+    lua_pushinteger(L, it->entities[i]);
 
-    lua_pushinteger(L, it->entities[i-1]);
+    each->i++;
 
     return it->column_count + 1;
 }
