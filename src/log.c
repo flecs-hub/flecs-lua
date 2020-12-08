@@ -57,7 +57,7 @@ int print_type(lua_State *L, int type)
             break;
     }
 
-    ecs_strbuf_reset(&buf);
+    ecs_os_free(str);
 
     return 0;
 }
