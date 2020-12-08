@@ -6,6 +6,7 @@ ecs.progress_cb(function() ecs.log("progress()!") end)
 local Position = ecs.struct("Position", "{float x; float y;}")
 local Velocity = ecs.struct("Velocity", "{float x; float y;}")
 local Foo = ecs.struct("Foo", "{float z;}")
+local FooBar = ecs.struct("FooBar", "{Foo bar; float z;}")
 local ents = ecs.bulk_new(10)
 
 for i, e in ipairs(ents) do
@@ -42,6 +43,7 @@ end
 
 assert(it.count == 10)
 
+
 q = ecs.query("Position, Velocity")
 
 q_count = 0
@@ -52,6 +54,7 @@ end
 print("each() count :" .. q_count)
 assert(q_count >= 10)
 
+
 --Empty query
 q = ecs.query("Foo")
 
@@ -61,3 +64,22 @@ for p, v, e in ecs.each(q) do
 end
 
 assert(q_count == 0)
+
+
+ecs.bulk_new(FooBar, 5)
+
+q = ecs.query("FooBar")
+
+q_count = 0
+
+for foo, e in ecs.each(q) do
+    q_count = q_count + 1
+
+    --make sure missing tables are recreated
+    assert(foo.bar ~= nil)
+
+    foo.bar = nil
+
+end
+
+assert(q_count == 5)
