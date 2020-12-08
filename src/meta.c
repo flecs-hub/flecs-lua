@@ -726,35 +726,34 @@ static void meta_reset(ecs_meta_cursor_t *cursor, void *base)
     cursor->scope[0].vector = NULL;
 }
 
-static ecs_meta_cursor_t ecs_lua_cursor(lua_State *L, ecs_world_t *world, ecs_entity_t type, void *base)
+static ecs_meta_cursor_t *ecs_lua_cursor(lua_State *L, ecs_world_t *world, ecs_entity_t type, void *base)
 {
     int ret = lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_CURSORS);
     ecs_assert(ret == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
     ret = lua_rawgeti(L, -1, type);
 
-    ecs_meta_cursor_t c;
+    ecs_meta_cursor_t *cursor;
 
     if(ret == LUA_TUSERDATA)
     {
-        ecs_meta_cursor_t *ptr = lua_touserdata(L, -1);
+        cursor = lua_touserdata(L, -1);
         lua_pop(L, 2);
 
-        c = *ptr;
-        c.scope[0].base = base;
+        meta_reset(cursor, base);
     }
     else
     {
         lua_pop(L, 1);
-        ecs_meta_cursor_t *ptr = lua_newuserdata(L, sizeof(ecs_meta_cursor_t));
+        cursor = lua_newuserdata(L, sizeof(ecs_meta_cursor_t));
         lua_rawseti(L, -2, type);
         lua_pop(L, 1);
 
-        c = ecs_meta_cursor(world, type, base);
-        memcpy(ptr, &c, sizeof(ecs_meta_cursor_t));
+        ecs_meta_cursor_t t = ecs_meta_cursor(world, type, base);
+        memcpy(cursor, &t, sizeof(ecs_meta_cursor_t));
     }
 
-    return c;
+    return cursor;
 }
 
 static
@@ -767,15 +766,15 @@ void deserialize_column(
     size_t stride,
     int32_t count)
 {
-    ecs_meta_cursor_t c = ecs_lua_cursor(L, world, type, base);
+    ecs_meta_cursor_t *c = ecs_lua_cursor(L, world, type, base);
 
     int j;
     for(j=0; j < count; j++)
     {
-        meta_reset(&c, (char*)base + j * stride);
+        meta_reset(c, (char*)base + j * stride);
 
         lua_rawgeti(L, idx, j + 1); /* columns[i+1][j+1] */
-        deserialize_type(L, -1, &c);
+        deserialize_type(L, -1, c);
 
         lua_pop(L, 1);
     }
@@ -799,9 +798,9 @@ void ecs_lua_to_ptr(
     ecs_entity_t type,
     void *ptr)
 {
-    ecs_meta_cursor_t c = ecs_lua_cursor(L, world, type, ptr);
+    ecs_meta_cursor_t *c = ecs_lua_cursor(L, world, type, ptr);
 
-    deserialize_type(L, idx, &c);
+    deserialize_type(L, idx, c);
 }
 
 void ecs_lua_update_type(
