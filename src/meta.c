@@ -97,6 +97,17 @@ void serialize_primitive(
     }
 }
 
+static inline
+void serialize_int32(
+    ecs_world_t *world,
+    ecs_type_op_t *op,
+    const void *base,
+    lua_State *L)
+{
+    int32_t value = *(int32_t*)base;
+    lua_pushinteger(L, value);
+}
+
 static
 void serialize_enum(
     ecs_world_t *world,
@@ -248,10 +259,10 @@ void serialize_type_op(
         serialize_primitive(world, op, ECS_OFFSET(base, op->offset), L);
         break;
     case EcsOpEnum:
-        serialize_enum(world, op, ECS_OFFSET(base, op->offset), L);
+        serialize_int32(world, op, ECS_OFFSET(base, op->offset), L);
         break;
     case EcsOpBitmask:
-        serialize_bitmask(world, op, ECS_OFFSET(base, op->offset), L);
+        serialize_int32(world, op, ECS_OFFSET(base, op->offset), L);
         break;
     case EcsOpArray:
         serialize_array(world, op, ECS_OFFSET(base, op->offset), L);
