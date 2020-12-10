@@ -1,5 +1,7 @@
 #include "private.h"
 
+static ECS_COMPONENT_DECLARE(EcsLuaHost);
+
 static const int ecs_lua__key;
 
 #define ECS_LUA_CONTEXT (&ecs_lua__key)
@@ -424,21 +426,30 @@ static void ecs_lua_exit(lua_State *L)
     if( !(ctx->internal & ECS_LUA__KEEPOPEN) ) lua_close(L);
 }
 
-int ecs_lua_set_state(ecs_world_t *w, lua_State *L)
+lua_State *ecs_lua_get_state(ecs_world_t *world)
 {
-    ecs_entity_t ecs_typeid(EcsLuaHost) = ecs_lookup_fullpath(w, "flecs.lua.LuaHost");
-    ecs_assert(ecs_typeid(EcsLuaHost) != 0, ECS_INTERNAL_ERROR, NULL);
+    const EcsLuaHost *host = ecs_singleton_get(world, EcsLuaHost);
 
-    EcsLuaHost *host = ecs_singleton_get_mut(w, EcsLuaHost);
+    ecs_assert(host != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(host->L != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    return host->L;
+}
+
+int ecs_lua_set_state(ecs_world_t *world, lua_State *L)
+{
+    ecs_assert(L != NULL, ECS_INVALID_PARAMETER, NULL);
+
+    EcsLuaHost *host = ecs_singleton_get_mut(world, EcsLuaHost);
 
     ecs_lua_exit(host->L);
 
-    ecs_lua_ctx param = { .L = L, .world = w, .internal = ECS_LUA__KEEPOPEN };
+    ecs_lua_ctx param = { .L = L, .world = world, .internal = ECS_LUA__KEEPOPEN };
 
     host->L = L;
     host->ctx = ctx_init(param);
 
-    ecs_singleton_modified(w, EcsLuaHost);
+    ecs_singleton_modified(world, EcsLuaHost);
 
     return 0;
 }
@@ -470,7 +481,7 @@ void FlecsLuaImport(ecs_world_t *w)
 
     ecs_set_name_prefix(w, "Ecs");
 
-    ECS_COMPONENT(w, EcsLuaHost);
+    ECS_COMPONENT_DEFINE(w, EcsLuaHost);
 
     ECS_META(w, EcsLuaWorldInfo);
     ECS_META(w, EcsLuaWorldStats);

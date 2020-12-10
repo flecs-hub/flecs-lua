@@ -294,12 +294,12 @@ int main(int argc, char **argv)
     ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g.s);
     ecs_set_ptr(w, ecs_typeid(lua_test_struct), lua_test_struct, &g.s);
 
-    //const EcsLuaHost *host = ecs_singleton_get(w, EcsLuaHost);
-    //lua_State *L = host->L;
-
     lua_State *L = new_test_state();
     ecs_lua_set_state(w, L);
     ecs_assert(custom_alloc, ECS_INTERNAL_ERROR, NULL);
+
+    /* Just to test the function, the pointer doesn't change */
+    L = ecs_lua_get_state(w);
 
     init_test_state(L);
 
