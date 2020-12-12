@@ -309,8 +309,10 @@ function ecs.get_mut(entity, component)
 end
 
 ---Signal that a component has been modified
----@param t ecs_mutable_t
-function ecs.modified(t)
+---@param entity integer
+---@param component integer
+---@param value table
+function ecs.modified(entity, component, value)
 end
 
 ---Set the value of a component,
@@ -351,8 +353,9 @@ function ecs.singleton_get_mut(component)
 end
 
 ---Signal that a singleton component has been modified
----@param component ecs_mutable_t
-function ecs.singleton_modified(component)
+---@param component integer
+---@param value table
+function ecs.singleton_modified(component, value)
 end
 
 ---Set the value of a singleton component

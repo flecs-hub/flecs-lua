@@ -44,7 +44,7 @@ test_struct.f64 = F64_MAX
 test_struct.enumeration = INT32_MAX
 test_struct.bitmask = INT32_MAX
 
-ecs.modified(test_struct)
+ecs.modified(ecs.Singleton, tstruct, test_struct)
 test_struct = nil
 test_struct = ecs.get_mut(ecs.Singleton, tstruct)
 
@@ -77,7 +77,7 @@ test_struct.i64 = INT64_MIN
 test_struct.f32 = F32_MIN
 test_struct.f64 = F64_MIN
 
-ecs.modified(test_struct)
+ecs.modified(ecs.Singleton, tstruct, test_struct)
 test_struct = nil
 test_struct = ecs.get_mut(ecs.Singleton, tstruct)
 

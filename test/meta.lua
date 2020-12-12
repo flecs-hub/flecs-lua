@@ -44,7 +44,7 @@ test_struct.enumeration = 500
 test_struct.bitmask = (1 | 2 | 3)
 test_struct.comp2.comp.foo = 1048333
 
-ecs.singleton_modified(test_struct)
+ecs.singleton_modified(tstruct, test_struct)
 test_struct = nil
 test_struct = ecs.singleton_get(tstruct)
 
@@ -62,7 +62,7 @@ test_struct = ecs.singleton_get_mut(tstruct)
 
 --Free string by setting it to 0
 test_struct.str = 0
-ecs.singleton_modified(test_struct)
+ecs.singleton_modified(tstruct, test_struct)
 test_struct = ecs.singleton_get(tstruct)
 assert(test_struct.str == nil) --NULL strings are not serialized
 
@@ -72,8 +72,6 @@ assert(ecs.singleton_set(tstruct, { i64 = 32}))
 test_struct = ecs.singleton_get(tstruct)
 assert(test_struct.i64 == 32)
 
-local v = { foo = "bar"}
-assert(not pcall(function () ecs.modified(v) end))
 
 local MetaType = ecs.lookup_fullpath("flecs.meta.MetaType")
 local MetaTypeSerializer = ecs.lookup_fullpath("flecs.meta.EcsMetaTypeSerializer")
