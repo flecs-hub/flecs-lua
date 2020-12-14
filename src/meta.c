@@ -481,17 +481,9 @@ static void deserialize_type(lua_State *L, int idx, ecs_meta_cursor_t *c)
                 ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
                 break;
             }
-            case LUA_TNIL:
-            {
-                ecs_lua_dbg("  set_null");
-                ret = ecs_meta_set_null(c);
-
-                ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
-                break;
-            }
             default:
             {
-                if(vtype == LUA_TSTRING)
+                if(ktype == LUA_TSTRING)
                     luaL_error(L, "invalid type for field '%s' (got %s)", lua_tostring(L, -2), lua_typename(L, vtype));
                 else
                     luaL_error(L, "invalid type at index [%d] (got %s)", lua_tointeger(L, -2), lua_typename(L, vtype));
