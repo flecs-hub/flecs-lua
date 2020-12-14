@@ -71,7 +71,6 @@ local ecs = require "ecs"
 local m = {}
 
 function m.system(it)
-    local p = ecs.column(it, 1)
 
     for p, e in ecs.each(it) do
         print("entity: " .. e)
