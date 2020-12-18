@@ -870,6 +870,7 @@ ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
         if(it->query && ecs_is_readonly(it, i)) continue;
 
         int type = lua_rawgeti(L, -1, i); /* columns[i] */
+        bool is_owned = ecs_is_owned(it, i);
 
         if(type == LUA_TNIL)
         {
@@ -878,13 +879,13 @@ ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
             continue;
         }
 
-        ecs_assert(it->count == lua_rawlen(L, -1), ECS_INTERNAL_ERROR, NULL);
+        if(is_owned) { ecs_assert(it->count == lua_rawlen(L, -1), ECS_INTERNAL_ERROR, NULL); }
 
         int32_t count = it->count;
         ecs_entity_t column_entity = ecs_get_typeid(world, ecs_column_entity(it, i));
         void *base = ecs_column_w_size(it, 0, i);
 
-        if(!ecs_is_owned(it, i)) ecs_lua_to_ptr(world, L, -1, column_entity, base);
+        if(!is_owned) ecs_lua_to_ptr(world, L, -1, column_entity, base);
         else deserialize_column(world, L, -1, column_entity, base, ecs_column_size(it, i), count);
 
         lua_pop(L, 1); /* columns[i] */
@@ -940,6 +941,8 @@ static void each_reset_columns(lua_State *L, ecs_lua_each_t *each)
         col->ptr = ecs_column_w_size(it, 0, i);
         col->ser = get_serializer(L, it->world, col->type);
         col->cursor = ecs_lua_cursor(L, it->world, col->type, col->ptr);
+
+        if(!ecs_is_owned(it, 1)) col->stride = 0;
 
         if(it->query && ecs_is_readonly(it, i)) col->readback = false;
         else col->readback = true;
