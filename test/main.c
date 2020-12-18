@@ -240,14 +240,6 @@ ECS_COPY(lua_test_struct, dst, src,
     dst->str = t;
 });
 
-ECS_MOVE(lua_test_struct, dst, src,
-{
-    ecs_os_free(dst->str);
-
-    memcpy(dst, src, sizeof(lua_test_struct));
-
-    src->str = NULL;
-});
 
 int main(int argc, char **argv)
 {
@@ -282,7 +274,6 @@ int main(int argc, char **argv)
         .ctor = ecs_ctor(lua_test_struct),
         .dtor = ecs_dtor(lua_test_struct),
         .copy = ecs_copy(lua_test_struct),
-        .move = ecs_move(lua_test_struct)
     });
 
 
