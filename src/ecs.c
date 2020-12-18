@@ -88,6 +88,7 @@ int get_trait(lua_State *L);
 int get_trait_tag(lua_State *L);
 int get_case(lua_State *L);
 
+int new_enum(lua_State *L);
 int new_array(lua_State *L);
 int new_struct(lua_State *L);
 int new_alias(lua_State *L);
@@ -238,6 +239,7 @@ static const luaL_Reg ecs_lib[] =
     { "get_trait_tag", get_trait_tag },
     { "get_case", get_case },
 
+    { "enum", new_enum },
     { "array", new_array },
     { "struct", new_struct },
     { "alias", new_alias },

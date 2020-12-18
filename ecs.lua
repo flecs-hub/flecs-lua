@@ -272,6 +272,13 @@ end
 function ecs.get_case(entity, sw)
 end
 
+---Create a meta enum component
+---@param name string name
+---@param descriptor string @format: "{name, ...}"
+---@return integer @entity
+function ecs.enum(name, descriptor)
+end
+
 ---Create a meta array component
 ---@param name string name
 ---@param type string

@@ -581,6 +581,38 @@ int get_case(lua_State *L)
     return 1;
 }
 
+int new_enum(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_get_world(L);
+
+    const char *name = luaL_checkstring(L, 1);
+    const char *desc = luaL_checkstring(L, 2);
+
+    ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
+
+    if(ecs_lookup_fullpath(w, name) || ecs_lookup(w, name)) luaL_argerror(L, 1, "component already exists");
+
+    ecs_entity_t component = ecs_new_component_id(w);
+
+    ecs_set(w, component, EcsName, {.alloc_value = (char*)name});
+
+    ecs_set(w, component, EcsMetaType,
+    {
+        .kind = EcsEnumType,
+        .size = sizeof(int),
+        .alignment = ECS_ALIGNOF(int),
+        .descriptor = desc
+    });
+
+    const EcsMetaType *meta = ecs_get(w, component, EcsMetaType);
+
+    ecs_new_component(w, component, NULL, meta->size, meta->alignment);
+
+    lua_pushinteger(L, component);
+
+    return 1;
+}
+
 int new_array(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
