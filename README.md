@@ -32,8 +32,7 @@ Scripts are hosted by the `FlecsLua` module for the world it's imported into.
 ECS_IMPORT(world, FlecsLua);
 
 /* Get a pointer to the VM */
-const EcsLuaHost *host = ecs_singleton_get(world, EcsLuaHost);
-lua_State *L = host->L;
+lua_State *L = ecs_lua_get_state(ecs_world_t *world);
 
 /* Execute init script, the world for all API calls is implicit */
 luaL_dofile(L, argv[1]);
