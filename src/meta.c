@@ -532,14 +532,12 @@ static const EcsMetaTypeSerializer *get_serializer(lua_State *L, ecs_world_t *wo
     ret = lua_rawgeti(L, -1, type);
 
     ecs_ref_t *ref;
-    ecs_entity_t MetaTypeSerializer;
 
     if(ret != LUA_TNIL)
     {
         ecs_assert(ret == LUA_TUSERDATA, ECS_INTERNAL_ERROR, NULL);
 
         ref = lua_touserdata(L, -1);
-        MetaTypeSerializer = ref->component;
 
         lua_pop(L, 2);
     }
@@ -549,13 +547,12 @@ static const EcsMetaTypeSerializer *get_serializer(lua_State *L, ecs_world_t *wo
         ref = lua_newuserdata(L, sizeof(ecs_ref_t));
         lua_rawseti(L, -2, type);
 
-        MetaTypeSerializer = get_serializer_id(L);
-        *ref = (ecs_ref_t){ .entity = type, .component = MetaTypeSerializer };
+        *ref = (ecs_ref_t){ .entity = type, .component = get_serializer_id(L) };
 
         lua_pop(L, 1); /* -types */
     }
 
-    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, ref, type, MetaTypeSerializer);
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, ref, 0, 0);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     return ser;
