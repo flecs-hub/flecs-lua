@@ -78,7 +78,8 @@ local MetaTypeSerializer = ecs.lookup_fullpath("flecs.meta.EcsMetaTypeSerializer
 local ecs_type_op = ecs.lookup_fullpath("flecs.meta.ecs_type_op_t")
 
 local LuaEnum = ecs.enum("LuaEnum", "{ Red, Green, Blue = 4 }")
-local TestStruct = ecs.struct("TestStruct", "{ int32_t x; LuaEnum enum; }")
+local LuaBitmask = ecs.bitmask("LuaBitmask", "{ Bacon = 1, Lettuce = 2, Tomato = 4 }")
+local TestStruct = ecs.struct("TestStruct", "{ int32_t x; LuaEnum enum; LuaBitmask mask; }")
 
 local LuaPosition = ecs.struct("LuaPosition", "{float x; float y; float z;}")
 local LuaStruct = ecs.struct("LuaStruct", "{ uint8_t blah[6]; LuaPosition position;}")
