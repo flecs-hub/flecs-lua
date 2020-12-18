@@ -62,7 +62,17 @@ int query_iter(lua_State *L)
 
 int query_next(lua_State *L)
 {
-    int b = ecs_lua_query_next(L, 1);
+    ecs_iter_t *it = ecs_lua_to_iter(L, 1);
+    int b;
+
+    if(lua_gettop(L) > 1)
+    {
+        ecs_filter_t filter = checkfilter(L, 2);
+        b = ecs_query_next_w_filter(it, &filter);
+    }
+    else b = ecs_query_next(it);
+
+    if(b) ecs_lua_iter_update(L, 1, it);
 
     lua_pushboolean(L, b);
 

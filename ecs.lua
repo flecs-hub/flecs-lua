@@ -272,14 +272,21 @@ end
 function ecs.get_case(entity, sw)
 end
 
----Create a meta enum component
+---Create a bitmask component
+---@param name string name
+---@param descriptor string @format: "{name = constant, ...}"
+---@return integer @entity
+function ecs.bitmask(name, descriptor)
+end
+
+---Create an enum component
 ---@param name string name
 ---@param descriptor string @format: "{name, ...}"
 ---@return integer @entity
 function ecs.enum(name, descriptor)
 end
 
----Create a meta array component
+---Create an array component
 ---@param name string name
 ---@param type string
 ---@param count integer
@@ -287,14 +294,14 @@ end
 function ecs.array(name, type, count)
 end
 
----Create a meta struct component
+---Create a struct component
 ---@param name string name
 ---@param descriptor string @format: "{type member; ...}"
 ---@return integer @entity
 function ecs.struct(name, descriptor)
 end
 
----Create an alias for a meta type
+---Clone a component with a new name
 ---@param meta_type string @name
 ---@param alias string
 ---@return integer @entity
@@ -486,8 +493,9 @@ end
 
 ---Progress the query iterator
 ---@param it ecs_iter_t
+---@param filter ecs_filter_t @optional
 ---@return boolean
-function ecs.query_next(it)
+function ecs.query_next(it, filter)
 end
 
 ---Check whether the query data changed since last iteration
