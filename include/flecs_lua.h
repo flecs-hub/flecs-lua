@@ -57,7 +57,7 @@ void ecs_lua_to_ptr(
 
 /* Update the value at the given index */
 FLECS_LUA_API
-void ecs_lua_update_type(
+void ecs_lua_type_update(
     ecs_world_t *world,
     lua_State *L,
     int idx,

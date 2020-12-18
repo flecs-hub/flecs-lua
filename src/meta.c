@@ -821,7 +821,7 @@ void ecs_lua_to_ptr(
     deserialize_type(L, idx, c);
 }
 
-void ecs_lua_update_type(
+void ecs_lua_type_update(
     ecs_world_t *world,
     lua_State *L,
     int idx,
