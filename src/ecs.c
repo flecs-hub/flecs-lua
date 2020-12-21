@@ -88,6 +88,8 @@ int set_trait(lua_State *L);
 int set_trait_tag(lua_State *L);
 int get_trait(lua_State *L);
 int get_trait_tag(lua_State *L);
+int add_switch(lua_State *L);
+int remove_switch(lua_State *L);
 int get_case(lua_State *L);
 int add_case(lua_State *L);
 int remove_case(lua_State *L);
@@ -244,6 +246,8 @@ static const luaL_Reg ecs_lib[] =
     { "set_trait_tag", set_trait_tag },
     { "get_trait", get_trait },
     { "get_trait_tag", get_trait_tag },
+    { "add_switch", add_switch },
+    { "remove_switch", remove_switch },
     { "get_case", get_case },
     { "add_case", add_case },
     { "remove_case", remove_case },

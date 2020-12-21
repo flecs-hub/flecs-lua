@@ -589,6 +589,30 @@ int get_trait_tag(lua_State *L)
     return 1;
 }
 
+int add_switch(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t sw = luaL_checkinteger(L, 2);
+
+    ecs_add_entity(w, e, ECS_SWITCH | sw);
+
+    return 0;
+}
+
+int remove_switch(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t sw = luaL_checkinteger(L, 2);
+
+    ecs_remove_entity(w, e, ECS_SWITCH | sw);
+
+    return 0;
+}
+
 int get_case(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);

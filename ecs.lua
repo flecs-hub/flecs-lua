@@ -282,6 +282,18 @@ end
 function ecs.get_case(entity, sw)
 end
 
+---Add switch to an entity
+---@param entity integer
+---@param sw integer
+function ecs.add_switch(entity, sw)
+end
+
+---Remove switch from an entity
+---@param entity integer
+---@param sw integer
+function ecs.remove_switch(entity, sw)
+end
+
 ---Add case to an entity
 ---@param entity integer
 ---@param sw integer
