@@ -20,7 +20,7 @@ int query_gc(lua_State *L)
 
 int query_new(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *sig = luaL_checkstring(L, 1);
     ecs_query_t *query = ecs_query_new(w, sig);
@@ -35,7 +35,7 @@ int query_new(lua_State *L)
 
 int subquery_new(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_query_t *parent = checkquery(L, 1);
     const char *sig = luaL_checkstring(L, 2);

@@ -3,7 +3,7 @@
 
 int set_timeout(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t timer = luaL_checkinteger(L, 1);
     lua_Number timeout = luaL_checknumber(L, 2);
@@ -17,7 +17,7 @@ int set_timeout(lua_State *L)
 
 int get_timeout(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t timer = luaL_checkinteger(L, 1);
 
@@ -30,7 +30,7 @@ int get_timeout(lua_State *L)
 
 int set_interval(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t timer = luaL_checkinteger(L, 1);
     lua_Number interval = luaL_checknumber(L, 2);
@@ -44,7 +44,7 @@ int set_interval(lua_State *L)
 
 int get_interval(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t timer = luaL_checkinteger(L, 1);
 
@@ -57,7 +57,7 @@ int get_interval(lua_State *L)
 
 int start_timer(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t timer = luaL_checkinteger(L, 1);
 
@@ -68,7 +68,7 @@ int start_timer(lua_State *L)
 
 int stop_timer(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t timer = luaL_checkinteger(L, 1);
 
@@ -79,7 +79,7 @@ int stop_timer(lua_State *L)
 
 int set_rate_filter(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t filter = luaL_checkinteger(L, 1);
     lua_Integer rate = luaL_checkinteger(L, 2);
@@ -94,7 +94,7 @@ int set_rate_filter(lua_State *L)
 
 int set_tick_source(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t system = luaL_checkinteger(L, 1);
     ecs_entity_t source = luaL_checkinteger(L, 2);

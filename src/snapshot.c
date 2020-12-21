@@ -18,7 +18,7 @@ int snapshot_gc(lua_State *L)
 
 int snapshot_take(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_iter_t *it;
     ecs_snapshot_t *snapshot;
@@ -41,7 +41,7 @@ int snapshot_take(lua_State *L)
 
 int snapshot_restore(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
     ecs_snapshot_t *snapshot = checksnapshot(L, 1);
 
     ecs_snapshot_restore(w, snapshot);

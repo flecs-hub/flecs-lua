@@ -121,7 +121,7 @@ int new_trigger(lua_State *L)
 
 int run_system(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t system = luaL_checkinteger(L, 1);
     lua_Number delta_time = luaL_checknumber(L, 2);
@@ -144,7 +144,7 @@ int run_system(lua_State *L)
 
 int set_system_context(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t system = luaL_checkinteger(L, 1);
     if(lua_gettop(L) < 2) lua_pushnil(L);

@@ -140,7 +140,7 @@ char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_
 
 int emmy_class(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t type = luaL_checkinteger(L, 1);
     bool b = false;

@@ -6,7 +6,7 @@ static int ecs_lua__name_prefix;
 
 int get_child_count(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     lua_Integer e = luaL_checkinteger(L, 1);
 
@@ -19,7 +19,7 @@ int get_child_count(lua_State *L)
 
 int scope_iter(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t parent = luaL_checkinteger(L, 1);
 
@@ -52,7 +52,7 @@ int scope_next(lua_State *L)
 
 int set_scope(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t scope = luaL_checkinteger(L, 1);
 
@@ -65,7 +65,7 @@ int set_scope(lua_State *L)
 
 int get_scope(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = ecs_get_scope(w);
 
@@ -76,7 +76,7 @@ int get_scope(lua_State *L)
 
 int set_name_prefix(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *prefix = NULL;
 

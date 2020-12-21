@@ -2,7 +2,7 @@
 
 int new_pipeline(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 2);
     const char *expr = luaL_checkstring(L, 2);
@@ -18,7 +18,7 @@ int new_pipeline(lua_State *L)
 
 int set_pipeline(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t pipeline = luaL_checkinteger(L, 1);
 
@@ -29,7 +29,7 @@ int set_pipeline(lua_State *L)
 
 int get_pipeline(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t pipeline = ecs_get_pipeline(w);
 
@@ -40,7 +40,7 @@ int get_pipeline(lua_State *L)
 
 int set_target_fps(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     lua_Number fps = luaL_checknumber(L, 1);
 
@@ -51,7 +51,7 @@ int set_target_fps(lua_State *L)
 
 int progress(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     lua_Number delta_time = luaL_checknumber(L, 1);
 
@@ -75,7 +75,7 @@ int progress_cb(lua_State *L)
 
 int set_time_scale(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     lua_Number scale = luaL_checknumber(L, 1);
 
@@ -86,7 +86,7 @@ int set_time_scale(lua_State *L)
 
 int reset_clock(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_reset_clock(w);
 
@@ -95,7 +95,7 @@ int reset_clock(lua_State *L)
 
 int lquit(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_quit(w);
 
@@ -104,7 +104,7 @@ int lquit(lua_State *L)
 
 int deactivate_systems(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_deactivate_systems(w);
 
@@ -113,7 +113,7 @@ int deactivate_systems(lua_State *L)
 
 int set_threads(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     lua_Integer threads = luaL_checkinteger(L, 1);
 
@@ -124,7 +124,7 @@ int set_threads(lua_State *L)
 
 int get_threads(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     int32_t threads = ecs_get_threads(w);
 
@@ -135,7 +135,7 @@ int get_threads(lua_State *L)
 
 int get_thread_index(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     int32_t index = ecs_get_thread_index(w);
 

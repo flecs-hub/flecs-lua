@@ -3,7 +3,7 @@
 
 int world_info(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
     const ecs_world_info_t *wi = ecs_get_world_info(w);
 
     ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaWorldInfo");
@@ -38,7 +38,7 @@ int world_info(lua_State *L)
 
 int world_stats(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 #if 0
     ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaWorldInfo");
     ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
@@ -78,7 +78,7 @@ int world_stats(lua_State *L)
 
 int dim(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     lua_Integer count = luaL_checkinteger(L, 1);
 
@@ -89,7 +89,7 @@ int dim(lua_State *L)
 
 int dim_type(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     lua_Integer count = luaL_checkinteger(L, 1);
     ecs_type_t type = checktype(L, 2);

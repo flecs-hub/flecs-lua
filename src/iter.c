@@ -79,7 +79,7 @@ int column_entity(lua_State *L)
 
 int filter_iter(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
     ecs_filter_t filter = checkfilter(L, 1);
 
     ecs_iter_t it = ecs_filter_iter(w, &filter);

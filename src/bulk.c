@@ -2,7 +2,7 @@
 
 int bulk_new(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     lua_Integer count = 0;
     ecs_type_t type = NULL;
@@ -44,7 +44,7 @@ int bulk_new(lua_State *L)
 
 int bulk_delete(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
     ecs_filter_t filter = checkfilter(L, 1);
 
     ecs_bulk_delete(w, &filter);

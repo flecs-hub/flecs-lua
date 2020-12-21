@@ -23,7 +23,7 @@ static const char *checkname(lua_State *L, int arg)
 
 int new_entity(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = 0;
 
@@ -107,7 +107,7 @@ int new_entity(lua_State *L)
 
 int delete_entity(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t entity;
 
@@ -140,7 +140,7 @@ int delete_entity(lua_State *L)
 
 int new_tag(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
 
@@ -155,7 +155,7 @@ int new_tag(lua_State *L)
 
 int entity_name(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
@@ -168,7 +168,7 @@ int entity_name(lua_State *L)
 
 int entity_symbol(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
@@ -181,7 +181,7 @@ int entity_symbol(lua_State *L)
 
 int entity_fullpath(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
@@ -196,7 +196,7 @@ int entity_fullpath(lua_State *L)
 
 int lookup_entity(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
 
@@ -209,7 +209,7 @@ int lookup_entity(lua_State *L)
 
 int lookup_child(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t parent = luaL_checkinteger(L, 1);
     const char *name = luaL_checkstring(L, 2);
@@ -223,7 +223,7 @@ int lookup_child(lua_State *L)
 
 int lookup_path(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t parent = luaL_checkinteger(L, 1);
     const char *path = luaL_checkstring(L, 2);
@@ -239,7 +239,7 @@ int lookup_path(lua_State *L)
 
 int lookup_fullpath(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
 
@@ -252,7 +252,7 @@ int lookup_fullpath(lua_State *L)
 
 int lookup_symbol(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
 
@@ -265,7 +265,7 @@ int lookup_symbol(lua_State *L)
 
 int use_alias(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     const char *name = luaL_checkstring(L, 2);
@@ -277,7 +277,7 @@ int use_alias(lua_State *L)
 
 int entity_has(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     int b;
@@ -311,7 +311,7 @@ int has_role(lua_State *L)
 
 int is_alive(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
@@ -324,7 +324,7 @@ int is_alive(lua_State *L)
 
 int exists(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
@@ -337,7 +337,7 @@ int exists(lua_State *L)
 
 int entity_add(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
@@ -357,7 +357,7 @@ int entity_add(lua_State *L)
 
 int entity_remove(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
@@ -377,7 +377,7 @@ int entity_remove(lua_State *L)
 
 int clear_entity(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = lua_tointeger(L, 1);
 
@@ -388,7 +388,7 @@ int clear_entity(lua_State *L)
 
 int delete_children(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t parent = lua_tointeger(L, 1);
 
@@ -399,7 +399,7 @@ int delete_children(lua_State *L)
 
 int new_type(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
     const char *expr = luaL_checkstring(L, 2);
@@ -413,7 +413,7 @@ int new_type(lua_State *L)
 
 int get_type(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
@@ -433,7 +433,7 @@ int get_type(lua_State *L)
 
 int get_typeid(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
@@ -446,7 +446,7 @@ int get_typeid(lua_State *L)
 
 int get_parent(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t c = 0;
@@ -462,7 +462,7 @@ int get_parent(lua_State *L)
 
 int add_trait(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t c = luaL_checkinteger(L, 2);
@@ -475,7 +475,7 @@ int add_trait(lua_State *L)
 
 int remove_trait(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t c = luaL_checkinteger(L, 2);
@@ -488,7 +488,7 @@ int remove_trait(lua_State *L)
 
 int has_trait(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t c = luaL_checkinteger(L, 2);
@@ -503,7 +503,7 @@ int has_trait(lua_State *L)
 
 int set_trait(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t c = luaL_checkinteger(L, 2);
@@ -520,7 +520,7 @@ int set_trait(lua_State *L)
 
 int set_trait_tag(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t t = luaL_checkinteger(L, 2);
@@ -537,7 +537,7 @@ int set_trait_tag(lua_State *L)
 
 int get_trait(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t c = luaL_checkinteger(L, 2);
@@ -553,7 +553,7 @@ int get_trait(lua_State *L)
 
 int get_trait_tag(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t t = luaL_checkinteger(L, 2);
@@ -569,7 +569,7 @@ int get_trait_tag(lua_State *L)
 
 int get_case(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t sw = luaL_checkinteger(L, 2);
@@ -583,7 +583,7 @@ int get_case(lua_State *L)
 
 int new_enum(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
@@ -615,7 +615,7 @@ int new_enum(lua_State *L)
 
 int new_bitmask(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
@@ -647,7 +647,7 @@ int new_bitmask(lua_State *L)
 
 int new_array(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
     const char *element = luaL_checkstring(L, 2);
@@ -684,7 +684,7 @@ int new_array(lua_State *L)
 
 int new_struct(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
@@ -710,7 +710,7 @@ int new_struct(lua_State *L)
 
 int new_alias(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     const char *name = luaL_checkstring(L, 1);
     const char *alias = luaL_checkstring(L, 2);
@@ -744,7 +744,7 @@ int new_alias(lua_State *L)
 
 int get_func(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t component = luaL_checkinteger(L, 2);
@@ -772,7 +772,7 @@ int get_mutable(ecs_world_t *w, lua_State *L, ecs_entity_t e, ecs_entity_t compo
 
 int get_mut(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t component = luaL_checkinteger(L, 2);
@@ -782,7 +782,7 @@ int get_mut(lua_State *L)
 
 int mutable_modified(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t component = luaL_checkinteger(L, 2);
@@ -800,7 +800,7 @@ int mutable_modified(lua_State *L)
 
 int set_func(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t component = luaL_checkinteger(L, 2);
@@ -831,7 +831,7 @@ int new_ref(lua_State *L)
 
 int get_ref(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_ref_t *ref = luaL_checkudata(L, 1, "ecs_ref_t");
     ecs_entity_t e = luaL_optinteger(L, 2, 0);
@@ -848,7 +848,7 @@ int get_ref(lua_State *L)
 
 int singleton_get(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t component = luaL_checkinteger(L, 1);
 
@@ -862,7 +862,7 @@ int singleton_get(lua_State *L)
 
 int singleton_get_mut(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t component = luaL_checkinteger(L, 1);
 
@@ -871,7 +871,7 @@ int singleton_get_mut(lua_State *L)
 
 int singleton_modified(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
     luaL_checktype(L, 2, LUA_TTABLE);
@@ -888,7 +888,7 @@ int singleton_modified(lua_State *L)
 
 int singleton_set(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t component = luaL_checkinteger(L, 1);
 
@@ -903,7 +903,7 @@ int singleton_set(lua_State *L)
 
 int new_prefab(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_get_world(L);
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = 0;
 
