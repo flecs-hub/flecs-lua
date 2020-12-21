@@ -346,7 +346,10 @@ static const luaL_Reg ecs_lib[] =
 
 int luaopen_ecs(lua_State *L)
 {
-    luaL_newlib(L, ecs_lib);
+    luaL_checkversion(L);
+    luaL_newlibtable(L, ecs_lib);
+    lua_pushlightuserdata(L, ecs_lua_get_world(L));
+    luaL_setfuncs(L, ecs_lib, 1);
 
     luaL_newmetatable(L, "ecs_type_t");
     lua_pop(L, 1);

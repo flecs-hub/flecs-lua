@@ -15,6 +15,9 @@ const int ecs_lua__cursors;
 const int ecs_lua__types;
 #define ECS_LUA_TYPES (&ecs_lua__types)
 
+//Internal, faster version of ecs_lua_get_world() for API functions
+#define ecs_lua_world(L) lua_touserdata(L, lua_upvalueindex(1))
+
 #define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
 #define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
 
