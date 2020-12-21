@@ -150,6 +150,15 @@ assert(ecs.has(id_name_comps, ecs.lookup("lua_test_struct")))
 ecs.clear(id_name_comps)
 assert(not ecs.has(id_name_comps, ecs.lookup("lua_test_struct")))
 
+
+--Enable/Disable
+ecs.disable(entity)
+assert(ecs.has(entity, ecs.Disabled))
+
+ecs.enable(entity)
+assert(not ecs.has(entity, ecs.Disabled))
+
+
 --Lookup
 local LuaWorldInfo = ecs.lookup_fullpath("flecs.lua.LuaWorldInfo")
 assert(LuaWorldInfo ~= 0)

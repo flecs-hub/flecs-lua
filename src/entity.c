@@ -386,6 +386,28 @@ int clear_entity(lua_State *L)
     return 0;
 }
 
+int enable_entity(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = lua_tointeger(L, 1);
+
+    ecs_enable(w, e, true);
+
+    return 0;
+}
+
+int disable_entity(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = lua_tointeger(L, 1);
+
+    ecs_enable(w, e, false);
+
+    return 0;
+}
+
 int delete_children(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
@@ -579,6 +601,30 @@ int get_case(lua_State *L)
     lua_pushinteger(L, cs);
 
     return 1;
+}
+
+int add_case(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t sw_case = luaL_checkinteger(L, 2);
+
+    ecs_add_entity(w, e, ECS_CASE | sw_case);
+
+    return 0;
+}
+
+int remove_case(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t sw_case = luaL_checkinteger(L, 2);
+
+    ecs_remove_entity(w, e, ECS_CASE | sw_case);
+
+    return 0;
 }
 
 int new_enum(lua_State *L)

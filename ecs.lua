@@ -179,6 +179,16 @@ end
 function ecs.clear(e)
 end
 
+---Enable an entity
+---@param entity integer
+function ecs.enable(entity)
+end
+
+---Disable an entity
+---@param entity integer
+function ecs.disable(entity)
+end
+
 ---Delete children of an entity
 ---@param parent integer @entity
 function ecs.delete_children(parent)
@@ -270,6 +280,18 @@ end
 ---@param sw integer switch
 ---@return integer
 function ecs.get_case(entity, sw)
+end
+
+---Add case to an entity
+---@param entity integer
+---@param sw integer
+function ecs.add_case(entity, sw)
+end
+
+---Remove case from an entity
+---@param entity integer
+---@param sw integer
+function ecs.remove_case(entity, sw)
 end
 
 ---Create a bitmask component
