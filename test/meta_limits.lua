@@ -24,11 +24,11 @@ local F32_MIN    = -(1 << 24)
 local F64_MIN    = -(1 << 53)
 
 local tstruct = ecs.lookup("lua_test_struct")
-local test_struct, added = ecs.get_mut(ecs.Singleton, tstruct)
+local test_struct = ecs.get(ecs.Singleton, tstruct)
 
 
 --Roundtrip with max values
-test_struct = ecs.get_mut(ecs.Singleton, tstruct)
+test_struct = ecs.get(ecs.Singleton, tstruct)
 
 test_struct.c = INT8_MAX
 test_struct.u8 = UINT8_MAX
@@ -44,9 +44,9 @@ test_struct.f64 = F64_MAX
 test_struct.enumeration = INT32_MAX
 test_struct.bitmask = INT32_MAX
 
-ecs.modified(ecs.Singleton, tstruct, test_struct)
+assert(ecs.patch(ecs.Singleton, tstruct, test_struct) == false)
 test_struct = nil
-test_struct = ecs.get_mut(ecs.Singleton, tstruct)
+test_struct = ecs.get(ecs.Singleton, tstruct)
 
 assert(test_struct.c == INT8_MAX)
 assert(test_struct.u8 == UINT8_MAX)
@@ -64,7 +64,7 @@ assert(test_struct.bitmask == INT32_MAX)
 
 
 --Roundtrip with minimum/negative values
-test_struct = ecs.get_mut(ecs.Singleton, tstruct)
+test_struct = ecs.get(ecs.Singleton, tstruct)
 
 test_struct.u8 = -1
 test_struct.u16 = -1
@@ -77,9 +77,9 @@ test_struct.i64 = INT64_MIN
 test_struct.f32 = F32_MIN
 test_struct.f64 = F64_MIN
 
-ecs.modified(ecs.Singleton, tstruct, test_struct)
+ecs.patch(ecs.Singleton, tstruct, test_struct)
 test_struct = nil
-test_struct = ecs.get_mut(ecs.Singleton, tstruct)
+test_struct = ecs.get(ecs.Singleton, tstruct)
 
 assert(test_struct.u8 == UINT8_MAX)
 assert(test_struct.u16 == UINT16_MAX)

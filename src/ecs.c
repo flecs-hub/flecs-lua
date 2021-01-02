@@ -101,9 +101,7 @@ int new_struct(lua_State *L);
 int new_alias(lua_State *L);
 
 int get_func(lua_State *L);
-int get_mut(lua_State *L);
-
-int mutable_modified(lua_State *L);
+int patch_func(lua_State *L);
 int set_func(lua_State *L);
 
 int new_ref(lua_State *L);
@@ -259,8 +257,7 @@ static const luaL_Reg ecs_lib[] =
     { "alias", new_alias },
 
     { "get", get_func },
-    { "get_mut", get_mut },
-    { "modified", mutable_modified },
+    { "patch", patch_func },
     { "set", set_func },
     { "ref", new_ref },
     { "get_ref", get_ref },

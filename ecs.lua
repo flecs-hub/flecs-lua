@@ -16,9 +16,6 @@ local ecs_ref_t = {}
 ---@field exclude_kind integer @ecs.Match*
 local ecs_filter_t = {}
 
----@class ecs_mutable_t
-local ecs_mutable_t = {}
-
 ---@class ecs_query_t
 local ecs_query_t = {}
 
@@ -349,18 +346,13 @@ end
 function ecs.get(entity, component)
 end
 
----Get a mutable table to a component
----@param entity integer
----@param component integer
----@return ecs_mutable_t, boolean
-function ecs.get_mut(entity, component)
-end
-
----Signal that a component has been modified
+---Patch component value without triggering OnSet systems, `copy` action.
+---Returns true if component was added, false otherwise
 ---@param entity integer
 ---@param component integer
 ---@param value table
-function ecs.modified(entity, component, value)
+---@return boolean
+function ecs.patch(entity, component, value)
 end
 
 ---Set the value of a component,

@@ -827,7 +827,7 @@ int get_func(lua_State *L)
     return 1;
 }
 
-int get_mutable(ecs_world_t *w, lua_State *L, ecs_entity_t e, ecs_entity_t component)
+static int get_mutable(ecs_world_t *w, lua_State *L, ecs_entity_t e, ecs_entity_t component)
 {
     bool is_added = 0;
     void *ptr = ecs_get_mut_w_entity(w, e, component, &is_added);
@@ -840,17 +840,7 @@ int get_mutable(ecs_world_t *w, lua_State *L, ecs_entity_t e, ecs_entity_t compo
     return 2;
 }
 
-int get_mut(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_world(L);
-
-    ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t component = luaL_checkinteger(L, 2);
-
-    return get_mutable(w, L, e, component);
-}
-
-int mutable_modified(lua_State *L)
+int patch_func(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
@@ -865,7 +855,9 @@ int mutable_modified(lua_State *L)
 
     ecs_modified_w_entity(w, e, component);
 
-    return 0;
+    lua_pushboolean(L, is_added);
+
+    return 1;
 }
 
 int set_func(lua_State *L)
