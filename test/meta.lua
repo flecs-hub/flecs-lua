@@ -5,7 +5,7 @@ local u = require "util"
 ecs.progress_cb(function() ecs.log("progress()!") end)
 
 local tstruct = ecs.lookup("lua_test_struct")
-local test_struct, added = ecs.singleton_get_mut(tstruct)
+local test_struct, added = ecs.singleton_get(tstruct)
 
 --Verify values set by host
 assert(not added)
@@ -44,7 +44,7 @@ test_struct.enumeration = 500
 test_struct.bitmask = (1 | 2 | 3)
 test_struct.comp2.comp.foo = 1048333
 
-ecs.singleton_modified(tstruct, test_struct)
+ecs.singleton_patch(tstruct, test_struct)
 test_struct = nil
 test_struct = ecs.singleton_get(tstruct)
 
@@ -58,11 +58,11 @@ assert(test_struct.bitmask == (1 | 2 | 3))
 assert(test_struct.comp2.comp.foo == 1048333)
 
 
-test_struct = ecs.singleton_get_mut(tstruct)
+test_struct = ecs.singleton_get(tstruct)
 
 --Free string by setting it to 0
 test_struct.str = 0
-ecs.singleton_modified(tstruct, test_struct)
+ecs.singleton_patch(tstruct, test_struct)
 test_struct = ecs.singleton_get(tstruct)
 assert(test_struct.str == nil) --NULL strings are not serialized
 

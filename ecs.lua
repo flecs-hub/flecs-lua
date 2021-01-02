@@ -386,16 +386,11 @@ end
 function ecs.singleton_get(component)
 end
 
----Get a mutable table to a singleton component
----@param component integer
----@return ecs_mutable_t, boolean
-function ecs.singleton_get_mut(component)
-end
-
----Signal that a singleton component has been modified
+---Patch singleton component value, returns true if component was added
 ---@param component integer
 ---@param value table
-function ecs.singleton_modified(component, value)
+---@return boolean
+function ecs.singleton_patch(component, value)
 end
 
 ---Set the value of a singleton component

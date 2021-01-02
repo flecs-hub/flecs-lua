@@ -108,8 +108,7 @@ int new_ref(lua_State *L);
 int get_ref(lua_State *L);
 
 int singleton_get(lua_State *L);
-int singleton_get_mut(lua_State *L);
-int singleton_modified(lua_State *L);
+int singleton_patch(lua_State *L);
 int singleton_set(lua_State *L);
 
 int new_prefab(lua_State *L);
@@ -263,8 +262,7 @@ static const luaL_Reg ecs_lib[] =
     { "get_ref", get_ref },
 
     { "singleton_get", singleton_get },
-    { "singleton_get_mut", singleton_get_mut },
-    { "singleton_modified", singleton_modified },
+    { "singleton_patch", singleton_patch },
     { "singleton_set", singleton_set },
 
     { "prefab", new_prefab },
