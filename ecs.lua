@@ -625,9 +625,9 @@ end
 function ecs.assert(v, message)
 end
 
----Get the size of a component
+---Get the size and alignment of a component
 ---@param component integer
----@return integer
+---@return integer, integer
 function ecs.sizeof(component)
 end
 

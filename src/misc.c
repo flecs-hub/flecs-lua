@@ -94,8 +94,9 @@ int sizeof_component(lua_State *L)
     const EcsComponent *ptr = ecs_get(w, e, EcsComponent);
 
     lua_pushinteger(L, ptr->size);
+    lua_pushinteger(L, ptr->alignment);
 
-    return 1;
+    return 2;
 }
 
 int createtable(lua_State *L)
