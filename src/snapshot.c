@@ -8,10 +8,13 @@ static ecs_snapshot_t *checksnapshot(lua_State *L, int arg)
 }
 
 int snapshot_gc(lua_State *L)
-{ecs_os_dbg("SNAPSHOT_GC"); fflush(stdout);
-    ecs_snapshot_t *snapshot = checksnapshot(L, 1);
+{
+    ecs_snapshot_t **ptr = luaL_checkudata(L, 1, "ecs_snapshot_t");
+    ecs_snapshot_t *snapshot = *ptr;
 
-    ecs_snapshot_free(snapshot);
+    if(snapshot) ecs_snapshot_free(snapshot);
+
+    *ptr = NULL;
 
     return 0;
 }

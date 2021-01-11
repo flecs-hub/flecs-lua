@@ -10,10 +10,13 @@ ecs_query_t *checkquery(lua_State *L, int arg)
 }
 
 int query_gc(lua_State *L)
-{ecs_os_dbg("QUERY_GC"); fflush(stdout);
-    ecs_query_t *query = checkquery(L, 1);
+{
+    ecs_query_t **ptr = luaL_checkudata(L, 1, "ecs_query_t");
+    ecs_query_t *query = *ptr;
 
-    ecs_query_free(query);
+    if(query) ecs_query_free(query);
+
+    *ptr = NULL;
 
     return 0;
 }
