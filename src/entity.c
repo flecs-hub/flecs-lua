@@ -94,7 +94,7 @@ int new_entity(lua_State *L)
     }
 
     /* create an entity, the following functions will take the same id */
-    if(!e && args) e = ecs_new_w_entity(w, e);
+    if(!e && args) e = ecs_new_id(w);
 
     if(components) ecs_add_type(w, e, ecs_type_from_str(w, components));
 
