@@ -38,12 +38,6 @@ int new_module(lua_State *L)
     ecs_entity_t e = ecs_import(w, import_entry_point, name, NULL, 0);
     ecs_set_context(w, orig);
 
-    if(m.imported)
-    {
-        lua_pushvalue(L, 1);
-        luaL_ref(L, LUA_REGISTRYINDEX);
-    }
-
     if(ctx->error) return lua_error(L);
 
     lua_pushinteger(L, e);
