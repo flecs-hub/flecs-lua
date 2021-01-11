@@ -141,3 +141,8 @@ int zero_init_component(lua_State *L)
 
     return 0;
 }
+
+void ecs_lua__assert(lua_State *L, bool condition, const char *param, const char *condition_str)
+{
+    if(!condition) luaL_error(L, "assert(%s) failed", condition_str);
+}

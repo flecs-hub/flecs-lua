@@ -906,12 +906,15 @@ int get_ref(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
 
     ecs_ref_t *ref = luaL_checkudata(L, 1, "ecs_ref_t");
-    ecs_entity_t e = luaL_optinteger(L, 2, 0);
-    ecs_entity_t c = 0;
+    ecs_entity_t entity = luaL_optinteger(L, 2, 0);
+    ecs_entity_t component = 0;
 
-    if(e) c = luaL_checkinteger(L, 3);
+    if(entity) component = luaL_checkinteger(L, 3);
 
-    const void *ptr = ecs_get_ref_w_entity(w, ref, e, c);
+    ecs_lua_assert(L, !entity || !ref->entity || entity == ref->entity, NULL);
+    ecs_lua_assert(L, !component || !ref->component || component == ref->component, NULL);
+
+    const void *ptr = ecs_get_ref_w_entity(w, ref, entity, component);
 
     ecs_ptr_to_lua(w, L, ref->component, ptr);
 

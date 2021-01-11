@@ -44,6 +44,13 @@ ecs_type_t checktype(lua_State *L, int arg);
 ecs_filter_t checkfilter(lua_State *L, int idx);
 ecs_query_t *checkquery(lua_State *L, int arg);
 int ecs_lua__readonly(lua_State *L);
+void ecs_lua__assert(lua_State *L, bool condition, const char *param, const char *condition_str);
+
+#ifdef NDEBUG
+    #define ecs_lua_assert(L, condition, param)
+#else
+    #define ecs_lua_assert(L, condition, param) ecs_lua__assert(L, condition, NULL, #condition)
+#endif
 
 typedef struct ecs_lua_ctx
 {

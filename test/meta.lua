@@ -99,6 +99,8 @@ assert(test_struct ~= nil)
 test_struct = ecs.get_ref(ref, ecs.Singleton, tstruct)
 assert(test_struct ~= nil)
 
+assert(not pcall(function () ecs.get_ref(ref, ecs.Singleton, 40) end))
+assert(not pcall(function () ecs.get_ref(ref, 123, 40) end))
 assert(not pcall(function () ecs.get_ref(ref, ecs.Singleton) end))
 
 
