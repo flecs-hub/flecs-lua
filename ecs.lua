@@ -382,7 +382,7 @@ end
 function ecs.ref(entity, component)
 end
 
----Get an immutable reference to a component
+---Get component value from cached reference
 ---@param ref ecs_ref_t
 ---@param entity integer @optional
 ---@param component integer @optional
@@ -390,9 +390,9 @@ end
 function ecs.get_ref(ref, entity, component)
 end
 
----Get an immutable table to a singleton component
+---Get the value of a singleton component
 ---@param component integer
----@return table
+---@return table|nil
 function ecs.singleton_get(component)
 end
 
