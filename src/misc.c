@@ -113,3 +113,31 @@ int ecs_lua__readonly(lua_State *L)
 {
     return luaL_error(L, "Attempt to modify read-only table");
 }
+
+static void ctor_initialize_0(
+    ecs_world_t *world,
+    ecs_entity_t component,
+    const ecs_entity_t *entities,
+    void *ptr,
+    size_t size,
+    int32_t count,
+    void *ctx)
+{
+    memset(ptr, 0, size * (size_t)count);
+}
+
+int zero_init_component(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t component = luaL_checkinteger(L, 1);
+
+    EcsComponentLifecycle lf =
+    {
+        .ctor = ctor_initialize_0
+    };
+
+    ecs_set_component_actions_w_entity(w, component, &lf);
+
+    return 0;
+}

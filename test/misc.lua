@@ -1,4 +1,5 @@
 local ecs = require "ecs"
+local u = require "util"
 
 local runs = 0
 
@@ -50,6 +51,19 @@ ecs.createtable()
 ecs.createtable(10)
 
 ecs.createtable(10, 10)
+
+local Struct = ecs.struct("Struct", "{int32_t x; int32_t y; int32_t z;}")
+
+ecs.zero_init(Struct)
+
+local e = ecs.new()
+
+local zero = ecs.get_mut(e, Struct)
+
+assert(zero.x == 0)
+assert(zero.y == 0)
+assert(zero.z == 0)
+
 
 --local ws = ecs.world_stats()
 --assert(ws.entity_count ~= 0)

@@ -101,6 +101,7 @@ int new_struct(lua_State *L);
 int new_alias(lua_State *L);
 
 int get_func(lua_State *L);
+int get_mut(lua_State *L);
 int patch_func(lua_State *L);
 int set_func(lua_State *L);
 
@@ -167,6 +168,7 @@ int tracing_enable(lua_State *L);
 int assert_func(lua_State *L);
 int sizeof_component(lua_State *L);
 int createtable(lua_State *L);
+int zero_init_component(lua_State *L);
 
 /* Time */
 int get_time(lua_State *L);
@@ -250,12 +252,13 @@ static const luaL_Reg ecs_lib[] =
     { "remove_case", remove_case },
 
     { "enum", new_enum },
-    { "bitmask", new_bitmask},
+    { "bitmask", new_bitmask },
     { "array", new_array },
     { "struct", new_struct },
     { "alias", new_alias },
 
     { "get", get_func },
+    { "get_mut", get_mut },
     { "patch", patch_func },
     { "set", set_func },
     { "ref", new_ref },
@@ -310,6 +313,7 @@ static const luaL_Reg ecs_lib[] =
     { "assert", assert_func },
     { "sizeof", sizeof_component },
     { "createtable", createtable },
+    { "zero_init", zero_init_component },
 
     { "get_time", get_time },
     { "time_measure", time_measure },

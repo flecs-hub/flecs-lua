@@ -339,11 +339,21 @@ end
 function ecs.alias(meta_type, alias)
 end
 
----Get an immutable table to a component
+---Get the value of an entity's component,
+---returns nil if the entity does not have the component
 ---@param entity integer
 ---@param component integer
----@return table
+---@return table|nil
 function ecs.get(entity, component)
+end
+
+---Get the value of an entity's component,
+---adds the component if it doesn't exist,
+---the second return value indicates whether it was added
+---@param entity integer
+---@param component integer
+---@return table, boolean
+function ecs.get_mut(entity, component)
 end
 
 ---Patch component value without triggering OnSet systems, `copy` action.
@@ -636,6 +646,11 @@ end
 ---@param nrec integer optional
 ---@return table
 function ecs.createtable(narr, nrec)
+end
+
+---Set a component to be zero-initialized
+---@param component integer
+function ecs.zero_init(component)
 end
 
 ---@class ecs_time_t
