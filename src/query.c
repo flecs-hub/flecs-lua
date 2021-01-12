@@ -4,6 +4,8 @@ ecs_query_t *checkquery(lua_State *L, int arg)
 {
     ecs_query_t **query = luaL_checkudata(L, 1, "ecs_query_t");
 
+    if(!*query) luaL_argerror(L, 1, "query was collected");
+
     if(ecs_query_orphaned(*query)) luaL_argerror(L, 1, "parent query was collected");
 
     return *query;

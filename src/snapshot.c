@@ -4,6 +4,8 @@ static ecs_snapshot_t *checksnapshot(lua_State *L, int arg)
 {
     ecs_snapshot_t **snapshot = luaL_checkudata(L, arg, "ecs_snapshot_t");
 
+    if(!*snapshot) luaL_argerror(L, arg, "snapshot was collected");
+
     return *snapshot;
 }
 
