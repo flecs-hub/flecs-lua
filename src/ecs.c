@@ -18,8 +18,8 @@ ecs_lua_ctx *ecs_lua_get_context(lua_State *L)
 
 ecs_world_t *ecs_lua_get_world(lua_State *L)
 {
-    ecs_lua_ctx *p = ecs_lua_get_context(L);
-    return p->world;
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+    return ctx ? ctx->world : NULL;
 }
 
 void ecs_lua_progress(lua_State *L)
@@ -359,7 +359,16 @@ int luaopen_ecs(lua_State *L)
 {
     luaL_checkversion(L);
     luaL_newlibtable(L, ecs_lib);
-    lua_pushlightuserdata(L, ecs_lua_get_world(L));
+
+    ecs_world_t *w;
+    int type = lua_type(L, 1);
+
+    if(type != LUA_TLIGHTUSERDATA)
+    {
+        w = ecs_lua_get_world(L);
+        lua_pushlightuserdata(L, w);
+    }
+
     luaL_setfuncs(L, ecs_lib, 1);
 
     luaL_newmetatable(L, "ecs_type_t");
@@ -404,6 +413,7 @@ int luaopen_ecs(lua_State *L)
 #define XX(const) lua_pushinteger(L, ECS_##const); lua_setfield(L, -2, #const);
     ECS_LUA_MACROS(XX)
 #undef XX
+
     return 1;
 }
 
