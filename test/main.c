@@ -298,7 +298,7 @@ int main(int argc, char **argv)
 
     if(ret)
     {
-        const char *err = lua_tostring(L, 1);
+        const char *err = lua_tostring(L, lua_gettop(L));
         ecs_os_err("script error: %s\n", err);
     }
 
