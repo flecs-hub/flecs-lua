@@ -201,6 +201,8 @@ int get_threads(lua_State *L);
 int get_thread_index(lua_State *L);
 
 /* World */
+int world_new(lua_State *L);
+int world_fini(lua_State *L);
 int world_info(lua_State *L);
 int world_stats(lua_State *L);
 int dim(lua_State *L);
@@ -341,6 +343,8 @@ static const luaL_Reg ecs_lib[] =
     { "get_threads", get_threads },
     { "get_thread_index", get_thread_index },
 
+    { "init", world_new },
+    { "fini", world_fini },
     { "world_info", world_info },
     { "world_stats", world_stats },
     { "dim", dim },
@@ -367,6 +371,10 @@ int luaopen_ecs(lua_State *L)
     {
         w = ecs_lua_get_world(L);
         lua_pushlightuserdata(L, w);
+    }
+    else
+    {
+        lua_pushvalue(L, 1);
     }
 
     luaL_setfuncs(L, ecs_lib, 1);

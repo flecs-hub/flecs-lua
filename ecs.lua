@@ -784,6 +784,16 @@ end
 function ecs.get_thread_index()
 end
 
+---EXPERIMENTAL: Create a new world,
+---returns a new set of API functions tied to the world
+---@return table
+function ecs.init()
+end
+
+---EXPERIMENTAL: Destroy world,
+---invalid for the default world
+function ecs.fini()
+end
 
 ---@class ecs_world_info_t
 ---@field last_component_id integer

@@ -1,5 +1,28 @@
 #include "private.h"
 
+int world_new(lua_State *L)
+{
+    ecs_world_t *w = ecs_init();
+
+    lua_pushcfunction(L, luaopen_ecs);
+    lua_pushlightuserdata(L, w);
+
+    lua_call(L, 1, 1);
+
+    return 1;
+}
+
+int world_fini(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+    ecs_world_t *main = ecs_lua_get_world(L);
+
+    if(w == main) return luaL_argerror(L, 0, "cannot destroy default world");
+
+    ecs_fini(w);
+
+    return 0;
+}
 
 int world_info(lua_State *L)
 {
