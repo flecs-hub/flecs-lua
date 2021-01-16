@@ -22,8 +22,8 @@ static void import_entry_point(ecs_world_t *w)
 
 int new_module(lua_State *L)
 {
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
-    ecs_world_t *w = ctx->world;
+    ecs_world_t *w = ecs_lua_world(L);
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L, w);
 
     const char *name = luaL_checkstring(L, 1);
 

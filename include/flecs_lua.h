@@ -26,7 +26,8 @@ void FlecsLuaImport(ecs_world_t *w);
 #define FlecsLuaImportHandles(handles)\
     ECS_IMPORT_COMPONENT(handles, EcsLuaHost);\
 
-/* Get the main lua_State */
+/* Get the default lua_State */
+FLECS_LUA_API
 lua_State *ecs_lua_get_state(ecs_world_t *world);
 
 /* Reinitialize with a custom lua_State */
@@ -36,7 +37,7 @@ int ecs_lua_set_state(ecs_world_t *w, lua_State *L);
 /* Call progress function callback (if set),
    this is meant to be called between iterations. */
 FLECS_LUA_API
-void ecs_lua_progress(lua_State *L);
+bool ecs_lua_progress(lua_State *L, lua_Number delta_time);
 
 /* Pushes the component at ptr onto the stack */
 FLECS_LUA_API
@@ -73,6 +74,7 @@ FLECS_LUA_API
 ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx);
 
 /* Create an EmmyLua class annotation */
+FLECS_LUA_API
 char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_table);
 
 /* Get world pointer from registry */

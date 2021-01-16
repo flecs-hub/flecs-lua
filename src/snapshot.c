@@ -40,6 +40,7 @@ int snapshot_take(lua_State *L)
     *ptr = snapshot;
 
     luaL_setmetatable(L, "ecs_snapshot_t");
+    register_collectible(L, w, -1);
 
     return 1;
 }

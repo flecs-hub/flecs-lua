@@ -526,7 +526,10 @@ static inline ecs_entity_t get_serializer_id(lua_State *L)
 static const EcsMetaTypeSerializer *get_serializer(lua_State *L, ecs_world_t *world, ecs_entity_t type)
 {
     //return ecs_get_w_entity(world, type, get_serializer_id(L));
-    int ret = lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_TYPES);
+    int ret = lua_rawgetp(L, LUA_REGISTRYINDEX, world);
+    ecs_assert(ret == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    ret = lua_rawgeti(L, -1, ECS_LUA_TYPES);
     ecs_assert(ret == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
     ret = lua_rawgeti(L, -1, type);
@@ -539,7 +542,7 @@ static const EcsMetaTypeSerializer *get_serializer(lua_State *L, ecs_world_t *wo
 
         ref = lua_touserdata(L, -1);
 
-        lua_pop(L, 2);
+        lua_pop(L, 3);
     }
     else
     {
@@ -549,7 +552,7 @@ static const EcsMetaTypeSerializer *get_serializer(lua_State *L, ecs_world_t *wo
 
         *ref = (ecs_ref_t){ .entity = type, .component = get_serializer_id(L) };
 
-        lua_pop(L, 1); /* -types */
+        lua_pop(L, 2); /* -types, -world */
     }
 
     const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, ref, 0, 0);
@@ -746,7 +749,10 @@ static void meta_reset(ecs_meta_cursor_t *cursor, void *base)
 
 static ecs_meta_cursor_t *ecs_lua_cursor(lua_State *L, ecs_world_t *world, ecs_entity_t type, void *base)
 {
-    int ret = lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_CURSORS);
+    int ret = lua_rawgetp(L, LUA_REGISTRYINDEX, world);
+    ecs_assert(ret == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    ret = lua_rawgeti(L, -1, ECS_LUA_CURSORS);
     ecs_assert(ret == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
     ret = lua_rawgeti(L, -1, type);
@@ -756,7 +762,7 @@ static ecs_meta_cursor_t *ecs_lua_cursor(lua_State *L, ecs_world_t *world, ecs_e
     if(ret == LUA_TUSERDATA)
     {
         cursor = lua_touserdata(L, -1);
-        lua_pop(L, 2);
+        lua_pop(L, 3);
 
         meta_reset(cursor, base);
     }
@@ -765,7 +771,7 @@ static ecs_meta_cursor_t *ecs_lua_cursor(lua_State *L, ecs_world_t *world, ecs_e
         lua_pop(L, 1);
         cursor = lua_newuserdata(L, sizeof(ecs_meta_cursor_t));
         lua_rawseti(L, -2, type);
-        lua_pop(L, 1);
+        lua_pop(L, 2);
 
         ecs_meta_cursor_t t = ecs_meta_cursor(world, type, base);
         memcpy(cursor, &t, sizeof(ecs_meta_cursor_t));

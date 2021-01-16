@@ -2,14 +2,57 @@
 
 int world_new(lua_State *L)
 {
+    (void)ecs_lua_world(L);
     ecs_world_t *w = ecs_init();
 
+    ECS_IMPORT(w, FlecsLua);
+
+    ecs_lua_set_state(w, L);
+
     lua_pushcfunction(L, luaopen_ecs);
-    lua_pushlightuserdata(L, w);
+    ecs_world_t **ptr = lua_newuserdata(L, sizeof(ecs_world_t*));
+    *ptr = w;
+
+    luaL_setmetatable(L, "ecs_world_t");
 
     lua_call(L, 1, 1);
 
     return 1;
+}
+
+int world_gc(lua_State *L)
+{
+    ecs_world_t **ptr = lua_touserdata(L, 1);
+    ecs_world_t *w = *ptr;
+
+    if(!w) return 0;
+
+    lua_rawgetp(L, LUA_REGISTRYINDEX, w);
+    lua_rawgeti(L, -1, ECS_LUA_COLLECT);
+
+    lua_pushnil(L);
+
+    int top = lua_gettop(L);
+    top = lua_type(L, -2);
+
+    while(lua_next(L, -2))
+    {
+        luaL_callmeta(L, -1, "__gc");
+
+        lua_pop(L, 1);
+    }
+
+    top = lua_gettop(L);
+
+    /* registry[world] = nil */
+    lua_pushnil(L);
+    lua_rawsetp(L, LUA_REGISTRYINDEX, w);
+
+    ecs_fini(w);
+
+    *ptr = NULL;
+
+    return 0;
 }
 
 int world_fini(lua_State *L)
@@ -19,7 +62,7 @@ int world_fini(lua_State *L)
 
     if(w == main) return luaL_argerror(L, 0, "cannot destroy default world");
 
-    ecs_fini(w);
+    luaL_callmeta(L, lua_upvalueindex(1), "__gc");
 
     return 0;
 }

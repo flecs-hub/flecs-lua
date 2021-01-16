@@ -1,9 +1,5 @@
 #include "private.h"
 
-static int ecs_lua__name_prefix;
-
-#define ECS_LUA_NAME_PREFIX (&ecs_lua__name_prefix)
-
 int get_child_count(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
@@ -77,6 +73,7 @@ int get_scope(lua_State *L)
 int set_name_prefix(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L, w);
 
     const char *prefix = NULL;
 
@@ -86,8 +83,14 @@ int set_name_prefix(lua_State *L)
 
     lua_pushstring(L, prev);
 
+    if(ctx->prefix_ref != LUA_NOREF)
+    {
+        luaL_unref(L, LUA_REGISTRYINDEX, ctx->prefix_ref);
+        ctx->prefix_ref = LUA_NOREF;
+    }
+
     lua_pushvalue(L, 1);
-    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_NAME_PREFIX);
+    ctx->prefix_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
     return 1;
 }

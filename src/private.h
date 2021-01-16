@@ -9,14 +9,20 @@
 const int ecs_lua__ser;
 #define ECS_LUA_SERIALIZER (&ecs_lua__ser)
 
-const int ecs_lua__cursors;
-#define ECS_LUA_CURSORS (&ecs_lua__cursors)
+#define ECS_LUA_CONTEXT (1)
+#define ECS_LUA_CURSORS (2)
+#define ECS_LUA_TYPES   (3)
+#define ECS_LUA_COLLECT (4)
 
-const int ecs_lua__types;
-#define ECS_LUA_TYPES (&ecs_lua__types)
+/* Internal version for API functions */
+static inline ecs_world_t *ecs_lua_world(lua_State *L)
+{
+    ecs_world_t *w = *(ecs_world_t**)lua_touserdata(L, lua_upvalueindex(1));
 
-//Internal, faster version of ecs_lua_get_world() for API functions
-#define ecs_lua_world(L) lua_touserdata(L, lua_upvalueindex(1))
+    if(!w) luaL_argerror(L, 0, "world was destroyed");
+
+    return w;
+}
 
 #define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
 #define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
@@ -28,7 +34,10 @@ const int ecs_lua__types;
 #endif
 
 /* ecs */
-ecs_lua_ctx *ecs_lua_get_context(lua_State *L);
+ecs_lua_ctx *ecs_lua_get_context(lua_State *L, ecs_world_t *world);
+
+/* Register object with the world to be __gc'd before ecs_fini() */
+void register_collectible(lua_State *L, ecs_world_t *w, int idx);
 
 /* meta */
 bool ecs_lua_query_next(lua_State *L, int idx);
@@ -60,6 +69,7 @@ typedef struct ecs_lua_ctx
     int internal;
     int error;
     int progress_ref;
+    int prefix_ref;
     ecs_world_t *world;
 
     ecs_entity_t serializer_id;

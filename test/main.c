@@ -306,7 +306,7 @@ int main(int argc, char **argv)
 
     while(ecs_progress(w, 0) && runs)
     {
-        ecs_lua_progress(L);
+        ecs_lua_progress(L, 2);
 
         runs--;
     }

@@ -70,17 +70,15 @@ static void system_entry_point(ecs_iter_t *it)
     ecs_lua__epilog(L);
 }
 
-static int new_whatever(lua_State *L, bool trigger)
+static int new_whatever(lua_State *L, ecs_world_t *w, bool trigger)
 {
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
-    ecs_world_t *w = ctx->world;
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L, w);
 
+    ecs_entity_t e = 0;
     luaL_checktype(L, 1, LUA_TFUNCTION);
     const char *name = luaL_checkstring(L, 2);
     ecs_entity_t phase = luaL_optinteger(L, 3, 0);
     const char *signature = luaL_optstring(L, 4, NULL);
-
-    ecs_entity_t e;
 
     if(trigger)
     {
@@ -111,12 +109,12 @@ static int new_whatever(lua_State *L, bool trigger)
 
 int new_system(lua_State *L)
 {
-    return new_whatever(L, false);
+    return new_whatever(L, ecs_lua_world(L), false);
 }
 
 int new_trigger(lua_State *L)
 {
-    return new_whatever(L, true);
+    return new_whatever(L, ecs_lua_world(L), true);
 }
 
 int run_system(lua_State *L)

@@ -34,6 +34,7 @@ int query_new(lua_State *L)
     *ptr = query;
 
     luaL_setmetatable(L, "ecs_query_t");
+    register_collectible(L, w, -1);
 
     return 1;
 }

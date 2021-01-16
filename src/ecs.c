@@ -2,56 +2,94 @@
 
 static ECS_COMPONENT_DECLARE(EcsLuaHost);
 
-static const int ecs_lua__key;
+static const int ecs_lua__default;
 
-#define ECS_LUA_CONTEXT (&ecs_lua__key)
+/* Default context key */
+#define ECS_LUA_DEFAULT (&ecs_lua__default)
 
 #define ECS_LUA__KEEPOPEN 1
 
-ecs_lua_ctx *ecs_lua_get_context(lua_State *L)
+ecs_lua_ctx *ecs_lua_get_context(lua_State *L, ecs_world_t *world)
 {
-    lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_CONTEXT);
-    ecs_lua_ctx *p = lua_touserdata(L, -1);
+    int type;
+    ecs_lua_ctx *p;
+
+    if(world)
+    {
+        type = lua_rawgetp(L, LUA_REGISTRYINDEX, world);
+        ecs_assert(type == LUA_TTABLE || type == LUA_TNIL, ECS_INTERNAL_ERROR, NULL);
+
+        if(type == LUA_TNIL) return NULL;
+
+        type = lua_rawgeti(L, -1, ECS_LUA_CONTEXT);
+        //ecs_assert(type == LUA_TUSERDATA, ECS_INTERNAL_ERROR, NULL);
+
+        p = lua_touserdata(L, -1);
+        lua_pop(L, 2);
+
+        return p;
+    }
+
+    lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT);
+    p = lua_touserdata(L, -1);
     lua_pop(L, 1);
+
     return p;
 }
 
 ecs_world_t *ecs_lua_get_world(lua_State *L)
 {
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L, NULL);
     return ctx ? ctx->world : NULL;
 }
 
-void ecs_lua_progress(lua_State *L)
+bool ecs_lua_progress(lua_State *L, lua_Number delta_time)
 {
     ecs_lua__prolog(L);
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L, NULL);
 
     ecs_assert(ctx->progress_ref != LUA_NOREF, ECS_INVALID_PARAMETER, "progress callback is not set");
 
-    if(ctx->progress_ref == LUA_NOREF) return;
+    if(ctx->progress_ref == LUA_NOREF) return false;
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->progress_ref);
 
     int type = lua_type(L, -1);
     ecs_assert(type == LUA_TFUNCTION, ECS_INTERNAL_ERROR, NULL);
+    if(type != LUA_TFUNCTION) return false;
 
-    if(type != LUA_TFUNCTION) return;
+    lua_pushnumber(L, delta_time);
 
-    int ret = lua_pcall(L, 0, 0, 0);
+    int ret = lua_pcall(L, 1, 1, 0);
 
     if(ret)
     {
         const char *err = lua_tostring(L, lua_gettop(L));
         ecs_os_err("progress() cb error (%d): %s", ret, err);
         lua_pop(L, 1);
+        return false;
     }
 
     ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
 
+    int b = lua_toboolean(L, lua_gettop(L));
+    lua_pop(L, 1);
+
     ecs_lua__epilog(L);
+
+    return b;
 }
 
+void register_collectible(lua_State *L, ecs_world_t *w, int idx)
+{
+    lua_rawgetp(L, LUA_REGISTRYINDEX, w);
+    lua_rawgeti(L, -1, ECS_LUA_COLLECT);
+
+    lua_pushvalue(L, lua_absindex(L, idx));
+    luaL_ref(L, -2);
+
+    lua_pop(L, 2);
+}
 
 /* Entity */
 int new_entity(lua_State *L);
@@ -203,6 +241,7 @@ int get_thread_index(lua_State *L);
 /* World */
 int world_new(lua_State *L);
 int world_fini(lua_State *L);
+int world_gc(lua_State *L);
 int world_info(lua_State *L);
 int world_stats(lua_State *L);
 int dim(lua_State *L);
@@ -352,37 +391,29 @@ static const luaL_Reg ecs_lib[] =
 
     { "emmy_class", emmy_class },
 
-#define XX(const) {#const, NULL },
+#define XX(const) { #const, NULL },
     ECS_LUA_ENUMS(XX)
     ECS_LUA_MACROS(XX)
 #undef XX
     { NULL, NULL }
 };
 
-int luaopen_ecs(lua_State *L)
+static void register_types(lua_State *L)
 {
-    luaL_checkversion(L);
-    luaL_newlibtable(L, ecs_lib);
-
-    ecs_world_t *w;
-    int type = lua_type(L, 1);
-
-    if(type != LUA_TLIGHTUSERDATA)
-    {
-        w = ecs_lua_get_world(L);
-        lua_pushlightuserdata(L, w);
-    }
-    else
-    {
-        lua_pushvalue(L, 1);
-    }
-
-    luaL_setfuncs(L, ecs_lib, 1);
-
     luaL_newmetatable(L, "ecs_type_t");
     lua_pop(L, 1);
 
     luaL_newmetatable(L, "ecs_ref_t");
+    lua_pop(L, 1);
+
+    luaL_newmetatable(L, "ecs_world_t");
+    lua_pushcfunction(L, world_gc);
+    lua_setfield(L, -2, "__gc");
+    lua_pop(L, 1);
+
+    luaL_newmetatable(L, "ecs_collect_t");
+    lua_pushstring(L, "v");
+    lua_setfield(L, -2, "__mode");
     lua_pop(L, 1);
 
     luaL_newmetatable(L, "ecs_readonly");
@@ -408,12 +439,59 @@ int luaopen_ecs(lua_State *L)
     lua_pushcfunction(L, time__tostring);
     lua_setfield(L, -2, "__tostring");
     lua_pop(L, 1);
+}
 
-    lua_createtable(L, 128, 0);
-    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_CURSORS);
+int luaopen_ecs(lua_State *L)
+{
+    luaL_checkversion(L);
+    luaL_newlibtable(L, ecs_lib);
 
-    lua_createtable(L, 128, 0);
-    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_TYPES);
+    ecs_world_t *w;
+    int type = lua_type(L, 1);
+    int default_world = 0;
+
+    if(type != LUA_TUSERDATA) default_world = 1;
+
+    if(default_world)
+    {
+        register_types(L);
+
+        w = ecs_lua_get_world(L);
+
+        ecs_world_t **ptr = lua_newuserdata(L, sizeof(ecs_world_t*));
+        *ptr = w;
+        /*luaL_setmetatable(L, "ecs_world_t");*/
+    }
+    else /* ecs.init() */
+    {
+        w = *(ecs_world_t**)lua_touserdata(L, 1);
+        lua_pushvalue(L, 1);
+    }
+
+    /* registry[world] = { [cursors], [types], [collect], ... } */
+    lua_createtable(L, 4, 0);
+    lua_pushvalue(L, -1);
+    lua_rawsetp(L, LUA_REGISTRYINDEX, w);
+
+        if(default_world) lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT);
+        else lua_pushvalue(L, 1);
+
+        lua_rawseti(L, -2, ECS_LUA_CONTEXT);
+
+        lua_createtable(L, 128, 0);
+        lua_rawseti(L, -2, ECS_LUA_CURSORS);
+
+        lua_createtable(L, 128, 0);
+        lua_rawseti(L, -2, ECS_LUA_TYPES);
+
+        /* [collect] = { object1, object2, ... } */
+        lua_createtable(L, 16, 0);
+        luaL_setmetatable(L, "ecs_collect_t");
+        lua_rawseti(L, -2, ECS_LUA_COLLECT);
+
+    lua_pop(L, 1);
+
+    luaL_setfuncs(L, ecs_lib, 1);
 
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
     ECS_LUA_ENUMS(XX)
@@ -430,34 +508,42 @@ static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
     lua_State *L = ctx.L;
     ecs_world_t *world = ctx.world;
 
+    ecs_lua__prolog(L);
+
+    ecs_lua_ctx *default_ctx = ecs_lua_get_context(L, NULL);
+
+    if(default_ctx) return default_ctx;
+
     ecs_lua_ctx *lctx = lua_newuserdata(L, sizeof(ecs_lua_ctx));
-    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_CONTEXT);
+
+    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT);
 
     memcpy(lctx, &ctx, sizeof(ecs_lua_ctx));
 
     lctx->error = 0;
     lctx->progress_ref = LUA_NOREF;
+    lctx->prefix_ref = LUA_NOREF;
 
-    ecs_entity_t MetaTypeSerializer = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
-    ecs_assert(MetaTypeSerializer != 0, ECS_INTERNAL_ERROR, NULL);
-
-    lctx->serializer_id = MetaTypeSerializer;
+    lctx->serializer_id = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
+    ecs_assert(lctx->serializer_id != 0, ECS_INTERNAL_ERROR, NULL);
 
     lctx->metatype_id = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     ecs_assert(lctx->metatype_id != 0, ECS_INTERNAL_ERROR, NULL);
 
-    lua_pushinteger(L, MetaTypeSerializer);
+    lua_pushinteger(L, lctx->serializer_id);
     lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_SERIALIZER);
 
     luaL_requiref(L, "ecs", luaopen_ecs, 1);
     lua_pop(L, 1);
+
+    ecs_lua__epilog(L);
 
     return lctx;
 }
 
 static void ecs_lua_exit(lua_State *L)
 {
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L, NULL);
 
     if( !(ctx->internal & ECS_LUA__KEEPOPEN) ) lua_close(L);
 }
@@ -505,8 +591,11 @@ static void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
 /* Should only be called on ecs_fini() */
 ECS_DTOR(EcsLuaHost, ptr,
 {
-    lua_close(ptr->L);
-    ptr->L = NULL;
+    if(ecs_lua_get_world(ptr->L) == world)
+    {
+        lua_close(ptr->L);
+        ptr->L = NULL;
+    }
 });
 
 void FlecsLuaImport(ecs_world_t *w)
@@ -520,7 +609,7 @@ void FlecsLuaImport(ecs_world_t *w)
     ECS_COMPONENT_DEFINE(w, EcsLuaHost);
 
     ECS_META(w, EcsLuaWorldInfo);
-    ECS_META(w, EcsLuaWorldStats);
+    //ECS_META(w, EcsLuaWorldStats);
 
     ECS_EXPORT_COMPONENT(EcsLuaHost);
 

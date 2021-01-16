@@ -64,8 +64,8 @@ int progress(lua_State *L)
 
 int progress_cb(lua_State *L)
 {
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
-    ecs_world_t *w = ctx->world;
+    ecs_world_t *w = ecs_lua_world(L);
+    ecs_lua_ctx *ctx = ecs_lua_get_context(L, w);
 
     luaL_checktype(L, 1, LUA_TFUNCTION);
     ctx->progress_ref = luaL_ref(L, LUA_REGISTRYINDEX);

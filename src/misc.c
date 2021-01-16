@@ -86,8 +86,7 @@ int assert_func(lua_State *L)
 
 int sizeof_component(lua_State *L)
 {
-    ecs_lua_ctx *ctx = ecs_lua_get_context(L);
-    ecs_world_t *w = ctx->world;
+    ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
