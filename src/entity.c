@@ -121,6 +121,7 @@ int delete_entity(lua_State *L)
             lua_rawgeti(L, 1, i + 1);
             entity = luaL_checkinteger(L, -1);
             ecs_delete(w, entity);
+            lua_pop(L, 1);
         }
 
         return 0;
@@ -443,8 +444,8 @@ int get_type(lua_State *L)
 
     if(type)
     {
-        ecs_vector_t **ptr = lua_newuserdata(L, sizeof(ecs_vector_t*));
-        *ptr = (ecs_vector_t*)type;
+        void *ptr = lua_newuserdata(L, sizeof(ecs_type_t*));
+        memcpy(ptr, &type, sizeof(ecs_type_t*));
 
         luaL_setmetatable(L, "ecs_type_t");
     }
@@ -793,21 +794,21 @@ int new_alias(lua_State *L)
 
     if(!ecs_has(w, type_entity, EcsComponent)) return luaL_argerror(L, 1, "not a component");
 
-    const EcsMetaType *p = ecs_get(w, type_entity, EcsMetaType);
+    const EcsMetaType *meta = ecs_get(w, type_entity, EcsMetaType);
 
-    if(!p) return luaL_argerror(L, 1, "missing descriptor");
+    if(!meta) return luaL_argerror(L, 1, "missing descriptor");
 
     if(ecs_lookup_fullpath(w, alias) || ecs_lookup(w, alias)) return luaL_argerror(L, 2, "alias already exists");
 
-    EcsMetaType meta = *p;
+    ecs_entity_t component = ecs_new_component_id(w);
 
-    ecs_entity_t e = ecs_new_component(w, 0, NULL, meta.size, meta.alignment);
+    ecs_set(w, component, EcsName, {.alloc_value = (char*)alias});
 
-    ecs_set(w, e, EcsName, {.alloc_value = (char*)alias});
+    ecs_set(w, component, EcsMetaType, {.kind = meta->kind, .descriptor = meta->descriptor});
 
-    ecs_new_meta(w, e, &meta);
+    ecs_new_component(w, component, NULL, meta->size, meta->alignment);
 
-    lua_pushinteger(L, e);
+    lua_pushinteger(L, component);
 
     return 1;
 }
