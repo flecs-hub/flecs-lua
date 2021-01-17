@@ -13,6 +13,7 @@ const int ecs_lua__ser;
 #define ECS_LUA_CURSORS (2)
 #define ECS_LUA_TYPES   (3)
 #define ECS_LUA_COLLECT (4)
+#define ECS_LUA_SYSTEMS (5)
 
 /* Internal version for API functions */
 static inline ecs_world_t *ecs_lua_world(lua_State *L)
@@ -22,6 +23,15 @@ static inline ecs_world_t *ecs_lua_world(lua_State *L)
     if(!w) luaL_argerror(L, 0, "world was destroyed");
 
     return w;
+}
+
+static inline bool ecs_lua_deferred(ecs_world_t *w)
+{
+    bool b = !ecs_defer_begin(w);
+
+    ecs_defer_end(w);
+
+    return b;
 }
 
 #define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
@@ -64,13 +74,13 @@ void ecs_lua__assert(lua_State *L, bool condition, const char *param, const char
 typedef struct ecs_lua_ctx
 {
     lua_State *L;
+    ecs_world_t *world;
     int flags;
 
     int internal;
     int error;
     int progress_ref;
     int prefix_ref;
-    ecs_world_t *world;
 
     ecs_entity_t serializer_id;
     ecs_entity_t metatype_id;
@@ -79,6 +89,7 @@ typedef struct ecs_lua_ctx
 typedef struct ecs_lua_system
 {
     lua_State *L;
+    const char *name;
     int func_ref;
     int param_ref;
     bool trigger;

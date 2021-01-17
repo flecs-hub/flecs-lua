@@ -1,6 +1,7 @@
 #include "private.h"
 
 static ECS_COMPONENT_DECLARE(EcsLuaHost);
+static ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
 
 static const int ecs_lua__default;
 
@@ -543,14 +544,40 @@ static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
 
 static void ecs_lua_exit(lua_State *L)
 {
+    if(!L) return;
+
     ecs_lua_ctx *ctx = ecs_lua_get_context(L, NULL);
 
     if( !(ctx->internal & ECS_LUA__KEEPOPEN) ) lua_close(L);
 }
 
+static void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+    if(!nsize)
+    {
+        ecs_os_free(ptr);
+        return NULL;
+    }
+
+    return ecs_os_realloc(ptr, nsize);
+}
+
 lua_State *ecs_lua_get_state(ecs_world_t *world)
 {
     const EcsLuaHost *host = ecs_singleton_get(world, EcsLuaHost);
+
+    if(!host)
+    {
+        lua_State *L = lua_newstate(Allocf, NULL);
+
+        ecs_lua_ctx param = { L, world };
+
+        ecs_lua_ctx *ctx = ctx_init(param);
+
+        ecs_singleton_set(world, EcsLuaHost, { L, ctx });
+
+        host = ecs_singleton_get(world, EcsLuaHost);
+    }
 
     ecs_assert(host != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(host->L != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -576,17 +603,10 @@ int ecs_lua_set_state(ecs_world_t *world, lua_State *L)
     return 0;
 }
 
-static void *Allocf(void *ud, void *ptr, size_t osize, size_t nsize)
+ECS_CTOR(EcsLuaHost, ptr,
 {
-    if(!nsize)
-    {
-        ecs_os_free(ptr);
-        return NULL;
-    }
-
-    return ecs_os_realloc(ptr, nsize);
-}
-
+    memset(ptr, 0, sizeof(EcsLuaHost));
+});
 
 /* Should only be called on ecs_fini() */
 ECS_DTOR(EcsLuaHost, ptr,
@@ -598,6 +618,14 @@ ECS_DTOR(EcsLuaHost, ptr,
     }
 });
 
+/**
+*
+* Must be used together with ECS_COMPONENT_DECLARE.
+*/
+#define ECS_META_DEFINE(world, T)\
+    ECS_COMPONENT_DEFINE(world, T);\
+    ecs_new_meta(world, ecs_entity(T), &__##T##__);
+
 void FlecsLuaImport(ecs_world_t *w)
 {
     ECS_MODULE(w, FlecsLua);
@@ -608,20 +636,14 @@ void FlecsLuaImport(ecs_world_t *w)
 
     ECS_COMPONENT_DEFINE(w, EcsLuaHost);
 
-    ECS_META(w, EcsLuaWorldInfo);
+    ECS_META_DEFINE(w, EcsLuaWorldInfo);
     //ECS_META(w, EcsLuaWorldStats);
 
     ECS_EXPORT_COMPONENT(EcsLuaHost);
 
-    lua_State *L = lua_newstate(Allocf, NULL);
-
-    ecs_lua_ctx param = { .L = L, .world = w};
-    ecs_lua_ctx *ctx = ctx_init(param);
-
-    ecs_singleton_set(w, EcsLuaHost, { .L = L, .ctx = ctx });
-
     ecs_set_component_actions(w, EcsLuaHost,
     {
+        .ctor = ecs_ctor(EcsLuaHost),
         .dtor = ecs_dtor(EcsLuaHost)
     });
 }

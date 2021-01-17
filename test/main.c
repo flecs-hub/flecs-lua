@@ -61,10 +61,6 @@ ECS_STRUCT(lua_test_struct,
     lua_test_comp2 comp2;
 });
 
-ECS_DECLARE_COMPONENT(lua_test_comp);
-ECS_DECLARE_COMPONENT(lua_test_comp2);
-ECS_DECLARE_COMPONENT(lua_test_struct);
-
 struct vars
 {
     lua_test_struct s;
@@ -240,12 +236,67 @@ ECS_COPY(lua_test_struct, dst, src,
     dst->str = t;
 });
 
+typedef struct Test
+{
+    ECS_DECLARE_COMPONENT(lua_test_comp);
+    ECS_DECLARE_COMPONENT(lua_test_comp2);
+    ECS_DECLARE_COMPONENT(lua_test_struct);
+}Test;
+
+#define TestImportHandles(handles)\
+    ECS_IMPORT_COMPONENT(handles, lua_test_comp);\
+    ECS_IMPORT_COMPONENT(handles, lua_test_comp2);\
+    ECS_IMPORT_COMPONENT(handles, lua_test_struct);
+
+static void TestImport(ecs_world_t *w)
+{
+    ECS_MODULE(w, Test);
+
+    ECS_IMPORT(w, FlecsMeta);
+
+    ecs_entity_t scope = ecs_set_scope(w, 0);
+
+    init_globals();
+
+    ECS_META(w, lua_test_comp);
+    ECS_META(w, lua_test_comp2);
+    ECS_META(w, lua_test_enum);
+    ECS_META(w, lua_test_bitmask);
+    ECS_META(w, lua_test_vector);
+    ECS_META(w, lua_test_mapi32);
+    ECS_META(w, lua_test_struct);
+
+    ecs_set_component_actions(w, lua_test_struct,
+    {
+        .ctor = ecs_ctor(lua_test_struct),
+        .dtor = ecs_dtor(lua_test_struct),
+        .copy = ecs_copy(lua_test_struct),
+    });
+
+    ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
+    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
+    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
+    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
+
+    ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g.s);
+    ecs_set_ptr(w, ecs_typeid(lua_test_struct), lua_test_struct, &g.s);
+
+    lua_State *L = new_test_state();
+    ecs_lua_set_state(w, L);
+
+    ecs_assert(custom_alloc, ECS_INTERNAL_ERROR, NULL);
+
+    /* The pointer shouldn't change */
+    ecs_assert(L == ecs_lua_get_state(w), ECS_INTERNAL_ERROR , NULL);
+
+    init_test_state(L);
+
+    ecs_set_scope(w, scope);
+}
 
 int main(int argc, char **argv)
 {
     if(argc < 2) return 1;
-
-    init_globals();
 
     ecs_os_set_api_defaults();
     ecs_os_api_t os_api = ecs_os_api;
@@ -260,39 +311,9 @@ int main(int argc, char **argv)
 
     ECS_IMPORT(w, FlecsLua);
 
-    ECS_META(w, lua_test_comp);
-    ECS_META(w, lua_test_comp2);
-    ECS_META(w, lua_test_enum);
-    ECS_META(w, lua_test_bitmask);
-    ECS_META(w, lua_test_vector);
-    ECS_META(w, lua_test_mapi32);
-    ECS_META(w, lua_test_struct);
+    ECS_IMPORT(w, Test);
 
-
-    ecs_set_component_actions(w, lua_test_struct,
-    {
-        .ctor = ecs_ctor(lua_test_struct),
-        .dtor = ecs_dtor(lua_test_struct),
-        .copy = ecs_copy(lua_test_struct),
-    });
-
-
-    ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
-    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
-    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
-    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
-
-    ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g.s);
-    ecs_set_ptr(w, ecs_typeid(lua_test_struct), lua_test_struct, &g.s);
-
-    lua_State *L = new_test_state();
-    ecs_lua_set_state(w, L);
-    ecs_assert(custom_alloc, ECS_INTERNAL_ERROR, NULL);
-
-    /* Just to test the function, the pointer doesn't change */
-    L = ecs_lua_get_state(w);
-
-    init_test_state(L);
+    lua_State *L = ecs_lua_get_state(w);
 
     int ret = luaL_dofile(L, argv[1]);
 

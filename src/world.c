@@ -2,16 +2,16 @@
 
 int world_new(lua_State *L)
 {
-    (void)ecs_lua_world(L);
-    ecs_world_t *w = ecs_init();
+    ecs_world_t *w = ecs_lua_world(L);
+    ecs_world_t *w2 = ecs_init();
 
-    ECS_IMPORT(w, FlecsLua);
+    ECS_IMPORT(w2, FlecsLua);
 
-    ecs_lua_set_state(w, L);
+    ecs_lua_set_state(w2, L);
 
     lua_pushcfunction(L, luaopen_ecs);
     ecs_world_t **ptr = lua_newuserdata(L, sizeof(ecs_world_t*));
-    *ptr = w;
+    *ptr = w2;
 
     luaL_setmetatable(L, "ecs_world_t");
 
@@ -32,9 +32,6 @@ int world_gc(lua_State *L)
 
     lua_pushnil(L);
 
-    int top = lua_gettop(L);
-    top = lua_type(L, -2);
-
     while(lua_next(L, -2))
     {
         luaL_callmeta(L, -1, "__gc");
@@ -42,7 +39,7 @@ int world_gc(lua_State *L)
         lua_pop(L, 1);
     }
 
-    top = lua_gettop(L);
+    lua_pop(L, 2);
 
     /* registry[world] = nil */
     lua_pushnil(L);
