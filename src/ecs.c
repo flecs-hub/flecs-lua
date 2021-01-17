@@ -83,13 +83,21 @@ bool ecs_lua_progress(lua_State *L, lua_Number delta_time)
 
 void register_collectible(lua_State *L, ecs_world_t *w, int idx)
 {
-    lua_rawgetp(L, LUA_REGISTRYINDEX, w);
-    lua_rawgeti(L, -1, ECS_LUA_COLLECT);
+    ecs_lua__prolog(L);
+    idx = lua_absindex(L, idx);
+    int type = lua_rawgetp(L, LUA_REGISTRYINDEX, w);
+    ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
-    lua_pushvalue(L, lua_absindex(L, idx));
-    luaL_ref(L, -2);
+    type = lua_rawgeti(L, -1, ECS_LUA_COLLECT);
+    ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    lua_type(L, idx);
+    lua_pushvalue(L, idx);
+    lua_pushboolean(L, 1);
+    lua_settable(L, -3);
 
     lua_pop(L, 2);
+    ecs_lua__epilog(L);
 }
 
 /* Entity */
@@ -208,6 +216,7 @@ int assert_func(lua_State *L);
 int sizeof_component(lua_State *L);
 int createtable(lua_State *L);
 int zero_init_component(lua_State *L);
+int get_world_ptr(lua_State *L);
 
 /* Time */
 int get_time(lua_State *L);
@@ -356,6 +365,7 @@ static const luaL_Reg ecs_lib[] =
     { "sizeof", sizeof_component },
     { "createtable", createtable },
     { "zero_init", zero_init_component },
+    { "world_ptr", get_world_ptr },
 
     { "get_time", get_time },
     { "time_measure", time_measure },
@@ -490,7 +500,7 @@ int luaopen_ecs(lua_State *L)
         luaL_setmetatable(L, "ecs_collect_t");
         lua_rawseti(L, -2, ECS_LUA_COLLECT);
 
-    lua_pop(L, 1);
+    lua_pop(L, 1); /* registry[world] */
 
     luaL_setfuncs(L, ecs_lib, 1);
 
@@ -611,8 +621,9 @@ ECS_CTOR(EcsLuaHost, ptr,
 /* Should only be called on ecs_fini() */
 ECS_DTOR(EcsLuaHost, ptr,
 {
-    if(ecs_lua_get_world(ptr->L) == world)
-    {
+    ecs_world_t *w = ecs_lua_get_world(ptr->L);
+    if(w == world)
+    {//TODO: force-gc all other worlds
         lua_close(ptr->L);
         ptr->L = NULL;
     }

@@ -652,6 +652,11 @@ end
 function ecs.zero_init(component)
 end
 
+---Get world pointer
+---@return lightuserdata
+function ecs.world_ptr()
+end
+
 ---@class ecs_time_t
 ---@field sec integer
 ---@field nanosec integer

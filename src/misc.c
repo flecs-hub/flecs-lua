@@ -141,6 +141,15 @@ int zero_init_component(lua_State *L)
     return 0;
 }
 
+int get_world_ptr(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    lua_pushlightuserdata(L, w);
+
+    return 1;
+}
+
 void ecs_lua__assert(lua_State *L, bool condition, const char *param, const char *condition_str)
 {
     if(!condition) luaL_error(L, "assert(%s) failed", condition_str);
