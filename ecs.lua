@@ -27,7 +27,6 @@ local ecs_snapshot_t = {}
 ---@field columns table[]
 ---@field system integer
 ---@field table_count integer
----@field table_offset integer
 ---@field delta_time number
 ---@field delta_system_time number
 ---@field world_time number

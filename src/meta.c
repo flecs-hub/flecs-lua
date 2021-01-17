@@ -676,10 +676,6 @@ static void push_iter_metadata(lua_State *L, ecs_iter_t *it)
     lua_pushinteger(L, it->table_count);
     lua_setfield(L, -2, "table_count");
 
-    /* it.table_offset */
-    lua_pushinteger(L, it->table_offset);
-    lua_setfield(L, -2, "table_offset");
-
     /* it.interrupted_by */
     lua_pushinteger(L, it->interrupted_by);
     lua_setfield(L, -2, "interrupted_by");
