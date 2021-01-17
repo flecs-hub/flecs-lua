@@ -4,6 +4,7 @@ int world_new(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
     ecs_world_t *w2 = ecs_init();
+    (void)w;
 
     ECS_IMPORT(w2, FlecsLua);
 
@@ -55,9 +56,9 @@ int world_gc(lua_State *L)
 int world_fini(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
-    ecs_world_t *main = ecs_lua_get_world(L);
+    ecs_world_t *default_world = ecs_lua_get_world(L);
 
-    if(w == main) return luaL_argerror(L, 0, "cannot destroy default world");
+    if(w == default_world) return luaL_argerror(L, 0, "cannot destroy default world");
 
     luaL_callmeta(L, lua_upvalueindex(1), "__gc");
 
