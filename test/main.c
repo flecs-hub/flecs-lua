@@ -67,7 +67,6 @@ struct vars
 };
 
 static struct vars g;
-static struct vars g_out;
 
 #define TEST_COMP_INIT { .foo = 123.4f, .u16a = 123, 4321, 32, 688}
 
@@ -121,8 +120,8 @@ int lpush_test_struct(lua_State *L)
 int lset_test_struct(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_get_world(L);
-
-    return 1;
+    (void)w;
+    return 0;
 }
 
 static const luaL_Reg test_lib[] =
@@ -177,36 +176,9 @@ static lua_State *new_test_state(void)
 
 static void test_abort(void)
 {
-    printf("TEST: ecs_os_abort() was called!\n");
+    fprintf(stderr, "TEST: ecs_os_abort() was called!\n");
     fflush(stdout);
     printf("\n");
-}
-
-static void test_msg(const char *type, const char *fmt, va_list args)
-{
-    printf("TEST %s: ", type);
-    vprintf(fmt, args);
-    printf("\n");
-}
-
-static void test_log(const char *fmt, va_list args)
-{
-    test_msg("LOG", fmt, args);
-}
-
-static void test_error(const char *fmt, va_list args)
-{
-    test_msg("ERROR", fmt, args);
-}
-
-static void test_debug(const char *fmt, va_list args)
-{
-    test_msg("DBG", fmt, args);
-}
-
-static void test_warn(const char *fmt, va_list args)
-{
-    test_msg("WARN", fmt, args);
 }
 
 ECS_CTOR(lua_test_struct, ptr,
@@ -301,10 +273,6 @@ int main(int argc, char **argv)
     ecs_os_set_api_defaults();
     ecs_os_api_t os_api = ecs_os_api;
     os_api.abort_ = test_abort;
-    /*os_api.log_ = test_log;
-    os_api.log_error_ = test_error;
-    os_api.log_debug_ = test_debug;
-    os_api.log_warning_ = test_warn;*/
     ecs_os_set_api(&os_api);
 
     ecs_world_t *w = ecs_init();
