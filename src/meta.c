@@ -109,36 +109,6 @@ void serialize_int32(
 }
 
 static
-void serialize_enum(
-    ecs_world_t *world,
-    ecs_type_op_t *op,
-    const void *base,
-    lua_State *L)
-{
-    const EcsEnum *enum_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
-    ecs_assert(enum_type != NULL, ECS_INVALID_PARAMETER, NULL);
-
-    int32_t value = *(int32_t*)base;
-
-    lua_pushinteger(L, value);
-}
-
-static
-void serialize_bitmask(
-    ecs_world_t *world,
-    ecs_type_op_t *op,
-    const void *base,
-    lua_State *L)
-{
-    const EcsBitmask *bitmask_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
-    ecs_assert(bitmask_type != NULL, ECS_INVALID_PARAMETER, NULL);
-
-    int32_t value = *(int32_t*)base;
-
-    lua_pushinteger(L, value);
-}
-
-static
 void serialize_elements(
     ecs_world_t *world,
     ecs_vector_t *elem_ops,
