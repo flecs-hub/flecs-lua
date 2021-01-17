@@ -24,7 +24,7 @@ local function sys(it)
     local count = 0
     for p, v, e in ecs.each(it) do
         count = count + 1
-        u.print_r(p)
+        --u.print_r(p)
         assert(p.x == count * 10)
         assert(p.y == count * 11)
         assert(v.x == count * 12)
@@ -40,7 +40,7 @@ local function sys(it)
     count = 0
     for p, v, e in ecs.each(it) do
         count = count + 1
-        u.print_r(p)
+        --u.print_r(p)
         assert(p.x == count * 10 + 1)
         assert(p.y == count * 11 + 2)
         assert(v.x == count * 12 + 3)
