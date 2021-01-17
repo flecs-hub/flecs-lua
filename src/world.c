@@ -31,13 +31,16 @@ int world_gc(lua_State *L)
     lua_rawgetp(L, LUA_REGISTRYINDEX, w);
     lua_rawgeti(L, -1, ECS_LUA_COLLECT);
 
+    int idx = lua_absindex(L, -1);
+
     lua_pushnil(L);
 
-    while(lua_next(L, -2))
+    while(lua_next(L, idx))
     {
-        luaL_callmeta(L, -1, "__gc");
+        int ret = luaL_callmeta(L, -2, "__gc");
+        ecs_assert(ret != 0, ECS_INTERNAL_ERROR, NULL);
 
-        lua_pop(L, 1);
+        lua_pop(L, 2); /* callmeta pushes a value */
     }
 
     lua_pop(L, 2);
