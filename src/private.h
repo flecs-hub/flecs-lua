@@ -34,13 +34,16 @@ static inline bool ecs_lua_deferred(ecs_world_t *w)
     return b;
 }
 
-#define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
-#define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
-
 #ifdef NDEBUG
     #define ecs_lua_dbg(fmt, ...)
+
+    #define ecs_lua__prolog(L)
+    #define ecs_lua__epilog(L)
 #else
     #define ecs_lua_dbg(fmt, ...) //ecs_os_dbg(fmt, __VA_ARGS__)
+
+    #define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
+    #define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
 #endif
 
 /* ecs */
