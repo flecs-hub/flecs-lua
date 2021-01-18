@@ -216,6 +216,25 @@ end
 function ecs.get_parent(e, c)
 end
 
+---Enable component for entity
+---@param entity integer
+---@param component intger
+function ecs.enable_component(entity, component)
+end
+
+---Disable component for entity
+---@param entity integer
+---@param component intger
+function ecs.disable_component(entity, component)
+end
+
+---Test if component is enabled for entity
+---@param entity integer
+---@param component intger
+---@return boolean
+function ecs.is_component_enabled(entity, component)
+end
+
 ---Add a trait to an entity
 ---@param e integer
 ---@param component integer

@@ -129,6 +129,10 @@ int get_type(lua_State *L);
 int get_typeid(lua_State *L);
 int get_parent(lua_State *L);
 
+int enable_component(lua_State *L);
+int disable_component(lua_State *L);
+int is_component_enabled(lua_State *L);
+
 int add_trait(lua_State *L);
 int remove_trait(lua_State *L);
 int has_trait(lua_State *L);
@@ -289,6 +293,10 @@ static const luaL_Reg ecs_lib[] =
     { "type", new_type },
     { "get_type", get_type },
     { "get_typeid", get_typeid },
+
+    { "enable_component", enable_component },
+    { "disable_component", disable_component },
+    { "is_component_enabled", is_component_enabled },
 
     { "add_trait", add_trait },
     { "remove_trait", remove_trait },

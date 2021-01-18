@@ -483,6 +483,44 @@ int get_parent(lua_State *L)
     return 1;
 }
 
+int enable_component(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = luaL_checkinteger(L, 2);
+
+    ecs_enable_component_w_entity(w, e, c, true);
+
+    return 0;
+}
+
+int disable_component(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = luaL_checkinteger(L, 2);
+
+    ecs_enable_component_w_entity(w, e, c, false);
+
+    return 0;
+}
+
+int is_component_enabled(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t c = luaL_checkinteger(L, 2);
+
+    int b = ecs_is_component_enabled_w_entity(w, e, c);
+
+    lua_pushboolean(L, b);
+
+    return 1;
+}
+
 int add_trait(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
