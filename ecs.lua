@@ -138,6 +138,13 @@ end
 function ecs.has(e, to_check)
 end
 
+---Test if an entity owns a component
+---@param entity integer
+---@param component integer
+---@return boolean
+function ecs.owns(entity, component)
+end
+
 ---Test if an entity has a role
 ---@param e integer @entity
 ---@param role integer

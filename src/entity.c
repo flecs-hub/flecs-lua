@@ -299,6 +299,30 @@ int entity_has(lua_State *L)
     return 1;
 }
 
+int entity_owns(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_type_t type = ecs_get_type(w, e);
+    int b;
+
+    if(lua_isinteger(L, 2))
+    {
+        ecs_entity_t to_check = luaL_checkinteger(L, 2);
+        b = ecs_type_owns_entity(w, type, to_check, true);
+    }
+    else
+    {
+        ecs_type_t to_check = checktype(L, 2);
+        b = ecs_type_owns_type(w, type, to_check, true);
+    }
+
+    lua_pushboolean(L, b);
+
+    return 1;
+}
+
 int has_role(lua_State *L)
 {
     ecs_entity_t e = luaL_checkinteger(L, 1);

@@ -93,7 +93,12 @@ assert(not pcall(function() ecs.array("LuaArray", "LuaStruct", 4) end))
 
 assert(not ecs.has(id_name_comp, arr))
 
+assert(ecs.owns(id_name_comp, ecs.get_type(arr)) == false)
+assert(ecs.owns(id_name_comp, arr) == false)
+
 ecs.add(id_name_comp, arr)
+assert(ecs.owns(id_name_comp, arr) == true)
+--assert(ecs.owns(id_name_comp, ecs.get_type(arr)) == true)
 assert(ecs.has(id_name_comp, arr))
 assert(ecs.is_component_enabled(id_name_comp, arr) == true)
 
