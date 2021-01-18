@@ -3,17 +3,18 @@
 static ECS_COMPONENT_DECLARE(EcsLuaHost);
 static ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
 
-static const int ecs_lua__default;
+static const int ecs_lua__ctx;
+static const int ecs_lua__world;
 
-/* Default context key */
-#define ECS_LUA_DEFAULT (&ecs_lua__default)
+#define ECS_LUA_DEFAULT_CTX (&ecs_lua__ctx)
+#define ECS_LUA_DEFAULT_WORLD (&ecs_lua__world)
 
 #define ECS_LUA__KEEPOPEN 1
 
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L, ecs_world_t *world)
 {
     int type;
-    ecs_lua_ctx *p;
+    ecs_lua_ctx *ctx;
 
     if(world)
     {
@@ -25,17 +26,17 @@ ecs_lua_ctx *ecs_lua_get_context(lua_State *L, ecs_world_t *world)
         type = lua_rawgeti(L, -1, ECS_LUA_CONTEXT);
         //ecs_assert(type == LUA_TUSERDATA, ECS_INTERNAL_ERROR, NULL);
 
-        p = lua_touserdata(L, -1);
+        ctx = lua_touserdata(L, -1);
         lua_pop(L, 2);
 
-        return p;
+        return ctx;
     }
 
-    lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT);
-    p = lua_touserdata(L, -1);
+    lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT_CTX);
+    ctx = lua_touserdata(L, -1);
     lua_pop(L, 1);
 
-    return p;
+    return ctx;
 }
 
 ecs_world_t *ecs_lua_get_world(lua_State *L)
@@ -471,7 +472,10 @@ int luaopen_ecs(lua_State *L)
 
         ecs_world_t **ptr = lua_newuserdata(L, sizeof(ecs_world_t*));
         *ptr = w;
-        /*luaL_setmetatable(L, "ecs_world_t");*/
+
+        luaL_setmetatable(L, "ecs_world_t");
+        lua_pushvalue(L, -1);
+        lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT_WORLD);
     }
     else /* ecs.init() */
     {
@@ -484,7 +488,7 @@ int luaopen_ecs(lua_State *L)
     lua_pushvalue(L, -1);
     lua_rawsetp(L, LUA_REGISTRYINDEX, w);
 
-        if(default_world) lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT);
+        if(default_world) lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT_CTX);
         else lua_pushvalue(L, 1);
 
         lua_rawseti(L, -2, ECS_LUA_CONTEXT);
@@ -495,8 +499,8 @@ int luaopen_ecs(lua_State *L)
         lua_createtable(L, 128, 0);
         lua_rawseti(L, -2, ECS_LUA_TYPES);
 
-        /* [collect] = { object1, object2, ... } */
-        lua_createtable(L, 16, 0);
+        /* world[collect] = { [object1], [object2], ... } */
+        lua_createtable(L, 0, 16);
         luaL_setmetatable(L, "ecs_collect_t");
         lua_rawseti(L, -2, ECS_LUA_COLLECT);
 
@@ -527,7 +531,7 @@ static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
 
     ecs_lua_ctx *lctx = lua_newuserdata(L, sizeof(ecs_lua_ctx));
 
-    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT);
+    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT_CTX);
 
     memcpy(lctx, &ctx, sizeof(ecs_lua_ctx));
 
@@ -621,10 +625,16 @@ ECS_CTOR(EcsLuaHost, ptr,
 /* Should only be called on ecs_fini() */
 ECS_DTOR(EcsLuaHost, ptr,
 {
-    ecs_world_t *w = ecs_lua_get_world(ptr->L);
-    if(w == world)
-    {//TODO: force-gc all other worlds
-        lua_close(ptr->L);
+    lua_State *L = ptr->L;
+    if(L == NULL) continue;
+
+    ecs_world_t *wdefault = ecs_lua_get_world(L);
+    if(wdefault == world)
+    {/* This is the default world in this VM */
+        lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT_WORLD);
+        luaL_callmeta(L, -1, "__gc");
+
+        lua_close(L);
         ptr->L = NULL;
     }
 });

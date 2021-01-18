@@ -3,8 +3,11 @@ local u = require "util"
 
 local runs = 0
 
-ecs.progress_cb(function()
+ecs.progress_cb(function(delta_time)
+
     ecs.log("progress()!")
+
+    assert(delta_time == 2.0)
 
     runs = runs + 1
     assert(runs <= 1)
@@ -36,6 +39,7 @@ time.nanosec = 0
 assert(not pcall(function () ecs.time_measure(time) end))
 
 ecs.tracing_enable(3)
+ecs.tracing_enable(0)
 
 runs = 2
 
@@ -71,3 +75,26 @@ assert(zero.z == 0)
 --local e = ecs.lookup_fullpath("flecs.lua.LuaWorldStats")
 --print(ecs.emmy_class(e))
 
+
+local w2 = ecs.init()
+
+w2.delete(w2.bulk_new(100))
+
+ecs.new(4444, "world_test")
+w2.new(4444, "world_test2")
+
+assert(ecs.name(4444) == "world_test")
+assert(w2.name(4444) == "world_test2")
+
+w2.fini()
+assert(not pcall(function () w2.fini() end))
+assert(not pcall(function () ecs.fini() end))
+
+local w3 = ecs.init()
+w3.struct("Test", "{int32_t x;}")
+w3.query("Test")
+--Let garbage collection take care of it
+
+ecs.progress_cb = function () end
+
+require "entity"

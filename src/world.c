@@ -2,9 +2,8 @@
 
 int world_new(lua_State *L)
 {
-    ecs_world_t *w = ecs_lua_world(L);
+    ecs_world_t *wdefault = ecs_lua_world(L);
     ecs_world_t *w2 = ecs_init();
-    (void)w;
 
     ECS_IMPORT(w2, FlecsLua);
 
@@ -16,6 +15,9 @@ int world_new(lua_State *L)
 
     luaL_setmetatable(L, "ecs_world_t");
 
+    /* The __gc of the default world will collect all other worlds */
+    register_collectible(L, wdefault, -1);
+
     lua_call(L, 1, 1);
 
     return 1;
@@ -23,6 +25,7 @@ int world_new(lua_State *L)
 
 int world_gc(lua_State *L)
 {
+    ecs_world_t *wdefault = ecs_lua_get_world(L);
     ecs_world_t **ptr = lua_touserdata(L, 1);
     ecs_world_t *w = *ptr;
 
@@ -45,11 +48,14 @@ int world_gc(lua_State *L)
 
     lua_pop(L, 2);
 
-    /* registry[world] = nil */
-    lua_pushnil(L);
-    lua_rawsetp(L, LUA_REGISTRYINDEX, w);
+    if(w != wdefault)
+    {
+        /* registry[world] = nil */
+        lua_pushnil(L);
+        lua_rawsetp(L, LUA_REGISTRYINDEX, w);
 
-    ecs_fini(w);
+        ecs_fini(w);
+    }
 
     *ptr = NULL;
 
