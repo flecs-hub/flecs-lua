@@ -576,7 +576,7 @@ end
 
 ---Create a snapshot
 ---@param it ecs_iter_t @optional
----@param next_action fuction @optional
+---@param next_action function @optional
 ---@return ecs_snapshot_t
 function ecs.snapshot(it, next_action)
 end
