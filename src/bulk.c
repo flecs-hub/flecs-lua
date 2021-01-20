@@ -4,11 +4,19 @@ int bulk_new(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
+    int noreturn = 0;
+    int args = lua_gettop(L);
+    int last_type = lua_type(L, args);
     lua_Integer count = 0;
     ecs_type_t type = NULL;
-    const ecs_entity_t* entities = NULL;
+    const ecs_entity_t *entities = NULL;
 
-    if(lua_gettop(L) == 2)
+    if(args == 2 && last_type == LUA_TBOOLEAN) /* bulk_new(count, noreturn) */
+    {
+        count = luaL_checkinteger(L, 1);
+        noreturn = lua_toboolean(L, 2);
+    }
+    else if(args >= 2) /* bulk_new(component, count, [noreturn]) */
     {
         ecs_entity_t type_entity = 0;
 
@@ -25,10 +33,13 @@ int bulk_new(lua_State *L)
         type = ecs_type_from_entity(w, type_entity);
 
         count = luaL_checkinteger(L, 2);
+        noreturn = lua_toboolean(L, 3);
     }
     else count = luaL_checkinteger(L, 1);
 
     entities = ecs_bulk_new_w_type(w, type, count);
+
+    if(noreturn) return 0;
 
     lua_createtable(L, count, 0);
 

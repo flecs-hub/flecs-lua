@@ -481,9 +481,20 @@ end
 ---Create N new entities with an optional component
 ---@param type integer|string @optional
 ---@param n integer
+---@param noreturn boolean @do not return the entity ID's
 ---@return integer[]
-function ecs.bulk_new(type, n)
+function ecs.bulk_new(type, n, noreturn)
 end
+
+local Component = ecs.lookup("Component")
+
+ecs.bulk_new(10)
+ecs.bulk_new(Component, 10)
+ecs.bulk_new("Component", 10)
+
+--Does not return the entity ID's
+ecs.bulk_new(10, true)
+ecs.bulk_new(Component, 10, true)
 
 ---Delete entities matching a filter
 ---@param filter ecs_filter_t

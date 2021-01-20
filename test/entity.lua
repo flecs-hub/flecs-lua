@@ -17,6 +17,8 @@ local just_comp = ecs.new(nil, "lua_test_comp")
 local id_name_comps = ecs.new(10001, "multiple_comps", "lua_test_struct, lua_test_comp")
 local bulk = ecs.bulk_new(10)
 local bulk_comp = ecs.bulk_new("lua_test_comp", 10)
+assert(ecs.bulk_new("lua_test_comp", 10, true) == nil)
+assert(ecs.bulk_new(10, true) == nil)
 local lua_test_comp = ecs.lookup("lua_test_comp")
 
 --last argument cannot be nil
