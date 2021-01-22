@@ -182,14 +182,18 @@ end
 function ecs.clear(e)
 end
 
----Enable an entity
+---Enable an entity or entity's component,
+---depending on the number of arguments
 ---@param entity integer
-function ecs.enable(entity)
+---@param component integer
+function ecs.enable(entity, component)
 end
 
----Disable an entity
+---Disable an entity or entity's component,
+---depending on the number of arguments
 ---@param entity integer
-function ecs.disable(entity)
+---@param component integer
+function ecs.disable(entity, component)
 end
 
 ---Delete children of an entity

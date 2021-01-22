@@ -110,6 +110,11 @@ assert(ecs.is_component_enabled(id_name_comp, arr) == false)
 ecs.enable_component(id_name_comp, arr)
 assert(ecs.is_component_enabled(id_name_comp, arr) == true)
 
+ecs.disable(id_name_comp, arr)
+assert(ecs.is_component_enabled(id_name_comp, arr) == false)
+
+ecs.enable(id_name_comp, arr)
+assert(ecs.is_component_enabled(id_name_comp, arr) == true)
 
 ecs.remove(id_name_comp, arr)
 assert(not ecs.has(id_name_comp, arr))

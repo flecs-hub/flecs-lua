@@ -417,7 +417,12 @@ int enable_entity(lua_State *L)
 
     ecs_entity_t e = lua_tointeger(L, 1);
 
-    ecs_enable(w, e, true);
+    if(lua_gettop(L) > 1)
+    {
+        ecs_entity_t c = lua_tointeger(L, 2);
+        ecs_enable_component_w_entity(w, e, c, true);
+    }
+    else ecs_enable(w, e, true);
 
     return 0;
 }
@@ -428,7 +433,12 @@ int disable_entity(lua_State *L)
 
     ecs_entity_t e = lua_tointeger(L, 1);
 
-    ecs_enable(w, e, false);
+    if(lua_gettop(L) > 1)
+    {
+        ecs_entity_t c = lua_tointeger(L, 2);
+        ecs_enable_component_w_entity(w, e, c, false);
+    }
+    else ecs_enable(w, e, false);
 
     return 0;
 }
