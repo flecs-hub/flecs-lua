@@ -653,7 +653,7 @@ ECS_DTOR(EcsLuaHost, ptr,
 *
 * Must be used together with ECS_COMPONENT_DECLARE.
 */
-#define ECS_META_DEFINE(world, T)\
+#define ECS_LUA_META(world, T)\
     ECS_COMPONENT_DEFINE(world, T);\
     ecs_new_meta(world, ecs_entity(T), &__##T##__);
 
@@ -667,7 +667,7 @@ void FlecsLuaImport(ecs_world_t *w)
 
     ECS_COMPONENT_DEFINE(w, EcsLuaHost);
 
-    ECS_META_DEFINE(w, EcsLuaWorldInfo);
+    ECS_LUA_META(w, EcsLuaWorldInfo);
     //ECS_META(w, EcsLuaWorldStats);
 
     ECS_EXPORT_COMPONENT(EcsLuaHost);
