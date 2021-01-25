@@ -301,6 +301,36 @@ end
 function ecs.get_trait_tag(e, trait, component)
 end
 
+---Add a base entity to an entity
+---@param entity integer
+---@param base integer
+function ecs.add_instanceof(entity, base)
+end
+
+---Remove a base entity from an entity
+---@param entity integer
+---@param base integer
+function ecs.remove_instanceof(entity, base)
+end
+
+---Add a parent entity to an entity
+---@param entity integer
+---@param parent integer
+function ecs.add_childof(entity, parent)
+end
+
+---Remove a parent entity from an entity
+---@param entity integer
+---@param parent integer
+function ecs.remove_childof(entity, parent)
+end
+
+---Add owned flag for component (forces ownership when instantiating)
+---@param entity integer
+---@param component integer
+function ecs.add_owned(entity, component)
+end
+
 ---Get case for switch
 ---@param entity integer
 ---@param sw integer switch

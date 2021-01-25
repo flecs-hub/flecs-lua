@@ -141,6 +141,11 @@ int set_trait(lua_State *L);
 int set_trait_tag(lua_State *L);
 int get_trait(lua_State *L);
 int get_trait_tag(lua_State *L);
+int add_instanceof(lua_State *L);
+int remove_instanceof(lua_State *L);
+int add_childof(lua_State *L);
+int remove_childof(lua_State *L);
+int add_owned(lua_State *L);
 int add_switch(lua_State *L);
 int remove_switch(lua_State *L);
 int get_case(lua_State *L);
@@ -307,6 +312,11 @@ static const luaL_Reg ecs_lib[] =
     { "set_trait_tag", set_trait_tag },
     { "get_trait", get_trait },
     { "get_trait_tag", get_trait_tag },
+    { "add_instanceof", add_instanceof },
+    { "remove_instanceof", remove_instanceof },
+    { "add_childof", add_childof },
+    { "remove_childof", remove_childof },
+    { "add_owned", add_owned },
     { "add_switch", add_switch },
     { "remove_switch", remove_switch },
     { "get_case", get_case },

@@ -178,6 +178,14 @@ assert(ecs.has(entity, ecs.Disabled))
 ecs.enable(entity)
 assert(not ecs.has(entity, ecs.Disabled))
 
+ecs.add_instanceof(entity, tag)
+ecs.remove_instanceof(entity, tag)
+
+ecs.add_childof(entity, tag)
+ecs.remove_childof(entity, tag)
+
+ecs.add_owned(entity, tag)
+
 
 --Lookup
 local LuaWorldInfo = ecs.lookup_fullpath("flecs.lua.LuaWorldInfo")

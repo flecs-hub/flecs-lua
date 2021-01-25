@@ -662,6 +662,66 @@ int get_trait_tag(lua_State *L)
     return 1;
 }
 
+int add_instanceof(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t entity = luaL_checkinteger(L, 1);
+    ecs_entity_t base = luaL_checkinteger(L, 2);
+
+    ecs_add_entity(w, entity, ECS_INSTANCEOF | base);
+
+    return 0;
+}
+
+int remove_instanceof(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t entity = luaL_checkinteger(L, 1);
+    ecs_entity_t base = luaL_checkinteger(L, 2);
+
+    ecs_remove_entity(w, entity, ECS_INSTANCEOF | base);
+
+    return 0;
+}
+
+int add_childof(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t entity = luaL_checkinteger(L, 1);
+    ecs_entity_t parent = luaL_checkinteger(L, 2);
+
+    ecs_add_entity(w, entity, ECS_CHILDOF | parent);
+
+    return 0;
+}
+
+int remove_childof(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t entity = luaL_checkinteger(L, 1);
+    ecs_entity_t parent = luaL_checkinteger(L, 2);
+
+    ecs_remove_entity(w, entity, ECS_CHILDOF | parent);
+
+    return 0;
+}
+
+int add_owned(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t entity = luaL_checkinteger(L, 1);
+    ecs_entity_t component = luaL_checkinteger(L, 2);
+
+    ecs_add_entity(w, entity, ECS_OWNED | component);
+
+    return 0;
+}
+
 int add_switch(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
