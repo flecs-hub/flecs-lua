@@ -147,6 +147,26 @@ ECS_STRUCT(EcsLuaWorldStats,
     int32_t discard_count;
 });
 
+#define ECS_LUA_BUILTINS(XX) \
+    XX(Component) \
+    XX(ComponentLifecycle) \
+    XX(Type) \
+    XX(Name) \
+\
+    XX(Trigger) \
+    XX(System) \
+    XX(TickSource) \
+    XX(SignatureExpr) \
+    XX(Signature) \
+    XX(Query) \
+    XX(IterAction) \
+    XX(Context) \
+\
+    XX(PipelineQuery) \
+\
+    XX(Timer) \
+    XX(RateFilter)
+
 #define ECS_LUA_ENUMS(XX) \
     XX(MatchDefault) \
     XX(MatchAll) \

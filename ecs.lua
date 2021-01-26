@@ -970,6 +970,21 @@ local ecs_type_op_t = {}
 local EcsMetaTypeSerializer = {}
 
 
+ecs.Component = 1
+ecs.ComponentLifecycle = 2
+ecs.Type = 3
+ecs.Name = 6
+ecs.Trigger = 4
+ecs.System = 5
+ecs.TickSource = 7
+ecs.SignatureExpr = 8
+ecs.Signature = 9
+ecs.Query = 10
+ecs.IterAction = 11
+ecs.Context = 12
+ecs.PipelineQuery = 13
+ecs.Timer = 14
+ecs.RateFilter = 15
 ecs.MatchDefault = 0
 ecs.MatchAll = 1
 ecs.MatchAny = 2

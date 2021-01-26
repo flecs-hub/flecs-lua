@@ -530,6 +530,9 @@ int luaopen_ecs(lua_State *L)
 
     luaL_setfuncs(L, ecs_lib, 1);
 
+#define XX(const) lua_pushinteger(L, ecs_typeid(Ecs##const)); lua_setfield(L, -2, #const);
+    ECS_LUA_BUILTINS(XX)
+#undef XX
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
     ECS_LUA_ENUMS(XX)
 #undef XX
