@@ -96,6 +96,9 @@ int new_entity(lua_State *L)
     /* create an entity, the following functions will take the same id */
     if(!e && args) e = ecs_new_id(w);
 
+    ecs_entity_t scope = ecs_get_scope(w);
+    if(scope) ecs_add_entity(w, e, ECS_CHILDOF | scope);
+
     if(components) ecs_add_type(w, e, ecs_type_from_str(w, components));
 
     if(name) ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
@@ -1113,6 +1116,8 @@ int new_prefab(lua_State *L)
     if(!args)
     {
         e = ecs_new_id(w);
+        ecs_entity_t scope = ecs_get_scope(w);
+        if(scope) ecs_add_entity(w, e, ECS_CHILDOF | scope);
         ecs_add_entity(w, e, EcsPrefab);
     }
     else if(args <= 2)
