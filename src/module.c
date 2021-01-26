@@ -44,3 +44,41 @@ int new_module(lua_State *L)
 
     return 1;
 }
+
+int import_handles(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    const char *c_name = luaL_checkstring(L, 1);
+
+    const char *name = ecs_module_path_from_c(c_name);
+    ecs_entity_t e = ecs_lookup_fullpath(w, name);
+    ecs_os_free((char*)name);
+
+    if(!e || !ecs_has_entity(w, e, EcsModule)) return luaL_argerror(L, 1, "no such module");
+
+    ecs_filter_t filter =
+    {
+        .include = ecs_type(EcsName)
+    };
+
+    ecs_iter_t it = ecs_scope_iter_w_filter(w, e, &filter);
+
+    lua_createtable(L, 0, 4);
+
+    int i;
+    while(ecs_scope_next(&it))
+    {
+        for(i=0; i < it.count; i++)
+        {
+            e = it.entities[i];
+            name = ecs_get_name(w, e);
+            if(!name) continue;
+
+            lua_pushinteger(L, e);
+            lua_setfield(L, -2, name);
+        }
+    }
+
+    return 1;
+}

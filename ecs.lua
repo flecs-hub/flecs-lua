@@ -677,6 +677,12 @@ end
 function ecs.module(name, cb)
 end
 
+---EXPERIMENTAL: Import a loaded module's named entities
+---@param name string
+---@return table|nil
+function ecs.import(name)
+end
+
 ---Print log message
 function ecs.log(...)
 end

@@ -214,6 +214,7 @@ int set_system_context(lua_State *L);
 
 /* Module */
 int new_module(lua_State *L);
+int import_handles(lua_State *L);
 
 /* Log */
 int print_log(lua_State *L);
@@ -375,6 +376,7 @@ static const luaL_Reg ecs_lib[] =
     { "snapshot_next", snapshot_next },
 
     { "module", new_module },
+    { "import", import_handles },
 
     { "log", print_log },
     { "err", print_err },
