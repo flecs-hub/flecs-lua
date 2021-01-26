@@ -25,6 +25,7 @@ local ecs_snapshot_t = {}
 ---@class ecs_iter_t
 ---@field count integer
 ---@field columns table[]
+---@field entities integer[]
 ---@field system integer
 ---@field table_count integer
 ---@field delta_time number
