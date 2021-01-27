@@ -20,7 +20,7 @@ static void import_entry_point(ecs_world_t *w)
     ctx->error = lua_pcall(L, 0, 0, 0);
 }
 
-static void add_handles(lua_State *L, int idx, ecs_world_t *w, ecs_entity_t e)
+static void export_handles(lua_State *L, int idx, ecs_world_t *w, ecs_entity_t e)
 {
     idx = lua_absindex(L, idx);
 
@@ -29,7 +29,7 @@ static void add_handles(lua_State *L, int idx, ecs_world_t *w, ecs_entity_t e)
     ecs_filter_t filter = { .include = ecs_type(EcsName) };
     ecs_iter_t it = ecs_scope_iter_w_filter(w, e, &filter);
 
-    int i;
+    int i, type;
     const char *name;
     while(ecs_scope_next(&it))
     {
@@ -40,6 +40,16 @@ static void add_handles(lua_State *L, int idx, ecs_world_t *w, ecs_entity_t e)
             if(!name) continue;
 
             lua_pushinteger(L, e);
+
+            type = lua_getfield(L, idx, name);
+
+            if(type != LUA_TNIL && type != LUA_TFUNCTION)
+            {
+                if(!lua_rawequal(L, -1, -2)) luaL_error(L, "export table conflict (%s)", name);
+            }
+
+            lua_pop(L, 1);
+
             lua_setfield(L, idx, name);
         }
     }
@@ -69,7 +79,7 @@ int new_module(lua_State *L)
 
     if(ctx->error) return lua_error(L);
 
-    if(func_idx == 3) add_handles(L, 2, w, e);
+    if(func_idx == 3) export_handles(L, 2, w, e);
 
     lua_pushinteger(L, e);
 
@@ -90,7 +100,7 @@ int import_handles(lua_State *L)
 
     lua_createtable(L, 0, 4);
 
-    add_handles(L, -1, w, e);
+    export_handles(L, -1, w, e);
 
     return 1;
 }
