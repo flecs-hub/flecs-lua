@@ -476,8 +476,12 @@ int get_type(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
+    int from_entity = lua_toboolean(L, 2);
 
-    ecs_type_t type = ecs_get_type(w, e);
+    ecs_type_t type;
+
+    if(from_entity) type = ecs_type_from_entity(w, e);
+    else type = ecs_get_type(w, e);
 
     if(type)
     {

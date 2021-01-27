@@ -210,9 +210,10 @@ function ecs.type(name, expr)
 end
 
 ---Get the type of an entity
----@param e integer entity
+---@param e integer @entity
+---@param from_entity boolean @return a type containing e
 ---@return ecs_type_t|nil
-function ecs.get_type(e)
+function ecs.get_type(e, from_entity)
 end
 
 ---Get the typeid of an entity
