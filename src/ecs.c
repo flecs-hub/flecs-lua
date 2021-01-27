@@ -189,6 +189,8 @@ int column(lua_State *L);
 int columns(lua_State *L);
 int is_owned(lua_State *L);
 int column_entity(lua_State *L);
+int filter_iter(lua_State *L);
+int filter_next(lua_State *L);
 
 /* Query */
 int query_gc(lua_State *L);
@@ -357,6 +359,8 @@ static const luaL_Reg ecs_lib[] =
     { "columns", columns },
     { "is_owned", is_owned },
     { "column_entity", column_entity },
+    { "filter_iter", filter_iter },
+    { "filter_next", filter_next },
 
     { "query", query_new },
     { "subquery", subquery_new },
