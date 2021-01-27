@@ -197,6 +197,12 @@ end
 function ecs.disable(entity, component)
 end
 
+---Count entities that have a component, type, tag or match a filter
+---@param param integer|ecs_type_t|ecs_filter_t
+---@return integer
+function ecs.count(param)
+end
+
 ---Delete children of an entity
 ---@param parent integer @entity
 function ecs.delete_children(parent)

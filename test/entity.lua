@@ -120,6 +120,13 @@ ecs.remove(id_name_comp, arr)
 assert(not ecs.has(id_name_comp, arr))
 assert(not pcall(function () ecs.has(id_name_comp, "does_not_exist") end))
 
+local with_name = ecs.count(ecs.Name)
+print("entities with EcsName: " .. with_name)
+
+assert(with_name > 0)
+assert(with_name == ecs.count(ecs.get_type(ecs.Name, true)))
+assert(with_name == ecs.count({ include = ecs.get_type(ecs.Name, true)}))
+
 local parent = ecs.new()
 local child = 16666
 ecs.add(child, ecs.CHILDOF | parent)

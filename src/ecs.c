@@ -124,6 +124,7 @@ int entity_remove(lua_State *L);
 int clear_entity(lua_State *L);
 int enable_entity(lua_State *L);
 int disable_entity(lua_State *L);
+int entity_count(lua_State *L);
 int delete_children(lua_State *L);
 int new_type(lua_State *L);
 int get_type(lua_State *L);
@@ -298,6 +299,7 @@ static const luaL_Reg ecs_lib[] =
     { "clear", clear_entity },
     { "enable", enable_entity },
     { "disable", disable_entity },
+    { "count", entity_count },
     { "delete_children", delete_children },
     { "get_parent", get_parent },
     { "type", new_type },

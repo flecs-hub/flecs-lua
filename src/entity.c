@@ -446,6 +446,34 @@ int disable_entity(lua_State *L)
     return 0;
 }
 
+int entity_count(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    int type = lua_type(L, 1);
+    int32_t count = 0;
+
+    if(type == LUA_TNUMBER)
+    {
+        ecs_entity_t e = luaL_checkinteger(L, 1);
+        count = ecs_count_entity(w, e);
+    }
+    else if(type == LUA_TUSERDATA)
+    {
+        ecs_type_t type = checktype(L, 1);
+        count = ecs_count_type(w, type);
+    }
+    else
+    {
+        ecs_filter_t filter = checkfilter(L, 1);
+        count = ecs_count_w_filter(w, &filter);
+    }
+
+    lua_pushinteger(L, count);
+
+    return 1;
+}
+
 int delete_children(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
