@@ -672,11 +672,13 @@ end
 function ecs.snapshot_next(it)
 end
 
----Create a module
+---Create a module, export named entities
+---to the optional export table
 ---@param name string
----@param cb function import callback
+---@param export table @optional
+---@param cb function @import callback
 ---@return integer @entity
-function ecs.module(name, cb)
+function ecs.module(name, export, cb)
 end
 
 ---EXPERIMENTAL: Import a loaded module's named entities

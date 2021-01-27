@@ -16,7 +16,7 @@ end
 
 m.imported = 0
 
-local x = ecs.module("LuaTest", function ()
+local x = ecs.module("LuaTest", m, function ()
 
     local private = ecs.new()
 
