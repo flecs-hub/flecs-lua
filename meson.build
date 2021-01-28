@@ -73,7 +73,19 @@ if tests.disabled()
     subdir_done()
 endif
 
-test_exe = executable('e', files('test/main.c'), dependencies : flecs_lua_dep)
+test_lib = library('test-lua',
+    files('test/test.c'),
+    dependencies : flecs_lua_dep,
+    c_args : [ '-Dflecs_lua_EXPORTS', flecs_lua_args ],
+)
+
+test_dep = declare_dependency(
+    link_with : test_lib,
+    dependencies : flecs_lua_dep,
+    compile_args : flecs_lua_args,
+)
+
+test_exe = executable('e', files('test/main.c'), dependencies : test_dep)
 const_exe = executable('print_const', 'test/const.c', dependencies : flecs_lua_dep)
 
 tests = [
@@ -82,6 +94,7 @@ tests = [
     'meta_limits',
     'meta',
     'snapshot',
+
     'system',
     'module',
     'pipeline',
@@ -91,8 +104,14 @@ tests = [
     'timer'
 ]
 
+#Note: Running tests from interpreter requires --layout=flat
 env = environment()
-env.set('LUA_PATH', meson.current_source_dir() / 'test/?.lua')
+lua_path = meson.current_source_dir() / 'test\?.lua'
+lua_cpath = test_lib.full_path()
+env.set('LUA_PATH', lua_path)
+env.set('LUA_CPATH', lua_cpath)
+
+lua_exe = find_program('lua')
 
 foreach name : tests
     script = files('test' / name + '.lua')
@@ -109,14 +128,14 @@ run_target('dec',
     command: [
         luac,
         '-l', '-l',
-        files('test/test.lua')
+        files('test/script.lua')
     ]
 )
 
 run_target('script',
     command: [
         lua,
-        files('test/test.lua')
+        files('test/script.lua')
     ]
 )
 

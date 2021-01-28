@@ -1,149 +1,4 @@
-#include <flecs_lua.h>
-
-#include <lualib.h>
-#include <lauxlib.h>
-
-ECS_STRUCT(lua_test_comp,
-{
-    float foo;
-    uint16_t u16a[4];
-});
-
-ECS_STRUCT(lua_test_comp2,
-{
-    lua_test_comp comp;
-    int32_t bar;
-});
-
-ECS_ENUM(lua_test_enum,
-{
-    TestEnum1,
-    TestEnum2
-});
-
-ECS_BITMASK(lua_test_bitmask,
-{
-    One = 1,
-    Two = 2,
-    Three = 3
-});
-
-ECS_VECTOR(lua_test_vector,float);
-
-ECS_MAP(lua_test_mapi32, int32_t, float);
-
-ECS_STRUCT(lua_test_struct,
-{
-    bool b;
-    char c;
-    uint8_t u8;
-    uint16_t u16;
-    uint32_t u32;
-    uint64_t u64;
-    int8_t i8;
-    int16_t i16;
-    int32_t i32;
-    int64_t i64;
-    float f32;
-    double f64;
-
-    char ca[4];
-
-    char *str;
-    void *vptr;
-    uintptr_t uptr;
-
-    lua_test_enum enumeration;
-    lua_test_bitmask bitmask;
-    lua_test_vector vector;
-
-    lua_test_comp comp;
-    lua_test_comp2 comp2;
-});
-
-struct vars
-{
-    lua_test_struct s;
-};
-
-static struct vars g;
-
-#define TEST_COMP_INIT { .foo = 123.4f, .u16a = 123, 4321, 32, 688}
-
-static void init_globals(void)
-{
-    lua_test_struct s =
-    {
-        .b = true,
-        .c = 1,
-        .u8 = 2,
-        .u16 = 4,
-        .u32 = 8,
-        .u64 = 16,
-        .i8 = 32,
-        .i16 = 64,
-        .i32 = 128,
-        .i64 = 256,
-        .f32 = 512,
-        .f64 = 1024,
-
-        .ca = { 10, 20, 30, 40 },
-
-        .str = "test string",
-        .vptr = &g,
-        .uptr = (uintptr_t)&g,
-
-        .enumeration = 465,
-        .bitmask = One | Two,
-
-        .comp.foo = 4.0f,
-        .comp.u16a = { 10, 20, 30, 40 },
-        .comp2.bar = 5,
-        .comp2.comp.u16a = { 100, 200, 300, 400 }
-    };
-
-    memcpy(&g.s, &s, sizeof(s));
-}
-
-int lpush_test_struct(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_get_world(L);
-
-    ecs_entity_t e = ecs_lookup_fullpath(w, "lua_test_struct");
-    ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
-
-    ecs_ptr_to_lua(w, L, e, &g.s);
-
-    return 1;
-}
-
-int lset_test_struct(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_get_world(L);
-    (void)w;
-    return 0;
-}
-
-static const luaL_Reg test_lib[] =
-{
-    { "struct", lpush_test_struct },
-    { "set_struct", lset_test_struct },
-    { NULL, NULL }
-};
-
-int luaopen_test(lua_State *L)
-{
-    luaL_newlib(L, test_lib);
-    return 1;
-}
-
-static void init_test_state(lua_State *L)
-{
-    luaL_openlibs(L);
-
-    luaL_requiref(L, "test", luaopen_test, 0);
-    lua_pop(L, 1);
-}
+#include "test.h"
 
 static int custom_alloc;
 static size_t mem_usage;
@@ -169,7 +24,9 @@ static lua_State *new_test_state(void)
 {
     lua_State *L = lua_newstate(Allocf, NULL);
 
-    init_test_state(L);
+    luaL_openlibs(L);
+
+    ecs_assert(custom_alloc == 1, ECS_INTERNAL_ERROR, NULL);
 
     return L;
 }
@@ -179,91 +36,6 @@ static void test_abort(void)
     fprintf(stderr, "TEST: ecs_os_abort() was called!\n");
     fflush(stdout);
     printf("\n");
-}
-
-ECS_CTOR(lua_test_struct, ptr,
-{
-    ptr->str = NULL;
-});
-
-ECS_DTOR(lua_test_struct, ptr,
-{
-    ecs_os_free(ptr->str);
-    ptr->str = NULL;
-});
-
-ECS_COPY(lua_test_struct, dst, src,
-{
-    if(dst->str)
-    {
-        ecs_os_free(dst->str);
-        dst->str = NULL;
-    }
-
-    if(src->str) dst->str = ecs_os_strdup(src->str);
-    else dst->str = NULL;
-
-    void *t = dst->str;
-    memcpy(dst, src, sizeof(lua_test_struct));
-    dst->str = t;
-});
-
-typedef struct Test
-{
-    ECS_DECLARE_COMPONENT(lua_test_comp);
-    ECS_DECLARE_COMPONENT(lua_test_comp2);
-    ECS_DECLARE_COMPONENT(lua_test_struct);
-}Test;
-
-#define TestImportHandles(handles)\
-    ECS_IMPORT_COMPONENT(handles, lua_test_comp);\
-    ECS_IMPORT_COMPONENT(handles, lua_test_comp2);\
-    ECS_IMPORT_COMPONENT(handles, lua_test_struct);
-
-static void TestImport(ecs_world_t *w)
-{
-    ECS_MODULE(w, Test);
-
-    ECS_IMPORT(w, FlecsMeta);
-
-    ecs_entity_t scope = ecs_set_scope(w, 0);
-
-    init_globals();
-
-    ECS_META(w, lua_test_comp);
-    ECS_META(w, lua_test_comp2);
-    ECS_META(w, lua_test_enum);
-    ECS_META(w, lua_test_bitmask);
-    ECS_META(w, lua_test_vector);
-    ECS_META(w, lua_test_mapi32);
-    ECS_META(w, lua_test_struct);
-
-    ecs_set_component_actions(w, lua_test_struct,
-    {
-        .ctor = ecs_ctor(lua_test_struct),
-        .dtor = ecs_dtor(lua_test_struct),
-        .copy = ecs_copy(lua_test_struct),
-    });
-
-    ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
-    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
-    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
-    ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
-
-    ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g.s);
-    ecs_set_ptr(w, ecs_typeid(lua_test_struct), lua_test_struct, &g.s);
-
-    lua_State *L = new_test_state();
-    ecs_lua_set_state(w, L);
-
-    ecs_assert(custom_alloc, ECS_INTERNAL_ERROR, NULL);
-
-    /* The pointer shouldn't change */
-    ecs_assert(L == ecs_lua_get_state(w), ECS_INTERNAL_ERROR , NULL);
-
-    init_test_state(L);
-
-    ecs_set_scope(w, scope);
 }
 
 int main(int argc, char **argv)
@@ -279,9 +51,18 @@ int main(int argc, char **argv)
 
     ECS_IMPORT(w, FlecsLua);
 
-    ECS_IMPORT(w, Test);
-
     lua_State *L = ecs_lua_get_state(w);
+
+    ecs_assert(L != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    L = new_test_state();
+    ecs_lua_set_state(w, L);
+
+    /* The pointer shouldn't change */
+    ecs_assert(L == ecs_lua_get_state(w), ECS_INTERNAL_ERROR , NULL);
+
+    luaL_requiref(L, "test", luaopen_test, 0);
+    lua_pop(L, 1);
 
     int ret = luaL_dofile(L, argv[1]);
 
