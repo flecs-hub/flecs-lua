@@ -10,6 +10,9 @@ static const int ecs_lua__world;
 #define ECS_LUA_DEFAULT_WORLD (&ecs_lua__world)
 
 #define ECS_LUA__KEEPOPEN 1
+#define ECS_LUA__DYNAMIC 2 /* Loaded as Lua module */
+
+ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx);
 
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L, ecs_world_t *world)
 {
@@ -498,6 +501,19 @@ int luaopen_ecs(lua_State *L)
 
         w = ecs_lua_get_world(L);
 
+        if(w == NULL) /* Loaded as Lua module */
+        {
+            w = ecs_init();
+
+            ECS_IMPORT(w, FlecsLua);
+
+            ecs_lua_ctx param = { .L = L, .world = w, .flags = ECS_LUA__DYNAMIC };
+
+            ecs_lua_ctx *ctx = ctx_init(param);
+
+            ecs_singleton_set(w, EcsLuaHost, { L, ctx });
+        }
+
         ecs_world_t **ptr = lua_newuserdata(L, sizeof(ecs_world_t*));
         *ptr = w;
 
@@ -579,8 +595,11 @@ static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
     lua_pushinteger(L, lctx->serializer_id);
     lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_SERIALIZER);
 
-    luaL_requiref(L, "ecs", luaopen_ecs, 1);
-    lua_pop(L, 1);
+    if( !(ctx.flags & ECS_LUA__DYNAMIC))
+    {
+        luaL_requiref(L, "ecs", luaopen_ecs, 1);
+        lua_pop(L, 1);
+    }
 
     ecs_lua__epilog(L);
 
