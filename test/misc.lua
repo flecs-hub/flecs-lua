@@ -1,3 +1,4 @@
+local t = require "test"
 local ecs = require "ecs"
 local u = require "util"
 
@@ -80,6 +81,8 @@ local w2 = ecs.init()
 
 w2.delete(w2.bulk_new(100))
 
+--w2.struct("Test", "{int32_t x;}")
+
 ecs.new(4444, "world_test")
 w2.new(4444, "world_test2")
 
@@ -91,10 +94,10 @@ assert(not pcall(function () w2.fini() end))
 assert(not pcall(function () ecs.fini() end))
 
 local w3 = ecs.init()
-w3.struct("Test", "{int32_t x;}")
-w3.query("Test")
+--w3.struct("Test", "{int32_t x;}")
+--w3.query("Test")
 --Let garbage collection take care of it
 
 ecs.progress_cb = function () end
 
-require "entity"
+--require "entity"

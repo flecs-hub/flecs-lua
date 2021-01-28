@@ -1,3 +1,4 @@
+local t = require "test"
 local ecs = require "ecs"
 local u = require "util"
 
