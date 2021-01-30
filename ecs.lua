@@ -689,8 +689,9 @@ end
 
 ---EXPERIMENTAL: Import a loaded module's named entities
 ---@param name string
+---@param t any table @optional
 ---@return table|nil
-function ecs.import(name)
+function ecs.import(name, t)
 end
 
 ---Print log message
