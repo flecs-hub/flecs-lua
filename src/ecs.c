@@ -12,7 +12,7 @@ static const int ecs_lua__world;
 #define ECS_LUA__KEEPOPEN 1
 #define ECS_LUA__DYNAMIC 2 /* Loaded as Lua module */
 
-ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx);
+static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx);
 
 ecs_lua_ctx *ecs_lua_get_context(lua_State *L, ecs_world_t *world)
 {
