@@ -1,5 +1,5 @@
 project('lua', 'c',
-    version : '5.3.5',
+    version : '5.3.6',
     license: 'mit',
     default_options : 'c_std=c99'
 )

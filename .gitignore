@@ -1,6 +1,6 @@
 /subprojects/flecs
 /subprojects/flecs-meta
-/subprojects/lua-5.3.5
+/subprojects/lua-5.3.6
 /subprojects/lua-5.4.2
 /subprojects/packagecache
 /build/
