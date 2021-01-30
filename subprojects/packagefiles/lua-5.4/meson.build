@@ -62,8 +62,6 @@ lua_src = files(
     'src/ltable.c',
     'src/ltablib.c',
     'src/ltm.c',
-    'src/lua.c',
-    'src/luac.c',
     'src/lundump.c',
     'src/lutf8lib.c',
     'src/lvm.c',
