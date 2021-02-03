@@ -275,7 +275,7 @@ void serialize_type(
                     ecs_assert(op->name != NULL, ECS_INVALID_PARAMETER, NULL);
                     lua_pushstring(L, op->name);
                 }
-                lua_newtable(L);
+                lua_createtable(L, 0, op->count);
                 break;
             }
             case EcsOpPop:
