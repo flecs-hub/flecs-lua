@@ -588,15 +588,6 @@ static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx)
     lctx->progress_ref = LUA_NOREF;
     lctx->prefix_ref = LUA_NOREF;
 
-    lctx->serializer_id = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
-    ecs_assert(lctx->serializer_id != 0, ECS_INTERNAL_ERROR, NULL);
-
-    lctx->metatype_id = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
-    ecs_assert(lctx->metatype_id != 0, ECS_INTERNAL_ERROR, NULL);
-
-    lua_pushinteger(L, lctx->serializer_id);
-    lua_rawsetp(L, LUA_REGISTRYINDEX, ECS_LUA_SERIALIZER);
-
     if( !(ctx.flags & ECS_LUA__DYNAMIC))
     {
         luaL_requiref(L, "ecs", luaopen_ecs, 1);

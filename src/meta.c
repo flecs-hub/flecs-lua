@@ -483,19 +483,9 @@ void serialize_column(
     serialize_elements(world, ser->ops, base, count, hdr->size, L);
 }
 
-static inline ecs_entity_t get_serializer_id(lua_State *L)
-{
-    int type = lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_SERIALIZER);
-    ecs_assert(type == LUA_TNUMBER, ECS_INTERNAL_ERROR, NULL);
-    lua_Integer s = lua_tointeger(L, -1);
-    lua_pop(L, 1);
-
-    return s;
-}
-
 static const EcsMetaTypeSerializer *get_serializer(lua_State *L, ecs_world_t *world, ecs_entity_t type)
 {
-    //return ecs_get_w_entity(world, type, get_serializer_id(L));
+    //ecs_get(world, type, EcsMetaTypeSerializer);
     int ret = lua_rawgetp(L, LUA_REGISTRYINDEX, world);
     ecs_assert(ret == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
@@ -520,7 +510,7 @@ static const EcsMetaTypeSerializer *get_serializer(lua_State *L, ecs_world_t *wo
         ref = lua_newuserdata(L, sizeof(ecs_ref_t));
         lua_rawseti(L, -2, type);
 
-        *ref = (ecs_ref_t){ .entity = type, .component = get_serializer_id(L) };
+        *ref = (ecs_ref_t){ .entity = type, .component = ecs_typeid(EcsMetaTypeSerializer) };
 
         lua_pop(L, 2); /* -types, -world */
     }

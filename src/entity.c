@@ -837,8 +837,6 @@ int new_enum(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
 
-    ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
-
     if(ecs_lookup_fullpath(w, name) || ecs_lookup(w, name)) luaL_argerror(L, 1, "component already exists");
 
     ecs_entity_t component = ecs_new_component_id(w);
@@ -868,8 +866,6 @@ int new_bitmask(lua_State *L)
 
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
-
-    ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
 
     if(ecs_lookup_fullpath(w, name) || ecs_lookup(w, name)) luaL_argerror(L, 1, "component already exists");
 
@@ -912,8 +908,6 @@ int new_array(lua_State *L)
 
     char *desc = ecs_strbuf_get(&buf);
 
-    ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
-
     ecs_entity_t component = ecs_new_component_id(w);
 
     ecs_set(w, component, EcsName, {.alloc_value = (char*)name});
@@ -938,8 +932,6 @@ int new_struct(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     const char *desc = luaL_checkstring(L, 2);
 
-    ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
-
     if(ecs_lookup_fullpath(w, name) || ecs_lookup(w, name)) luaL_argerror(L, 1, "component already exists");
 
     ecs_entity_t component = ecs_new_component_id(w);
@@ -963,8 +955,6 @@ int new_alias(lua_State *L)
 
     const char *name = luaL_checkstring(L, 1);
     const char *alias = luaL_checkstring(L, 2);
-
-    ecs_entity_t ecs_typeid(EcsMetaType) = ecs_lookup_fullpath(w, "flecs.meta.MetaType");
 
     ecs_entity_t type_entity = ecs_lookup_fullpath(w, name);
 

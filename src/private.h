@@ -6,9 +6,6 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-const int ecs_lua__ser;
-#define ECS_LUA_SERIALIZER (&ecs_lua__ser)
-
 #define ECS_LUA_CONTEXT (1)
 #define ECS_LUA_CURSORS (2)
 #define ECS_LUA_TYPES   (3)
@@ -84,9 +81,6 @@ typedef struct ecs_lua_ctx
     int error;
     int progress_ref;
     int prefix_ref;
-
-    ecs_entity_t serializer_id;
-    ecs_entity_t metatype_id;
 }ecs_lua_ctx;
 
 typedef struct ecs_lua_system

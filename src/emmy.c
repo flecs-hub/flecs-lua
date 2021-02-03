@@ -50,7 +50,6 @@ static const char *array_type_name(ecs_world_t *world, ecs_type_op_t *op)
 
 char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_table)
 {
-    ecs_entity_t ecs_typeid(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
 
