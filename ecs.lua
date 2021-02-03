@@ -62,6 +62,10 @@ ecs.new(123, nil) --invalid
 ecs.new(123, "name", nil) --invalid
 ecs.new(123, 0, "component") --invalid: name must be a string or nil
 
+---Create a new entity id without scope
+---@return integer
+function ecs.new_id()
+end
 
 ---Delete an entity and all of its components
 ---@param entity string|integer|integer[]

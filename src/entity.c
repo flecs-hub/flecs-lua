@@ -108,6 +108,17 @@ int new_entity(lua_State *L)
     return 1;
 }
 
+int new_id(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t id = ecs_new_id(w);
+
+    lua_pushinteger(L, id);
+
+    return 1;
+}
+
 int delete_entity(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);

@@ -106,6 +106,7 @@ void register_collectible(lua_State *L, ecs_world_t *w, int idx)
 
 /* Entity */
 int new_entity(lua_State *L);
+int new_id(lua_State *L);
 int delete_entity(lua_State *L);
 int new_tag(lua_State *L);
 int entity_name(lua_State *L);
@@ -281,6 +282,7 @@ int emmy_class(lua_State *L);
 static const luaL_Reg ecs_lib[] =
 {
     { "new", new_entity },
+    { "new_id", new_id },
     { "delete", delete_entity },
     { "tag", new_tag },
     { "name", entity_name },

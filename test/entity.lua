@@ -41,6 +41,7 @@ assert(not pcall(function () ecs.new(333, "too", "many", "args") end))
 --existing entity redefined with different name
 assert(not pcall(function () ecs.new(5120, "diff_name") end))
 
+assert(ecs.new_id() ~= 0)
 assert(only_id == 4096)
 assert(ecs.name(only_id) == nil)
 assert(ecs.name(only_name) == "name_only")
