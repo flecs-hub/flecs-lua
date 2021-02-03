@@ -105,7 +105,7 @@ assert(not pcall(function () ecs.get_ref(ref, ecs.Singleton) end))
 
 
 for i, op in pairs(ser.ops) do
-  print(string.format("ops[%s].kind = %d", i, op.kind))
+  print(string.format("ops[%s].kind = %d, name: %s, count: %d", i, op.kind, op.name, op.count))
 end
 
 local sizeof_LuaStruct = meta.size
