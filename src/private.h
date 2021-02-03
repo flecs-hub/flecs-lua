@@ -204,7 +204,43 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(FlecsCore) \
     XX(World) \
     XX(Singleton) \
-    XX(Wildcard)
+    XX(Wildcard) \
+\
+    XX(PrimitiveType) \
+    XX(BitmaskType) \
+    XX(EnumType) \
+    XX(StructType) \
+    XX(ArrayType) \
+    XX(VectorType) \
+    XX(MapType) \
+\
+    XX(Bool) \
+    XX(Char) \
+    XX(Byte) \
+    XX(U8) \
+    XX(U16) \
+    XX(U32) \
+    XX(U64) \
+    XX(I8) \
+    XX(I16) \
+    XX(I32) \
+    XX(I64) \
+    XX(F32) \
+    XX(F64) \
+    XX(UPtr) \
+    XX(IPtr) \
+    XX(String) \
+    XX(Entity) \
+\
+    XX(OpHeader) \
+    XX(OpPrimitive) \
+    XX(OpEnum) \
+    XX(OpBitmask) \
+    XX(OpPush) \
+    XX(OpPop) \
+    XX(OpArray) \
+    XX(OpVector) \
+    XX(OpMap)
 
 #define ECS_LUA_MACROS(XX) \
     XX(INSTANCEOF) \
