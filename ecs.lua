@@ -241,19 +241,19 @@ end
 
 ---Enable component for entity
 ---@param entity integer
----@param component intger
+---@param component integer
 function ecs.enable_component(entity, component)
 end
 
 ---Disable component for entity
 ---@param entity integer
----@param component intger
+---@param component integer
 function ecs.disable_component(entity, component)
 end
 
 ---Test if component is enabled for entity
 ---@param entity integer
----@param component intger
+---@param component integer
 ---@return boolean
 function ecs.is_component_enabled(entity, component)
 end
@@ -942,7 +942,7 @@ local ecs_world_info_t = {}
 local ecs_world_stats_t = {}
 
 ---Get world info
----@return world_info_t
+---@return ecs_world_info_t
 function ecs.world_info()
 end
 
