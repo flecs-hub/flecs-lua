@@ -1,5 +1,7 @@
 #include "private.h"
 
+#include <ctype.h> /* tolower() */
+
 typedef struct ecs_lua_col_t
 {
     ecs_entity_t type;
@@ -250,7 +252,9 @@ static
 void serialize_constants(
     ecs_world_t *world,
     ecs_type_op_t *op,
-    lua_State *L)
+    lua_State *L,
+    const char *prefix,
+    bool lowercase)
 {
     /* EcsEnum is a compatible type */
     const EcsBitmask *bitmask_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
@@ -259,11 +263,42 @@ void serialize_constants(
     ecs_map_iter_t it = ecs_map_iter(bitmask_type->constants);
     ecs_map_key_t key;
     char **constant;
+    char *str;
 
     while((constant = ecs_map_next(&it, char*, &key)))
     {
+        str = *constant;
+
+        if(prefix)
+        {
+            char *ptr = strstr(*constant, prefix);
+            size_t len = strlen(prefix);
+
+            if(ptr == *constant && ptr[len] != '\0')
+            {
+                str = ptr + len;
+            }
+        }
+
+        if(lowercase)
+        {
+            char *p = ecs_os_strdup(str);
+
+            int i;
+            for(i=0; p[i] != '\0'; i++)
+            {
+                p[i] = tolower(p[i]);
+            }
+
+            lua_pushstring(L, p);
+
+            ecs_os_free(p);
+        }
+        else lua_pushstring(L, str);
+
         lua_pushinteger(L, key);
-        lua_setfield(L, -2, *constant);
+
+        lua_settable(L, -3);
     }
 }
 
@@ -912,6 +947,10 @@ int meta_constants(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t type = luaL_checkinteger(L, 1);
+    const char *prefix = luaL_optstring(L, 3, NULL);
+    const char *flags = luaL_optstring(L, 4, "");
+
+    int lowercase = strchr(flags, 'l') ? 1 : 0;
 
     const EcsMetaType *meta = ecs_get(w, type, EcsMetaType);
 
@@ -921,9 +960,10 @@ int meta_constants(lua_State *L)
     const EcsMetaTypeSerializer *ser = get_serializer(L, w, type);
     ecs_type_op_t *op = (ecs_type_op_t*)ecs_vector_get(ser->ops, ecs_type_op_t, 1);
 
-    if(lua_type(L, 2) != LUA_TTABLE) lua_newtable(L);
+    if(lua_type(L, 2) == LUA_TTABLE) lua_pushvalue(L, 2);
+    else lua_newtable(L);
 
-    serialize_constants(w, op, L);
+    serialize_constants(w, op, L, prefix, lowercase);
 
     return 1;
 }

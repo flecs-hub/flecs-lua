@@ -751,9 +751,11 @@ end
 
 ---Get the constants from an enum or bitmask component
 ---@param type integer
----@param t table @optional table to merge with
+---@param out table @optional table to merge with
+---@param prefix string @prefix to omit from names
+---@param flags string @convert to lowercase ("l")
 ---@return table
-function ecs.meta_constants(type, t)
+function ecs.meta_constants(type, out, prefix, flags)
 end
 
 ---@class ecs_time_t

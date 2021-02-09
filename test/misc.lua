@@ -59,7 +59,7 @@ ecs.createtable(10, 10)
 
 local Struct = ecs.struct("Struct", "{int32_t x; int32_t y; int32_t z;}")
 local Enum = ecs.enum("Enum", "{ Minus = -1, Zero, One, Two, Three }")
-local Bitmask = ecs.bitmask("Bitmask", "{ One = 1, Two = 2, Four = 4, Seven = 7, SixtyFour = 64 }" )
+local Bitmask = ecs.bitmask("Bitmask", "{ One = 1, LIB_Two = 2, Four = 4, Seven = 7, SixtyFour = 64 }" )
 
 ecs.zero_init(Struct)
 
@@ -81,6 +81,17 @@ assert(ecs.meta_constants(Bitmask, ret) == ret)
 assert(ret.Two == 2)
 assert(ret.Seven == 7)
 assert(ret.SixtyFour == 64)
+
+ret.LIB_Two = nil
+
+ecs.meta_constants(Bitmask, ret, "LIB_")
+
+assert(ret.LIB_Two == nil)
+
+ecs.meta_constants(Bitmask, ret, "LIB_", "l")
+
+u.print_r(ret)
+assert(ret.two == 2)
 
 assert(not pcall(function () ecs.meta_constants(Struct) end))
 assert(not pcall(function () ecs.meta_constants(ecs.Timer) end))
