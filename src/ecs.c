@@ -705,8 +705,6 @@ void FlecsLuaImport(ecs_world_t *w)
     ECS_LUA_META(w, EcsLuaWorldInfo);
     //ECS_META(w, EcsLuaWorldStats);
 
-    ECS_EXPORT_COMPONENT(EcsLuaHost);
-
     ecs_set_component_actions(w, EcsLuaHost,
     {
         .ctor = ecs_ctor(EcsLuaHost),

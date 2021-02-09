@@ -17,14 +17,13 @@ typedef struct EcsLuaHost
 
 typedef struct FlecsLua
 {
-    ECS_DECLARE_COMPONENT(EcsLuaHost);
+    int dummy;
 }FlecsLua;
 
 FLECS_LUA_API
 void FlecsLuaImport(ecs_world_t *w);
 
-#define FlecsLuaImportHandles(handles)\
-    ECS_IMPORT_COMPONENT(handles, EcsLuaHost);\
+#define FlecsLuaImportHandles(handles)
 
 /* Get the default lua_State */
 FLECS_LUA_API
