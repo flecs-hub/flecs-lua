@@ -749,6 +749,13 @@ end
 function ecs.world_ptr()
 end
 
+---Get the constants from an enum or bitmask component
+---@param type integer
+---@param t table @optional table to merge with
+---@return table
+function ecs.meta_constants(type, t)
+end
+
 ---@class ecs_time_t
 ---@field sec integer
 ---@field nanosec integer

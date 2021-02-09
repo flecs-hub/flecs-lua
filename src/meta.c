@@ -247,6 +247,27 @@ void serialize_type_op(
 }
 
 static
+void serialize_constants(
+    ecs_world_t *world,
+    ecs_type_op_t *op,
+    lua_State *L)
+{
+    /* EcsEnum is a compatible type */
+    const EcsBitmask *bitmask_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
+    ecs_assert(bitmask_type != NULL, ECS_INVALID_PARAMETER, NULL);
+
+    ecs_map_iter_t it = ecs_map_iter(bitmask_type->constants);
+    ecs_map_key_t key;
+    char **constant;
+
+    while((constant = ecs_map_next(&it, char*, &key)))
+    {
+        lua_pushinteger(L, key);
+        lua_setfield(L, -2, *constant);
+    }
+}
+
+static
 void serialize_type(
     ecs_world_t *world,
     const ecs_vector_t *ser,
@@ -884,6 +905,27 @@ bool ecs_lua_query_next(lua_State *L, int idx)
     ecs_lua_iter_update(L, idx, it);
 
     return true;
+}
+
+int meta_constants(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t type = luaL_checkinteger(L, 1);
+
+    const EcsMetaType *meta = ecs_get(w, type, EcsMetaType);
+
+    if(!meta) luaL_argerror(L, 1, "invalid type");
+    if(meta->kind != EcsEnumType && meta->kind != EcsBitmaskType) luaL_argerror(L, 1, "not an enum/bitmask");
+
+    const EcsMetaTypeSerializer *ser = get_serializer(L, w, type);
+    ecs_type_op_t *op = (ecs_type_op_t*)ecs_vector_get(ser->ops, ecs_type_op_t, 1);
+
+    if(lua_type(L, 2) != LUA_TTABLE) lua_newtable(L);
+
+    serialize_constants(w, op, L);
+
+    return 1;
 }
 
 static void each_reset_columns(lua_State *L, ecs_lua_each_t *each)

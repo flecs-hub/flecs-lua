@@ -51,6 +51,7 @@ void register_collectible(lua_State *L, ecs_world_t *w, int idx);
 
 /* meta */
 bool ecs_lua_query_next(lua_State *L, int idx);
+int meta_constants(lua_State *L);
 
 /* Update iterator, usually called after ecs_lua_to_iter() + ecs_*_next() */
 void ecs_lua_iter_update(lua_State *L, int idx, ecs_iter_t *it);

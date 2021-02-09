@@ -236,6 +236,7 @@ int sizeof_component(lua_State *L);
 int createtable(lua_State *L);
 int zero_init_component(lua_State *L);
 int get_world_ptr(lua_State *L);
+int meta_constants(lua_State *L);
 
 /* Time */
 int get_time(lua_State *L);
@@ -400,6 +401,7 @@ static const luaL_Reg ecs_lib[] =
     { "createtable", createtable },
     { "zero_init", zero_init_component },
     { "world_ptr", get_world_ptr },
+    { "meta_constants", meta_constants },
 
     { "get_time", get_time },
     { "time_measure", time_measure },
