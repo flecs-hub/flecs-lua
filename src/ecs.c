@@ -110,6 +110,7 @@ int new_id(lua_State *L);
 int delete_entity(lua_State *L);
 int new_tag(lua_State *L);
 int entity_name(lua_State *L);
+int set_name(lua_State *L);
 int entity_symbol(lua_State *L);
 int entity_fullpath(lua_State *L);
 int lookup_entity(lua_State *L);
@@ -287,6 +288,7 @@ static const luaL_Reg ecs_lib[] =
     { "delete", delete_entity },
     { "tag", new_tag },
     { "name", entity_name },
+    { "set_name", set_name },
     { "symbol", entity_symbol },
     { "fullpath", entity_fullpath },
     { "lookup", lookup_entity },

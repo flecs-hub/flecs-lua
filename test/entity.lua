@@ -21,6 +21,11 @@ assert(ecs.bulk_new("lua_test_comp", 10, true) == nil)
 assert(ecs.bulk_new(10, true) == nil)
 local lua_test_comp = ecs.lookup("lua_test_comp")
 
+local renamed = ecs.new("foo")
+assert(ecs.name(renamed) == "foo")
+assert(ecs.set_name(renamed, "bar") == "foo")
+assert(ecs.name(renamed) == "bar")
+
 --last argument cannot be nil
 assert(not pcall(function () ecs.new(nil) end))
 assert(not pcall(function () ecs.new(0, nil) end))

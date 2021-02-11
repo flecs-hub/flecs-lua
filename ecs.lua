@@ -84,6 +84,13 @@ end
 function ecs.name(e)
 end
 
+---Set the name of an entity
+---@param e integer
+---@param name string
+---@return string|nil @previous name if set
+function ecs.set_name(e, name)
+end
+
 ---Get the symbol name of an entity
 ---@param e integer
 ---@return string|nil @entity symbol name

@@ -181,6 +181,22 @@ int entity_name(lua_State *L)
     return 1;
 }
 
+int set_name(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    const char *name = luaL_checkstring(L, 2);
+
+    const char *prev = ecs_get_name(w, e);
+
+    lua_pushstring(L, prev);
+
+    ecs_set(w, e, EcsName, { .alloc_value = (char*)name });
+
+    return 1;
+}
+
 int entity_symbol(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
