@@ -186,7 +186,7 @@ int set_name(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    const char *name = luaL_checkstring(L, 2);
+    const char *name = lua_isnoneornil(L, 2) ? NULL : luaL_checkstring(L, 2);
 
     const char *prev = ecs_get_name(w, e);
 

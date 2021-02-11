@@ -25,6 +25,9 @@ local renamed = ecs.new("foo")
 assert(ecs.name(renamed) == "foo")
 assert(ecs.set_name(renamed, "bar") == "foo")
 assert(ecs.name(renamed) == "bar")
+assert(ecs.set_name(renamed, nil) == "bar")
+assert(ecs.name(renamed) == nil)
+assert(not pcall(function () ecs.set_name(renamed, false) end))
 
 --last argument cannot be nil
 assert(not pcall(function () ecs.new(nil) end))
