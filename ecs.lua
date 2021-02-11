@@ -87,7 +87,7 @@ end
 ---Set the name of an entity
 ---@param e integer
 ---@param name string
----@return string|nil @previous name if set
+---@return integer @entity id
 function ecs.set_name(e, name)
 end
 

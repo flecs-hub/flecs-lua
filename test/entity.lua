@@ -23,9 +23,9 @@ local lua_test_comp = ecs.lookup("lua_test_comp")
 
 local renamed = ecs.new("foo")
 assert(ecs.name(renamed) == "foo")
-assert(ecs.set_name(renamed, "bar") == "foo")
+assert(ecs.set_name(renamed, "bar") == renamed)
 assert(ecs.name(renamed) == "bar")
-assert(ecs.set_name(renamed, nil) == "bar")
+assert(ecs.set_name(renamed, nil) == renamed)
 assert(ecs.name(renamed) == nil)
 assert(not pcall(function () ecs.set_name(renamed, false) end))
 

@@ -188,11 +188,9 @@ int set_name(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     const char *name = lua_isnoneornil(L, 2) ? NULL : luaL_checkstring(L, 2);
 
-    const char *prev = ecs_get_name(w, e);
+    e = ecs_set(w, e, EcsName, { .alloc_value = (char*)name });
 
-    lua_pushstring(L, prev);
-
-    ecs_set(w, e, EcsName, { .alloc_value = (char*)name });
+    lua_pushinteger(L, e);
 
     return 1;
 }
