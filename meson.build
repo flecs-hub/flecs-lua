@@ -1,5 +1,5 @@
 project('flecs-lua', 'c',
-    version : '2.2',
+    version : '2.3.0',
     license : 'mit',
     default_options : 'c_std=c99'
 )
