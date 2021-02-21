@@ -214,7 +214,7 @@ assert(ecs.lookup("lua_world_info") == 0)
 ecs.use(LuaWorldInfo, "lua_world_info")
 assert(ecs.lookup("lua_world_info") ~= 0)
 
-local FlecsLua = ecs.lookup_symbol("FlecsLua")
+local FlecsLua = ecs.lookup_symbol("flecs.lua")
 assert(FlecsLua ~= 0)
 
 assert(ecs.lookup_path(FlecsLua, "LuaWorldInfo") ~= 0)

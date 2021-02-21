@@ -36,7 +36,7 @@ end)
 assert(x ~=0)
 print("module name: " .. ecs.name(x) .. ", symbol: " .. ecs.symbol(x) .. ", fullpath: " .. ecs.fullpath(x))
 assert(ecs.name(x) == "test")
-assert(ecs.symbol(x) == "LuaTest")
+assert(ecs.symbol(x) == "lua.test")
 assert(ecs.lookup_fullpath("lua.test") == x)
 assert(ecs.lookup_fullpath("Lua.Test") == 0)
 

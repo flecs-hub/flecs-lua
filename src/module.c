@@ -68,14 +68,18 @@ int new_module(lua_State *L)
 
     luaL_checktype(L, func_idx, LUA_TFUNCTION);
 
+    char *module_name = ecs_module_path_from_c(name);
+
     ctx->error = 0;
-    ecs_lua_module m = { .ctx = ctx, .name = name };
+    ecs_lua_module m = { .ctx = ctx, .name = module_name };
 
     void *orig = ecs_get_context(w);
 
     ecs_set_context(w, &m);
-    ecs_entity_t e = ecs_import(w, import_entry_point, name, NULL, 0);
+    ecs_entity_t e = ecs_import(w, import_entry_point, module_name, NULL, 0);
     ecs_set_context(w, orig);
+
+    ecs_os_free(module_name);
 
     if(ctx->error) return lua_error(L);
 
