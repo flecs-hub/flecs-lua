@@ -79,7 +79,7 @@ int world_info(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
     const ecs_world_info_t *wi = ecs_get_world_info(w);
 
-    ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaWorldInfo");
+    ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.WorldInfo");
     ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
 
     struct EcsLuaWorldInfo world_info =

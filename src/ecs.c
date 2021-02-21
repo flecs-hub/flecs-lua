@@ -700,11 +700,11 @@ void FlecsLuaImport(ecs_world_t *w)
 
     ECS_IMPORT(w, FlecsMeta);
 
-    ecs_set_name_prefix(w, "Ecs");
+    ecs_set_name_prefix(w, "EcsLua");
 
     ECS_COMPONENT_DEFINE(w, EcsLuaHost);
 
-    ECS_LUA_META(w, EcsLuaWorldInfo);
+    ECS_META_DEFINE(w, EcsLuaWorldInfo);
     //ECS_META(w, EcsLuaWorldStats);
 
     ecs_set_component_actions(w, EcsLuaHost,

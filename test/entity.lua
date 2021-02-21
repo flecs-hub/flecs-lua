@@ -204,7 +204,7 @@ ecs.add_owned(entity, tag)
 
 
 --Lookup
-local LuaWorldInfo = ecs.lookup_fullpath("flecs.lua.LuaWorldInfo")
+local LuaWorldInfo = ecs.lookup_fullpath("flecs.lua.WorldInfo")
 assert(LuaWorldInfo ~= 0)
 
 ecs.add(ecs.new("named"), ecs.CHILDOF | entity)
@@ -217,7 +217,7 @@ assert(ecs.lookup("lua_world_info") ~= 0)
 local FlecsLua = ecs.lookup_symbol("flecs.lua")
 assert(FlecsLua ~= 0)
 
-assert(ecs.lookup_path(FlecsLua, "LuaWorldInfo") ~= 0)
+assert(ecs.lookup_path(FlecsLua, "WorldInfo") ~= 0)
 
 
 --Bulk, filters

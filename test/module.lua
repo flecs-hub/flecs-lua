@@ -16,10 +16,10 @@ assert(m.random_id == m2.random_id)
 assert(m.fixed_id == m2.fixed_id)
 assert(m.name_only == m2.name_only)
 
-local lua = ecs.import('flecs.lua')
-assert(lua.LuaHost == ecs.lookup_fullpath('flecs.lua.LuaHost'))
+local lua = ecs.import("flecs.lua")
+assert(lua.Host == ecs.lookup_fullpath("flecs.lua.Host"))
 
-local m3 = ecs.import('lua.test')
+local m3 = ecs.import("lua.test")
 
 assert(m.fixed_id == m3.named)
 assert(m.name_only == m3.rand_id)
