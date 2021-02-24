@@ -33,15 +33,15 @@ local function import_func(name)
     print("MODULE ID: " .. module)
 
     local it = ecs.scope_iter(module, { include = ecs.get_type(ecs.Name, true) })
-    local t = {}
+    local export = {}
 
     while ecs.scope_next(it) do
         for e in ecs.each(it) do
-            t[ecs.name(e)] = e
+            export[ecs.name(e)] = e
         end
     end
 
-    return t
+    return export
 end
 
 local m4 = import_func "lua.test"
