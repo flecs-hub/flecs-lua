@@ -583,6 +583,7 @@ end
 
 ---Create a filter iterator
 ---@param filter ecs_filter_t
+---@return ecs_iter_t
 function ecs.filter_iter(filter)
 end
 
