@@ -1001,6 +1001,7 @@ local ecs_type_op_t = {}
 ---@field ops ecs_type_op_t[]
 local EcsMetaTypeSerializer = {}
 
+local undef = 111
 
 ecs.Component = 1
 ecs.ComponentLifecycle = 2
@@ -1056,6 +1057,18 @@ ecs.StructType = 3
 ecs.ArrayType = 4
 ecs.VectorType = 5
 ecs.MapType = 6
+ecs.Primitive = undef
+ecs.Enum = undef
+ecs.Bitmask = undef
+ecs.Member = undef
+ecs.Struct = undef
+ecs.Array = undef
+ecs.Vector = undef
+ecs.Map = undef
+ecs.MetaType = undef
+ecs.ecs_type_op_kind_t = undef
+ecs.ecs_type_op_t = undef
+ecs.MetaTypeSerializer = undef
 ecs.Bool = 0
 ecs.Char = 1
 ecs.Byte = 2

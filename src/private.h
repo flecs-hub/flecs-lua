@@ -117,29 +117,56 @@ ECS_STRUCT(EcsLuaWorldInfo,
     int32_t systems_ran_frame;
 });
 
+ECS_STRUCT(EcsLuaGauge,
+{
+    float avg[60];
+    float min[60];
+    float max[60];
+});
+
+ECS_STRUCT(EcsLuaCounter,
+{
+    EcsLuaGauge rate;
+    float value[60];
+});
 
 ECS_STRUCT(EcsLuaWorldStats,
 {
-    int32_t entity_count;
-    int32_t component_count;
-    int32_t query_count;
-    int32_t system_count;
-    int32_t table_count;
-    int32_t empty_table_count;
-    int32_t singleton_table_count;
-    int32_t max_entities_per_table;
-    int32_t max_components_per_table;
-    int32_t max_columns_per_table;
-    int32_t max_matched_queries_per_table;
+    int32_t dummy_;
 
-    int32_t new_count;
-    int32_t bulk_new_count;
-    int32_t delete_count;
-    int32_t clear_count;
-    int32_t add_count;
-    int32_t remove_count;
-    int32_t set_count;
-    int32_t discard_count;
+    EcsLuaGauge entity_count;
+    EcsLuaGauge component_count;
+    EcsLuaGauge query_count;
+    EcsLuaGauge system_count;
+    EcsLuaGauge table_count;
+    EcsLuaGauge empty_table_count;
+    EcsLuaGauge singleton_table_count;
+    EcsLuaGauge matched_entity_count;
+    EcsLuaGauge matched_table_count;
+
+    EcsLuaCounter new_count;
+    EcsLuaCounter bulk_new_count;
+    EcsLuaCounter delete_count;
+    EcsLuaCounter clear_count;
+    EcsLuaCounter add_count;
+    EcsLuaCounter remove_count;
+    EcsLuaCounter set_count;
+    EcsLuaCounter discard_count;
+
+    EcsLuaCounter world_time_total_raw;
+    EcsLuaCounter world_time_total;
+    EcsLuaCounter frame_time_total;
+    EcsLuaCounter system_time_total;
+    EcsLuaCounter merge_time_total;
+    EcsLuaGauge fps;
+    EcsLuaGauge delta_time;
+
+    EcsLuaCounter frame_count_total;
+    EcsLuaCounter merge_count_total;
+    EcsLuaCounter pipeline_build_count_total;
+    EcsLuaCounter systems_ran_frame;
+
+    int32_t t;
 });
 
 #define ECS_LUA_BUILTINS(XX) \
@@ -249,6 +276,17 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(SWITCH) \
     XX(OWNED)
 
+#define ECS_LUA_TYPEIDS(XX) \
+    XX(Primitive) \
+    XX(Enum) \
+    XX(Bitmask) \
+    XX(Member) \
+    XX(Struct) \
+    XX(Array) \
+    XX(Vector) \
+    XX(Map) \
+    XX(MetaType) \
+    XX(MetaTypeSerializer)
 
 
 

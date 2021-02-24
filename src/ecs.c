@@ -2,6 +2,9 @@
 
 static ECS_COMPONENT_DECLARE(EcsLuaHost);
 static ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
+static ECS_COMPONENT_DECLARE(EcsLuaGauge);
+static ECS_COMPONENT_DECLARE(EcsLuaCounter);
+static ECS_COMPONENT_DECLARE(EcsLuaWorldStats);
 
 static const int ecs_lua__ctx;
 static const int ecs_lua__world;
@@ -567,6 +570,15 @@ int luaopen_ecs(lua_State *L)
 #define XX(const) lua_pushinteger(L, ECS_##const); lua_setfield(L, -2, #const);
     ECS_LUA_MACROS(XX)
 #undef XX
+#define XX(type) lua_pushinteger(L, ecs_typeid(Ecs##type)); lua_setfield(L, -2, #type);
+    ECS_LUA_TYPEIDS(XX)
+#undef XX
+
+    lua_pushinteger(L, ecs_typeid(ecs_type_op_kind_t));
+    lua_setfield(L, -2, "type_op_kind_t");
+
+    lua_pushinteger(L, ecs_typeid(ecs_type_op_t));
+    lua_setfield(L, -2, "type_op_t");
 
     return 1;
 }
@@ -686,7 +698,8 @@ ECS_DTOR(EcsLuaHost, ptr,
     }
 });
 
-/**
+/** Define a component with a high/entity id,
+ * leaving the low id's to performance critical components.
 *
 * Must be used together with ECS_COMPONENT_DECLARE.
 */
@@ -705,7 +718,11 @@ void FlecsLuaImport(ecs_world_t *w)
     ECS_COMPONENT_DEFINE(w, EcsLuaHost);
 
     ECS_META_DEFINE(w, EcsLuaWorldInfo);
-    //ECS_META(w, EcsLuaWorldStats);
+    //ECS_LUA_META(w, EcsLuaGauge);
+    //ECS_LUA_META(w, EcsLuaCounter);
+    //ECS_LUA_META(w, EcsLuaWorldStats);
+
+    ecs_assert(sizeof(ecs_world_stats_t) == sizeof(EcsLuaWorldStats), ECS_INTERNAL_ERROR, NULL);
 
     ecs_set_component_actions(w, EcsLuaHost,
     {
