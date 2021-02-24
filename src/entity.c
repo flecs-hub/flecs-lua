@@ -203,6 +203,8 @@ int entity_symbol(lua_State *L)
 
     const EcsName *name = ecs_get(w, e, EcsName);
 
+    if(!name) return 0;
+
     lua_pushstring(L, name->symbol);
 
     return 1;
