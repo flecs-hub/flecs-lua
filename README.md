@@ -27,6 +27,8 @@ ninja test
 
 Scripts are hosted by the `FlecsLua` module for the world it's imported into.
 
+The ability to 'require "ecs"' as a standalone Lua module is currently not maintained.
+
 ```c
 /* Creates a script host for the world */
 ECS_IMPORT(world, FlecsLua);
@@ -41,7 +43,14 @@ luaL_dofile(L, argv[1]);
 while(ecs_progress(world, 0))
 ```
 
-The script executed on init should be similar to the program's `main()`.
+Most of the functions are bound to their native counterparts,
+components are (de-)serialized to- and from Lua, it is not designed
+to be used with LuaJIT where FFI is preferred.
+
+Components defined from the host with flecs-meta and from Lua are
+handled the same way and can be mixed in systems, queries, etc.
+
+The script executed on init should be similar to the host's `main()`.
 
 **main.lua**
 
