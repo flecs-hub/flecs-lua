@@ -27,7 +27,7 @@ ninja test
 
 Scripts are hosted by the `FlecsLua` module for the world it's imported into.
 
-The ability to 'require "ecs"' as a standalone Lua module is currently not maintained.
+The ability to `require "ecs"` as a standalone Lua module is currently not maintained.
 
 ```c
 /* Creates a script host for the world */
