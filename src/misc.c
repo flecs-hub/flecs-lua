@@ -101,6 +101,8 @@ int sizeof_component(lua_State *L)
 
     const EcsComponent *ptr = ecs_get(w, e, EcsComponent);
 
+    if(!ptr) luaL_argerror(L, 1, "not a component");
+
     lua_pushinteger(L, ptr->size);
     lua_pushinteger(L, ptr->alignment);
 
