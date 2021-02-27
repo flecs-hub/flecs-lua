@@ -4,7 +4,7 @@ static void print_time(ecs_time_t *time, const char *str)
 {
 #ifndef NDEBUG
     double sec = ecs_time_measure(time);
-    ecs_os_dbg("Lua %s took %f milliseconds", str, sec * 1000.0);
+    ecs_lua_dbg("Lua %s took %f milliseconds", str, sec * 1000.0);
 #endif
 }
 
@@ -20,7 +20,7 @@ static void system_entry_point(ecs_iter_t *it)
 
     ecs_assert(idx == 0, ECS_INTERNAL_ERROR, "Lua systems must run on the main thread");
 
-    ecs_os_dbg("Lua %s: \"%s\", %d columns, count %d, func ref %d",
+    ecs_lua_dbg("Lua %s: \"%s\", %d columns, count %d, func ref %d",
         sys->trigger ? "trigger" : "system", ecs_get_name(w, it->system),
         it->column_count, it->count, sys->func_ref);
 

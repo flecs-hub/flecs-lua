@@ -867,7 +867,7 @@ ecs_iter_t *ecs_iter_to_lua(ecs_iter_t *it, lua_State *L, bool copy)
 
 ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
 {
-    ecs_os_dbg("ECS_LUA_TO_ITER");
+    ecs_lua_dbg("ECS_LUA_TO_ITER");
     ecs_lua__prolog(L);
     ecs_iter_t *it = ecs_lua__checkiter(L, idx);
     ecs_world_t *world = it->world;
@@ -932,7 +932,7 @@ void ecs_lua_iter_update(lua_State *L, int idx, ecs_iter_t *it)
 
 /* Progress the query iterator at the given index */
 bool ecs_lua_query_next(lua_State *L, int idx)
-{ecs_os_dbg("QUERY_NEXT");
+{ecs_lua_dbg("QUERY_NEXT");
     ecs_iter_t *it = ecs_lua_to_iter(L, idx);
 
     if(!ecs_query_next(it)) return false;
