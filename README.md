@@ -52,7 +52,7 @@ handled the same way and can be mixed in systems, queries, etc.
 
 The script executed on init should be similar to the host's `main()`.
 
-**main.lua**
+#### **main.lua**
 
 ```lua
 local ecs = require "ecs"
@@ -71,7 +71,7 @@ Flecs modules are defined with `ecs.module()`, note that they are imported autom
 all components and entities should be registered inside the callback function
 for proper scoping.
 
-**module.lua**
+#### **module.lua**
 
 ```lua
 local ecs = require "ecs"
