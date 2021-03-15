@@ -90,7 +90,7 @@ assert(ret.LIB_Two == nil)
 
 ecs.meta_constants(Bitmask, ret, "LIB_", "l")
 
-u.print_r(ret)
+--u.print_r(ret)
 assert(ret.two == 2)
 
 assert(not pcall(function () ecs.meta_constants(Struct) end))
