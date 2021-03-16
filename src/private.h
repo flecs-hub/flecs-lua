@@ -109,7 +109,6 @@ ECS_STRUCT(EcsLuaWorldInfo,
     double merge_time_total;
     double world_time_total;
     double world_time_total_raw;
-    double sleep_err;
 
     int32_t frame_count_total;
     int32_t merge_count_total;

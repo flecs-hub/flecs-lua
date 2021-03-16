@@ -922,7 +922,6 @@ end
 ---@field merge_time_total number
 ---@field world_time_total number
 ---@field world_time_total_raw number
----@field sleep_err number
 ---@field frame_count_total integer
 ---@field merge_count_total integer
 ---@field pipeline_build_count_total integer

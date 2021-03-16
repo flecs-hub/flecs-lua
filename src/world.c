@@ -97,7 +97,6 @@ int world_info(lua_State *L)
         .merge_time_total = wi->merge_time_total,
         .world_time_total = wi->world_time_total,
         .world_time_total_raw = wi->world_time_total_raw,
-        .sleep_err = wi->sleep_err,
         .frame_count_total = wi->frame_count_total,
         .merge_count_total = wi->merge_count_total,
         .pipeline_build_count_total = wi->pipeline_build_count_total,
