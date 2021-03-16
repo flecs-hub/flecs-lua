@@ -1,16 +1,5 @@
 #include "private.h"
 
-static void set_default_name(ecs_world_t *w, ecs_entity_t e)
-{
-#ifndef NDEBUG
-    char str[32];
-    snprintf(str, sizeof(str), "Lua.%llu", e);
-    ecs_set(w, e, EcsName, {.alloc_value = str});
-#else
-    ecs_set(w, e, EcsName, {.value = "Lua.Entity"});
-#endif
-}
-
 static const char *checkname(lua_State *L, int arg)
 {
     int type = lua_type(L, arg);
