@@ -6,11 +6,18 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+ECS_COMPONENT_DECLARE(EcsLuaHost);
+ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
+ECS_COMPONENT_DECLARE(EcsLuaGauge);
+ECS_COMPONENT_DECLARE(EcsLuaCounter);
+ECS_COMPONENT_DECLARE(EcsLuaWorldStats);
+
 #define ECS_LUA_CONTEXT (1)
 #define ECS_LUA_CURSORS (2)
 #define ECS_LUA_TYPES   (3)
 #define ECS_LUA_COLLECT (4)
 #define ECS_LUA_SYSTEMS (5)
+#define ECS_LUA_APIWORLD (6)
 
 /* Internal version for API functions */
 static inline ecs_world_t *ecs_lua_world(lua_State *L)

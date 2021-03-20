@@ -2,7 +2,9 @@
 
 int world_new(lua_State *L)
 {
-    ecs_world_t *wdefault = ecs_lua_world(L);
+    ecs_world_t *wdefault = ecs_lua_get_world(L);
+    ecs_assert(wdefault != NULL, ECS_INTERNAL_ERROR, NULL);
+
     ecs_world_t *w2 = ecs_init();
 
     ECS_IMPORT(w2, FlecsLua);
@@ -79,8 +81,7 @@ int world_info(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
     const ecs_world_info_t *wi = ecs_get_world_info(w);
 
-    ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.WorldInfo");
-    ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(ecs_typeid(EcsLuaWorldInfo) != 0, ECS_INTERNAL_ERROR, NULL);
 
     struct EcsLuaWorldInfo world_info =
     {
@@ -103,7 +104,7 @@ int world_info(lua_State *L)
         .systems_ran_frame = wi->systems_ran_frame,
     };
 
-    ecs_ptr_to_lua(w, L, e, &world_info);
+    ecs_ptr_to_lua(w, L, ecs_typeid(EcsLuaWorldInfo), &world_info);
 
     return 1;
 }
@@ -112,8 +113,7 @@ int world_stats(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 #if 0
-    ecs_entity_t e = ecs_lookup_fullpath(w, "flecs.lua.LuaWorldInfo");
-    ecs_assert(e, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(ecs_typeid(EcsLuaWorldStats) != 0, ECS_INTERNAL_ERROR, NULL);
 
     ecs_world_stats_t ws;
     ecs_get_world_stats(w, &ws);
@@ -141,7 +141,7 @@ int world_stats(lua_State *L)
         .discard_count = ws.discard_count,
     };
 
-    ecs_ptr_to_lua(w, L, e, &world_stats);
+    ecs_ptr_to_lua(w, L, ecs_typeid(EcsLuaWorldStats), &world_stats);
 #endif
     lua_pushnil(L);
 

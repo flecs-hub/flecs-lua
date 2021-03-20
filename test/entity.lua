@@ -72,15 +72,10 @@ assert(#bulk == 10)
 assert(ecs.has(bulk_comp[1], lua_test_comp))
 assert(ecs.has(bulk_comp[10], lua_test_comp))
 ecs.delete(bulk)
-assert(not ecs.name(bulk[1]))
-assert(not ecs.name(bulk[10]))
 
 local type = ecs.get_type(lua_test_comp)
-local invalid_type = ecs.get_type(bulk[1])
 ecs.dim(400)
 ecs.dim_type(400, type)
-assert(not pcall(function () ecs.dim_type(400, invalid_type) end))
-
 
 ecs.struct("LuaPosition", "{float x; float y; float z;}")
 ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")

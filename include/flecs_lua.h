@@ -41,7 +41,7 @@ bool ecs_lua_progress(lua_State *L, lua_Number delta_time);
 /* Pushes the component at ptr onto the stack */
 FLECS_LUA_API
 void ecs_ptr_to_lua(
-    ecs_world_t *world,
+    const ecs_world_t *world,
     lua_State *L,
     ecs_entity_t type,
     const void *ptr);
@@ -49,7 +49,7 @@ void ecs_ptr_to_lua(
 /* Converts the Lua value at the given index to the component type */
 FLECS_LUA_API
 void ecs_lua_to_ptr(
-    ecs_world_t *world,
+    const ecs_world_t *world,
     lua_State *L,
     int idx,
     ecs_entity_t type,
@@ -58,7 +58,7 @@ void ecs_lua_to_ptr(
 /* Update the value at the given index */
 FLECS_LUA_API
 void ecs_lua_type_update(
-    ecs_world_t *world,
+    const ecs_world_t *world,
     lua_State *L,
     int idx,
     ecs_entity_t type,
@@ -74,7 +74,7 @@ ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx);
 
 /* Create an EmmyLua class annotation */
 FLECS_LUA_API
-char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_table);
+char *ecs_type_to_emmylua(const ecs_world_t *world, ecs_entity_t type, bool struct_as_table);
 
 /* Get world pointer from registry */
 FLECS_LUA_API

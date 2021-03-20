@@ -1,10 +1,10 @@
 #include "private.h"
 
-static ECS_COMPONENT_DECLARE(EcsLuaHost);
-static ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
-static ECS_COMPONENT_DECLARE(EcsLuaGauge);
-static ECS_COMPONENT_DECLARE(EcsLuaCounter);
-static ECS_COMPONENT_DECLARE(EcsLuaWorldStats);
+ECS_COMPONENT_DECLARE(EcsLuaHost);
+ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
+ECS_COMPONENT_DECLARE(EcsLuaGauge);
+ECS_COMPONENT_DECLARE(EcsLuaCounter);
+ECS_COMPONENT_DECLARE(EcsLuaWorldStats);
 
 static const int ecs_lua__ctx;
 static const int ecs_lua__world;
@@ -556,6 +556,9 @@ int luaopen_ecs(lua_State *L)
         lua_createtable(L, 0, 16);
         luaL_setmetatable(L, "ecs_collect_t");
         lua_rawseti(L, -2, ECS_LUA_COLLECT);
+
+        lua_pushvalue(L, -2); /* world userdata */
+        lua_rawseti(L, -2, ECS_LUA_APIWORLD);
 
     lua_pop(L, 1); /* registry[world] */
 

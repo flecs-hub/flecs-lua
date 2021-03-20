@@ -11,20 +11,38 @@ static void print_time(ecs_time_t *time, const char *str)
 /* Also used for triggers */
 static void system_entry_point(ecs_iter_t *it)
 {
-    ecs_world_t *w = it->world;
     ecs_lua_system *sys = it->param;
     lua_State *L = sys->L;
+    ecs_world_t *w = it->world;
+    const ecs_world_t *real_world = ecs_get_world(w);
+
+    /* Since >2.3.2 it->world != the actual world, we have to
+       swap the world pointer for all API calls with it->world (stage pointer)
+    */
+    ecs_lua__prolog(L);
+
+    int ret = lua_rawgetp(L, LUA_REGISTRYINDEX, real_world);
+    ecs_assert(ret == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    ret = lua_rawgeti(L, -1, ECS_LUA_APIWORLD);
+    ecs_assert(ret == LUA_TUSERDATA, ECS_INTERNAL_ERROR, NULL);
+
+    ecs_world_t **wbuf = lua_touserdata(L, -1);
+    ecs_world_t *prev_world = *wbuf;
+
+    lua_pop(L, 2);
+
+    *wbuf = it->world;
 
     ecs_time_t time;
     int idx = ecs_get_thread_index(w);
+    //int stage_id = ecs_get_stage_id(w);
 
     ecs_assert(idx == 0, ECS_INTERNAL_ERROR, "Lua systems must run on the main thread");
 
     ecs_lua_dbg("Lua %s: \"%s\", %d columns, count %d, func ref %d",
         sys->trigger ? "trigger" : "system", ecs_get_name(w, it->system),
         it->column_count, it->count, sys->func_ref);
-
-    ecs_lua__prolog(L);
 
     int type = lua_rawgeti(L, LUA_REGISTRYINDEX, sys->func_ref);
 
@@ -41,7 +59,9 @@ static void system_entry_point(ecs_iter_t *it)
 
     ecs_os_get_time(&time);
 
-    int ret = lua_pcall(L, 1, 0, 0);
+    ret = lua_pcall(L, 1, 0, 0);
+
+    *wbuf = prev_world;
 
     print_time(&time, "system");
 
@@ -83,7 +103,7 @@ static int new_whatever(lua_State *L, ecs_world_t *w, bool trigger)
     if(trigger)
     {
         if(phase != EcsOnAdd && phase != EcsOnRemove) return luaL_argerror(L, 3, "invalid kind");
-        if(signature == NULL) return luaL_argerror(L, 4, "");
+        if(signature == NULL) return luaL_argerror(L, 4, "missing signature");
 
         e = ecs_new_trigger(w, 0, name, phase, signature, system_entry_point);
     }

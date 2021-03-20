@@ -30,7 +30,7 @@ static const char *primitive_type_name(int primitive)
     }
 }
 
-static const char *array_type_name(ecs_world_t *world, ecs_type_op_t *op)
+static const char *array_type_name(const ecs_world_t *world, ecs_type_op_t *op)
 {
     const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -48,7 +48,7 @@ static const char *array_type_name(ecs_world_t *world, ecs_type_op_t *op)
     return name;
 }
 
-char *ecs_type_to_emmylua(ecs_world_t *world, ecs_entity_t type, bool struct_as_table)
+char *ecs_type_to_emmylua(const ecs_world_t *world, ecs_entity_t type, bool struct_as_table)
 {
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
