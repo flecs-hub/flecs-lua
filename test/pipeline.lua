@@ -32,6 +32,7 @@ local sys_b = ecs.system(SysB, "SysB", ecs.PostUpdate)
 
 
 assert(ecs.get_threads ~= 0)
+assert(ecs.get_stage_id() == 0)
 assert(ecs.get_thread_index() == 0)
 
 ecs.set_time_scale(2)

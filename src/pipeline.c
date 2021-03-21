@@ -137,7 +137,7 @@ int get_thread_index(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
-    int32_t index = ecs_get_thread_index(w);
+    int32_t index = ecs_get_stage_id(w);
 
     lua_pushinteger(L, index);
 

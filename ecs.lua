@@ -887,14 +887,26 @@ end
 function ecs.set_threads(threads)
 end
 
----Get current number of threads
+---Get the number of threads
+---DEPRECATED: use ecs.get_stage_count()
 ---@return integer
 function ecs.get_threads()
 end
 
 ---Get current thread index
+---DEPRECATED: use ecs.get_stage_id()
 ---@return integer
 function ecs.get_thread_index()
+end
+
+---Get the number of stages
+---@return integer
+function ecs.get_stage_count()
+end
+
+---Get current stage id
+---@return integer
+function ecs.get_stage_id()
 end
 
 ---EXPERIMENTAL: Create a new world,

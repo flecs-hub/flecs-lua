@@ -434,6 +434,9 @@ static const luaL_Reg ecs_lib[] =
     { "get_threads", get_threads },
     { "get_thread_index", get_thread_index },
 
+    { "get_stage_count", get_threads },
+    { "get_stage_id", get_thread_index },
+
     { "init", world_new },
     { "fini", world_fini },
     { "world_info", world_info },
