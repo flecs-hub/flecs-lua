@@ -10,6 +10,7 @@ local ecs_type_t = {}
 local ecs_ref_t = {}
 
 ---@class ecs_filter_t
+---@field expr string
 ---@field include ecs_type_t
 ---@field exclude ecs_type_t
 ---@field include_kind integer @ecs.Match*

@@ -126,11 +126,13 @@ assert(not ecs.has(id_name_comp, arr))
 assert(not pcall(function () ecs.has(id_name_comp, "does_not_exist") end))
 
 local with_name = ecs.count(ecs.get_type("(Identifier, Name)"))
+assert(with_name > 0)
 print("entities with ecs.Identifier: " .. with_name)
 
 assert(with_name > 0)
 assert(with_name == ecs.count(ecs.get_type("(Identifier, Name)")))
 assert(with_name == ecs.count({ include = ecs.get_type("(Identifier, Name)")}))
+assert(with_name <= ecs.count({ expr = "(Identifier, Name)"})) --larger count, is it expected?
 
 local parent = ecs.new()
 local child = 16666

@@ -15,10 +15,19 @@ ecs_filter_t checkfilter(lua_State *L, int arg)
     ecs_filter_t filter = {0};
 
     int fields = 0;
+    int expr_type = lua_getfield(L, arg, "expr");
     int include_type = lua_getfield(L, arg, "include");
     int exclude_type = lua_getfield(L, arg, "exclude");
     int include_kind_type = lua_getfield(L, arg, "include_kind");
     int exclude_kind_type = lua_getfield(L, arg, "exclude_kind");
+
+    if(expr_type != LUA_TNIL)
+    {
+        if(expr_type != LUA_TSTRING) luaL_argerror(L, arg, "expected string (expr)");
+
+        filter.expr = (char*)luaL_checkstring(L, -5);
+        fields++;
+    }
 
     if(include_type != LUA_TNIL)
     {
@@ -60,7 +69,7 @@ ecs_filter_t checkfilter(lua_State *L, int arg)
         fields++;
     }
 
-    lua_pop(L, 4);
+    lua_pop(L, 5);
 
     if(!fields) luaL_argerror(L, arg, "empty filter");
 
