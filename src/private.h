@@ -11,11 +11,11 @@
     #error "flecs-lua requires a 64-bit lua_Integer"
 #endif
 
-extern ECS_COMPONENT_DECLARE(EcsLuaHost);
-extern ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
-extern ECS_COMPONENT_DECLARE(EcsLuaGauge);
-extern ECS_COMPONENT_DECLARE(EcsLuaCounter);
-extern ECS_COMPONENT_DECLARE(EcsLuaWorldStats);
+ECS_COMPONENT_EXTERN(EcsLuaHost);
+ECS_COMPONENT_EXTERN(EcsLuaWorldInfo);
+ECS_COMPONENT_EXTERN(EcsLuaGauge);
+ECS_COMPONENT_EXTERN(EcsLuaCounter);
+ECS_COMPONENT_EXTERN(EcsLuaWorldStats);
 
 #define ECS_LUA_CONTEXT (1)
 #define ECS_LUA_CURSORS (2)
@@ -229,7 +229,6 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(OnSet) \
     XX(UnSet) \
 \
-    XX(OnDemand) \
     XX(Monitor) \
     XX(DisabledIntern) \
     XX(Inactive) \
@@ -253,11 +252,6 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(IsA)
 
 #define ECS_LUA_ENUMS(XX) \
-    XX(MatchDefault) \
-    XX(MatchAll) \
-    XX(MatchAny) \
-    XX(MatchExact) \
-\
     XX(PrimitiveType) \
     XX(BitmaskType) \
     XX(EnumType) \
@@ -308,8 +302,9 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(XOR) \
     XX(NOT) \
     XX(CASE) \
-    XX(SWITCH) \
-    XX(OWNED)
+    XX(SWITCH)
+
+    //XX(OVERRIDE)
 
 #define ECS_LUA_TYPEIDS(XX) \
     XX(Component) \
