@@ -36,7 +36,11 @@ static const char *array_type_name(const ecs_world_t *world, ecs_type_op_t *op)
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     ecs_type_op_t *ops = (ecs_type_op_t*)ecs_vector_first(ser->ops, ecs_type_op_t);
+
+#ifndef NDEBUG
     int32_t count = ecs_vector_count(ser->ops);
+    ecs_assert(count >= 2, ECS_INVALID_PARAMETER, NULL);
+#endif
 
     op = &ops[1];
 
