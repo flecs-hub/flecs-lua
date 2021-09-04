@@ -109,6 +109,29 @@ int sizeof_component(lua_State *L)
     return 2;
 }
 
+int is_primitive(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    const EcsMetaTypeSerializer *ser = ecs_get(w, e, EcsMetaTypeSerializer);
+
+    if(!ser) luaL_argerror(L, 1, "not a component");
+
+    int32_t count = ecs_vector_count(ser->ops);
+
+    if(count != 2) return 0;
+
+    ecs_type_op_t *op = ecs_vector_get(ser->ops, ecs_type_op_t, 1);
+
+    if(op->kind != EcsOpPrimitive) return 0;
+
+    lua_pushinteger(L, op->is.primitive);
+
+    return 1;
+}
+
 int createtable(lua_State *L)
 {
     int narr = luaL_optinteger(L, 1, 0);
@@ -147,7 +170,7 @@ int zero_init_component(lua_State *L)
         .ctor = ctor_initialize_0
     };
 
-    ecs_set_component_actions_w_entity(w, component, &lf);
+    ecs_set_component_actions_w_id(w, component, &lf);
 
     return 0;
 }

@@ -2,7 +2,7 @@ local t = require "test"
 local ecs = require "ecs"
 local u = require "util"
 
-ecs.progress_cb(function() ecs.log("progress()!") end)
+u.test_defaults()
 
 local AppContext = ecs.struct("AppContext", "{int32_t whatever;}")
 local Position = ecs.struct("Position", "{float x; float y;}")
@@ -43,7 +43,7 @@ while ecs.query_next(it) do
 end
 
 print("count :" .. q_count)
-assert(q_count == 1)
+u.asserteq(q_count, 1)
 
 ecs.subquery(q, "Position")
 
@@ -95,3 +95,15 @@ for foo, e in ecs.each(q) do
 end
 
 assert(q_count == 5)
+
+--[[ XXX: fix this
+local ent = ecs.new("ent", "Velocity")
+
+q = ecs.query("ent:Velocity")
+it = ecs.query_iter(q)
+
+assert(ecs.has(ent, Velocity))
+
+print("COUNT: ", it.count)
+--assert(it.count == 1)
+]]--

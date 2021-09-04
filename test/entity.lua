@@ -2,9 +2,11 @@ local t = require "test"
 local ecs = require "ecs"
 local u = require "util"
 
-ecs.progress_cb(function() ecs.log("progress()!") end)
+u.test_defaults()
 
 u.print_constants("MatchAll", "Module", "OnStore", "XOR")
+
+local lua_test_comp = ecs.lookup("lua_test_comp")
 
 local entity = ecs.new()
 local only_id = ecs.new(4096)
@@ -16,10 +18,9 @@ local id_comp = ecs.new(6000, nil, "lua_test_comp")
 local just_comp = ecs.new(nil, "lua_test_comp")
 local id_name_comps = ecs.new(10001, "multiple_comps", "lua_test_struct, lua_test_comp")
 local bulk = ecs.bulk_new(10)
-local bulk_comp = ecs.bulk_new("lua_test_comp", 10)
-assert(ecs.bulk_new("lua_test_comp", 10, true) == nil)
+local bulk_comp = ecs.bulk_new(lua_test_comp, 10)
+assert(ecs.bulk_new(lua_test_comp, 10, true) == nil)
 assert(ecs.bulk_new(10, true) == nil)
-local lua_test_comp = ecs.lookup("lua_test_comp")
 
 local renamed = ecs.new("foo")
 assert(ecs.name(renamed) == "foo")
@@ -124,16 +125,16 @@ ecs.remove(id_name_comp, arr)
 assert(not ecs.has(id_name_comp, arr))
 assert(not pcall(function () ecs.has(id_name_comp, "does_not_exist") end))
 
-local with_name = ecs.count(ecs.Name)
-print("entities with EcsName: " .. with_name)
+local with_name = ecs.count(ecs.get_type("(Identifier, Name)"))
+print("entities with ecs.Identifier: " .. with_name)
 
 assert(with_name > 0)
-assert(with_name == ecs.count(ecs.get_type(ecs.Name, true)))
-assert(with_name == ecs.count({ include = ecs.get_type(ecs.Name, true)}))
+assert(with_name == ecs.count(ecs.get_type("(Identifier, Name)")))
+assert(with_name == ecs.count({ include = ecs.get_type("(Identifier, Name)")}))
 
 local parent = ecs.new()
 local child = 16666
-ecs.add(child, ecs.CHILDOF | parent)
+ecs.add(child, ecs.ChildOf, parent)
 
 assert(ecs.get_parent(child) == parent)
 
@@ -160,10 +161,7 @@ assert(ecs.has(id_name_comp, tag))
 
 ecs.delete(tag2)
 assert(pcall(function () ecs.delete(tag2) end)) -- is this normal?
-
-assert(pcall(function () ecs.delete("LuaTag") end))
-assert(not pcall(function () ecs.delete("LuaTag") end))
-assert(not pcall(function () ecs.delete("LuaTag2") end))
+assert(pcall(function () ecs.delete(tag) end))
 
 --Test idempotence
 tag = ecs.tag("Tag")
@@ -202,7 +200,7 @@ ecs.add_owned(entity, tag)
 local LuaWorldInfo = ecs.lookup_fullpath("flecs.lua.WorldInfo")
 assert(LuaWorldInfo ~= 0)
 
-ecs.add(ecs.new("named"), ecs.CHILDOF | entity)
+ecs.add(ecs.new("named"), ecs.ChildOf, entity)
 assert(ecs.lookup_child(entity, "named") ~= 0)
 
 assert(ecs.lookup("lua_world_info") == 0)

@@ -56,21 +56,21 @@ int is_owned(lua_State *L)
 
     if(col < 1 || col > it->column_count) luaL_argerror(L, 2, "invalid column index");
 
-    int b = ecs_is_owned(it, col - 1);
+    int b = ecs_term_is_owned(it, col);
 
     lua_pushboolean(L, b);
 
     return 1;
 }
 
-int column_entity(lua_State *L)
+int term_id(lua_State *L)
 {
     ecs_iter_t *it = ecs_lua__checkiter(L, 1);
     lua_Integer col = luaL_checkinteger(L, 2);
 
     if(col < 1 || col > it->column_count) luaL_argerror(L, 2, "invalid column index");
 
-    ecs_entity_t e = ecs_column_entity(it, col);
+    ecs_entity_t e = ecs_term_id(it, col);
 
     lua_pushinteger(L, e);
 

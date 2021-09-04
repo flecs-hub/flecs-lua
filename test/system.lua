@@ -2,7 +2,7 @@ local t = require "test"
 local ecs = require "ecs"
 local u = require "util"
 
-ecs.progress_cb(function() ecs.log("progress()!") end)
+u.test_defaults()
 
 ecs.set_target_fps(60)
 
@@ -121,12 +121,12 @@ local function sys_empty(it)
     if it.param ~= nil then
         assert(it.param[1] == "foo")
 
-        if(it.param[3] == true) then
-            it.interrupted_by = 400
-        end
-
         if(it.param[2] == "custom_context") then
             custom_context = true
+        end
+
+        if(it.param[3] == true) then
+            it.interrupted_by = 400
         end
     end
 

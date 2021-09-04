@@ -86,11 +86,11 @@ int new_entity(lua_State *L)
     if(!e && args) e = ecs_new_id(w);
 
     ecs_entity_t scope = ecs_get_scope(w);
-    if(scope) ecs_add_entity(w, e, ECS_CHILDOF | scope);
+    if(scope) ecs_add_pair(w, e, EcsChildOf, scope);
 
     if(components) ecs_add_type(w, e, ecs_type_from_str(w, components));
 
-    if(name) ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+    if(name) ecs_set_name(w, e, name);
 
     lua_pushinteger(L, e);
 
@@ -114,7 +114,11 @@ int delete_entity(lua_State *L)
 
     ecs_entity_t entity;
 
-    if(lua_isinteger(L, 1)) entity = luaL_checkinteger(L, 1);
+    if(lua_isinteger(L, 1))
+    {
+        entity = luaL_checkinteger(L, 1);
+        ecs_delete(w, entity);
+    }
     else if(lua_type(L, 1) == LUA_TTABLE)
     {
         int len = lua_rawlen(L, 1);
@@ -129,15 +133,6 @@ int delete_entity(lua_State *L)
 
         return 0;
     }
-    else
-    {
-        const char *name = luaL_checkstring(L, 1);
-        entity = ecs_lookup_fullpath(w, name);
-
-        if(!entity) return luaL_argerror(L, 1, "could not find entity");
-    }
-
-    ecs_delete(w, entity);
 
     return 0;
 }
@@ -150,7 +145,7 @@ int new_tag(lua_State *L)
 
     ecs_entity_t e = ecs_lookup(w, name);
 
-    if(!e) e = ecs_set(w, e, EcsName, {.alloc_value = (char*)name});
+    if(!e) e = ecs_set_name(w, e, name);
 
     lua_pushinteger(L, e);
 
@@ -177,7 +172,7 @@ int set_name(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     const char *name = lua_isnoneornil(L, 2) ? NULL : luaL_checkstring(L, 2);
 
-    e = ecs_set(w, e, EcsName, { .alloc_value = (char*)name });
+    e = ecs_set_name(w, e, name);
 
     lua_pushinteger(L, e);
 
@@ -190,11 +185,11 @@ int entity_symbol(lua_State *L)
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
-    const EcsName *name = ecs_get(w, e, EcsName);
+    const char *symbol = ecs_get_symbol(w, e);
 
-    if(!name) return 0;
+    if(!symbol) return 0;
 
-    lua_pushstring(L, name->symbol);
+    lua_pushstring(L, symbol);
 
     return 1;
 }
@@ -250,7 +245,7 @@ int lookup_path(lua_State *L)
     const char *sep = luaL_optstring(L, 3, ".");
     const char *prefix = luaL_optstring(L, 4, NULL);
 
-    ecs_entity_t e = ecs_lookup_path_w_sep(w, parent, path, sep, prefix);
+    ecs_entity_t e = ecs_lookup_path_w_sep(w, parent, path, sep, prefix, false);
 
     lua_pushinteger(L, e);
 
@@ -276,7 +271,7 @@ int lookup_symbol(lua_State *L)
 
     const char *name = luaL_checkstring(L, 1);
 
-    ecs_entity_t e = ecs_lookup_symbol(w, name);
+    ecs_entity_t e = ecs_lookup_symbol(w, name, true);
 
     lua_pushinteger(L, e);
 
@@ -299,18 +294,29 @@ int entity_has(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
+    int args = lua_gettop(L);
+
     ecs_entity_t e = luaL_checkinteger(L, 1);
     int b;
 
-    if(lua_isinteger(L, 2))
+    if(args == 3)
     {
-        ecs_entity_t to_check = luaL_checkinteger(L, 2);
-        b = ecs_has_entity(w, e, to_check);
+        ecs_entity_t relation = luaL_checkinteger(L, 2);
+        ecs_entity_t object = luaL_checkinteger(L, 3);
+        b = ecs_has_pair(w, e, relation, object);
     }
     else
     {
-        ecs_type_t type = checktype(L, 2);
-        b = ecs_has_type(w, e, type);
+        if(lua_isinteger(L, 2))
+        {
+            ecs_entity_t to_check = luaL_checkinteger(L, 2);
+            b = ecs_has_id(w, e, to_check);
+        }
+        else
+        {
+            ecs_type_t type = checktype(L, 2);
+            b = ecs_has_type(w, e, type);
+        }
     }
 
     lua_pushboolean(L, b);
@@ -366,6 +372,19 @@ int is_alive(lua_State *L)
     return 1;
 }
 
+int is_valid(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    int b = ecs_is_valid(w, e);
+
+    lua_pushboolean(L, b);
+
+    return 1;
+}
+
 int exists(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
@@ -383,17 +402,28 @@ int entity_add(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
+    int args = lua_gettop(L);
+
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
-    if(lua_isinteger(L, 2))
+    if(args == 3)
     {
-        ecs_entity_t to_add = luaL_checkinteger(L, 2);
-        ecs_add_entity(w, e, to_add);
+        ecs_entity_t relation = luaL_checkinteger(L, 2);
+        ecs_entity_t object = luaL_checkinteger(L, 3);
+        ecs_add_pair(w, e, relation, object);
     }
-    else
+    else /* add(e, integer|ecs_type_t) */
     {
-        ecs_type_t type = checktype(L, 2);
-        ecs_add_type(w, e, type);
+        if(lua_isinteger(L, 2))
+        {
+            ecs_entity_t to_add = luaL_checkinteger(L, 2);
+            ecs_add_id(w, e, to_add);
+        }
+        else
+        {
+            ecs_type_t type = checktype(L, 2);
+            ecs_add_type(w, e, type);
+        }
     }
 
     return 0;
@@ -403,17 +433,27 @@ int entity_remove(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
+    int args = lua_gettop(L);
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
-    if(lua_isinteger(L, 2))
+    if(args == 3)
     {
-        ecs_entity_t to_remove = luaL_checkinteger(L, 2);
-        ecs_remove_entity(w, e, to_remove);
+        ecs_entity_t relation = luaL_checkinteger(L, 2);
+        ecs_entity_t object = luaL_checkinteger(L, 3);
+        ecs_remove_pair(w, e, relation, object);
     }
     else
     {
-        ecs_type_t type = checktype(L, 2);
-        ecs_remove_type(w, e, type);
+        if(lua_isinteger(L, 2))
+        {
+            ecs_entity_t to_remove = luaL_checkinteger(L, 2);
+            ecs_remove_id(w, e, to_remove);
+        }
+        else
+        {
+            ecs_type_t type = checktype(L, 2);
+            ecs_remove_type(w, e, type);
+        }
     }
 
     return 0;
@@ -439,7 +479,7 @@ int enable_entity(lua_State *L)
     if(lua_gettop(L) > 1)
     {
         ecs_entity_t c = lua_tointeger(L, 2);
-        ecs_enable_component_w_entity(w, e, c, true);
+        ecs_enable_component_w_id(w, e, c, true);
     }
     else ecs_enable(w, e, true);
 
@@ -455,7 +495,7 @@ int disable_entity(lua_State *L)
     if(lua_gettop(L) > 1)
     {
         ecs_entity_t c = lua_tointeger(L, 2);
-        ecs_enable_component_w_entity(w, e, c, false);
+        ecs_enable_component_w_id(w, e, c, false);
     }
     else ecs_enable(w, e, false);
 
@@ -472,17 +512,17 @@ int entity_count(lua_State *L)
     if(type == LUA_TNUMBER)
     {
         ecs_entity_t e = luaL_checkinteger(L, 1);
-        count = ecs_count_entity(w, e);
+        count = ecs_count_id(w, e);
     }
     else if(type == LUA_TUSERDATA)
     {
         ecs_type_t type = checktype(L, 1);
-        count = ecs_count_type(w, type);
+        count = ecs_count_filter(w, &(ecs_filter_t){ .include = type });
     }
     else
     {
         ecs_filter_t filter = checkfilter(L, 1);
-        count = ecs_count_w_filter(w, &filter);
+        count = ecs_count_filter(w, &filter);
     }
 
     lua_pushinteger(L, count);
@@ -508,7 +548,9 @@ int new_type(lua_State *L)
     const char *name = luaL_checkstring(L, 1);
     const char *expr = luaL_checkstring(L, 2);
 
-    ecs_entity_t e = ecs_new_type(w, 0, name, expr);
+    ecs_entity_t e = ecs_type_init(w, &(ecs_type_desc_t){ .ids_expr = expr });
+
+    ecs_set_name(w, e, name);
 
     lua_pushinteger(L, e);
 
@@ -519,13 +561,25 @@ int get_type(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
-    ecs_entity_t e = luaL_checkinteger(L, 1);
-    int from_entity = lua_toboolean(L, 2);
+    ecs_entity_t e = 0;
+    ecs_type_t type = NULL;
+    int from_entity = 0;
 
-    ecs_type_t type;
+    int arg_type = lua_type(L, 1);
 
-    if(from_entity) type = ecs_type_from_entity(w, e);
-    else type = ecs_get_type(w, e);
+    if(arg_type == LUA_TSTRING)
+    {
+        const char *expr = luaL_checkstring(L, 1);
+        type = ecs_type_from_str(w, expr);
+    }
+    else
+    {
+        e = luaL_checkinteger(L, 1);
+        from_entity = lua_toboolean(L, 2);
+
+        if(from_entity) type = ecs_type_from_id(w, e);
+        else type = ecs_get_type(w, e);
+    }
 
     if(type)
     {
@@ -561,7 +615,7 @@ int get_parent(lua_State *L)
 
     if(lua_gettop(L) == 2) c = luaL_checkinteger(L, 2);
 
-    ecs_entity_t parent = ecs_get_parent_w_entity(w, e, c);
+    ecs_entity_t parent = ecs_get_object(w, e, EcsChildOf, 0);
 
     lua_pushinteger(L, parent);
 
@@ -575,7 +629,7 @@ int enable_component(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t c = luaL_checkinteger(L, 2);
 
-    ecs_enable_component_w_entity(w, e, c, true);
+    ecs_enable_component_w_id(w, e, c, true);
 
     return 0;
 }
@@ -587,7 +641,7 @@ int disable_component(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t c = luaL_checkinteger(L, 2);
 
-    ecs_enable_component_w_entity(w, e, c, false);
+    ecs_enable_component_w_id(w, e, c, false);
 
     return 0;
 }
@@ -599,14 +653,14 @@ int is_component_enabled(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t c = luaL_checkinteger(L, 2);
 
-    int b = ecs_is_component_enabled_w_entity(w, e, c);
+    int b = ecs_is_component_enabled_w_id(w, e, c);
 
     lua_pushboolean(L, b);
 
     return 1;
 }
 
-int add_trait(lua_State *L)
+int add_pair(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
@@ -614,12 +668,12 @@ int add_trait(lua_State *L)
     ecs_entity_t c = luaL_checkinteger(L, 2);
     ecs_entity_t t = luaL_checkinteger(L, 3);
 
-    ecs_add_trait(w, e, c, t);
+    ecs_add_id(w, e, ecs_pair(c, t));
 
     return 0;
 }
 
-int remove_trait(lua_State *L)
+int remove_pair(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
@@ -627,12 +681,12 @@ int remove_trait(lua_State *L)
     ecs_entity_t c = luaL_checkinteger(L, 2);
     ecs_entity_t t = luaL_checkinteger(L, 3);
 
-    ecs_remove_trait(w, e, c, t);
+    ecs_remove_id(w, e, ecs_pair(c, t));
 
     return 0;
 }
 
-int has_trait(lua_State *L)
+int has_pair(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
@@ -640,75 +694,170 @@ int has_trait(lua_State *L)
     ecs_entity_t c = luaL_checkinteger(L, 2);
     ecs_entity_t t = luaL_checkinteger(L, 3);
 
-    int b = ecs_has_trait(w, e, c, t);
+    int b = ecs_has_id(w, e, ecs_pair(c, t));
 
     lua_pushboolean(L, b);
 
     return 1;
 }
 
-int set_trait(lua_State *L)
+int set_pair(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t c = luaL_checkinteger(L, 2);
-    ecs_entity_t t = luaL_checkinteger(L, 3);
+    ecs_entity_t relation = luaL_checkinteger(L, 2);
+    ecs_entity_t object = luaL_checkinteger(L, 3);
 
-    void *ptr = ecs_get_mut_w_entity(w, e, ecs_trait(c, t), NULL);
+    ecs_entity_t pair = ecs_pair(relation, object);
 
-    ecs_lua_to_ptr(w, L, 4, t, ptr);
+    if(!e)
+    {
+        e = ecs_new_id(w);
+        ecs_entity_t scope = ecs_get_scope(w);
+        if(scope) ecs_add_pair(w, e, EcsChildOf, scope);
+    }
 
-    ecs_modified_w_entity(w, e, ecs_trait(c, t));
+    void *ptr = ecs_get_mut_id(w, e, pair, NULL);
+
+    ecs_lua_to_ptr(w, L, 4, relation, ptr);
+
+    ecs_modified_id(w, e, pair);
+
+    lua_pushinteger(L, e);
+
+    return 1;
+}
+
+int set_pair_object(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t relation = luaL_checkinteger(L, 2);
+    ecs_entity_t object = luaL_checkinteger(L, 3);
+
+    ecs_entity_t pair = ecs_pair(relation, object);
+
+    if(!e)
+    {
+        e = ecs_new_id(w);
+        ecs_entity_t scope = ecs_get_scope(w);
+        if(scope) ecs_add_pair(w, e, EcsChildOf, scope);
+    }
+
+    void *ptr = ecs_get_mut_id(w, e, pair, NULL);
+
+    ecs_lua_to_ptr(w, L, 4, object, ptr);
+
+    ecs_modified_id(w, e, pair);
+
+    lua_pushinteger(L, e);
 
     return 0;
 }
 
-int set_trait_tag(lua_State *L)
+int get_pair(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t t = luaL_checkinteger(L, 2);
-    ecs_entity_t c = luaL_checkinteger(L, 3);
+    ecs_entity_t relation = luaL_checkinteger(L, 2);
+    ecs_entity_t object = luaL_checkinteger(L, 3);
 
-    void *ptr = ecs_get_mut_w_entity(w, e, ecs_trait(c, t), NULL);
+    ecs_entity_t pair = ecs_pair(relation, object);
 
-    ecs_lua_to_ptr(w, L, 4, t, ptr);
+    const void *ptr = ecs_get_id(w, e, pair);
 
-    ecs_modified_w_entity(w, e, ecs_trait(c, t));
-
-    return 0;
-}
-
-int get_trait(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_world(L);
-
-    ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t c = luaL_checkinteger(L, 2);
-    ecs_entity_t t = luaL_checkinteger(L, 3);
-
-    const void *ptr = ecs_get_w_entity(w, e, ecs_trait(c, t));
-
-    if(ptr) ecs_ptr_to_lua(w, L, t, ptr);
+    if(ptr) ecs_ptr_to_lua(w, L, relation, ptr);
     else lua_pushnil(L);
 
     return 1;
 }
 
-int get_trait_tag(lua_State *L)
+int get_mut_pair(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t t = luaL_checkinteger(L, 2);
-    ecs_entity_t c = luaL_checkinteger(L, 3);
+    ecs_entity_t relation = luaL_checkinteger(L, 2);
+    ecs_entity_t object = luaL_checkinteger(L, 3);
 
-    const void *ptr = ecs_get_w_entity(w, e, ecs_trait(c, t));
+    ecs_entity_t pair = ecs_pair(relation, object);
 
-    if(ptr) ecs_ptr_to_lua(w, L, t, ptr);
+    bool is_added = 0;
+    void *ptr = ecs_get_mut_id(w, e, pair, &is_added);
+
+    if(ptr) ecs_ptr_to_lua(w, L, relation, ptr);
     else lua_pushnil(L);
+
+    lua_pushboolean(L, (int)is_added);
+
+    return 2;
+}
+
+int get_pair_object(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t relation = luaL_checkinteger(L, 2);
+    ecs_entity_t object = luaL_checkinteger(L, 3);
+
+    ecs_entity_t pair = ecs_pair(relation, object);
+
+    const void *ptr = ecs_get_id(w, e, pair);
+
+    if(ptr) ecs_ptr_to_lua(w, L, object, ptr);
+    else lua_pushnil(L);
+
+    return 1;
+}
+
+int get_mut_pair_object(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+    ecs_entity_t relation = luaL_checkinteger(L, 2);
+    ecs_entity_t object = luaL_checkinteger(L, 3);
+
+    ecs_entity_t pair = ecs_pair(relation, object);
+
+    bool is_added = 0;
+    void *ptr = ecs_get_mut_id(w, e, pair, &is_added);
+
+    if(ptr) ecs_ptr_to_lua(w, L, object, ptr);
+    else lua_pushnil(L);
+
+    lua_pushboolean(L, (int)is_added);
+
+    return 2;
+}
+
+int make_pair(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t predicate = luaL_checkinteger(L, 1);
+    ecs_entity_t object = luaL_checkinteger(L, 2);
+
+    ecs_entity_t pair = ecs_pair(predicate, object);
+
+    lua_pushinteger(L, pair);
+
+    return 1;
+}
+
+int pair_object(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t pair = luaL_checkinteger(L, 1);
+
+    ecs_entity_t object = ecs_pair_object(w, pair);
+
+    lua_pushinteger(L, object);
 
     return 1;
 }
@@ -720,7 +869,7 @@ int add_instanceof(lua_State *L)
     ecs_entity_t entity = luaL_checkinteger(L, 1);
     ecs_entity_t base = luaL_checkinteger(L, 2);
 
-    ecs_add_entity(w, entity, ECS_INSTANCEOF | base);
+    ecs_add_pair(w, entity, EcsIsA, base);
 
     return 0;
 }
@@ -732,7 +881,7 @@ int remove_instanceof(lua_State *L)
     ecs_entity_t entity = luaL_checkinteger(L, 1);
     ecs_entity_t base = luaL_checkinteger(L, 2);
 
-    ecs_remove_entity(w, entity, ECS_INSTANCEOF | base);
+    ecs_remove_pair(w, entity, EcsIsA, base);
 
     return 0;
 }
@@ -744,7 +893,7 @@ int add_childof(lua_State *L)
     ecs_entity_t entity = luaL_checkinteger(L, 1);
     ecs_entity_t parent = luaL_checkinteger(L, 2);
 
-    ecs_add_entity(w, entity, ECS_CHILDOF | parent);
+    ecs_add_pair(w, entity, EcsChildOf, parent);
 
     return 0;
 }
@@ -756,7 +905,7 @@ int remove_childof(lua_State *L)
     ecs_entity_t entity = luaL_checkinteger(L, 1);
     ecs_entity_t parent = luaL_checkinteger(L, 2);
 
-    ecs_remove_entity(w, entity, ECS_CHILDOF | parent);
+    ecs_remove_pair(w, entity, EcsChildOf, parent);
 
     return 0;
 }
@@ -768,7 +917,7 @@ int add_owned(lua_State *L)
     ecs_entity_t entity = luaL_checkinteger(L, 1);
     ecs_entity_t component = luaL_checkinteger(L, 2);
 
-    ecs_add_entity(w, entity, ECS_OWNED | component);
+    ecs_add_id(w, entity, ECS_OWNED | component);
 
     return 0;
 }
@@ -780,7 +929,7 @@ int add_switch(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t sw = luaL_checkinteger(L, 2);
 
-    ecs_add_entity(w, e, ECS_SWITCH | sw);
+    ecs_add_id(w, e, ECS_SWITCH | sw);
 
     return 0;
 }
@@ -792,7 +941,7 @@ int remove_switch(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t sw = luaL_checkinteger(L, 2);
 
-    ecs_remove_entity(w, e, ECS_SWITCH | sw);
+    ecs_remove_id(w, e, ECS_SWITCH | sw);
 
     return 0;
 }
@@ -818,7 +967,7 @@ int add_case(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t sw_case = luaL_checkinteger(L, 2);
 
-    ecs_add_entity(w, e, ECS_CASE | sw_case);
+    ecs_add_id(w, e, ECS_CASE | sw_case);
 
     return 0;
 }
@@ -830,9 +979,27 @@ int remove_case(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t sw_case = luaL_checkinteger(L, 2);
 
-    ecs_remove_entity(w, e, ECS_CASE | sw_case);
+    ecs_remove_id(w, e, ECS_CASE | sw_case);
 
     return 0;
+}
+
+static void init_component(ecs_world_t *w, ecs_entity_t id)
+{
+    const EcsMetaType *meta = ecs_get(w, id, EcsMetaType);
+
+    ecs_assert(meta != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    ecs_component_init(w, &(ecs_component_desc_t)
+    {
+        .entity = id,
+        .size = meta->size,
+        .alignment = meta->alignment
+    });
+
+    ecs_entity_t scope = ecs_get_scope(w);
+
+    if(scope) ecs_add_pair(w, id, EcsChildOf, scope);
 }
 
 int new_enum(lua_State *L)
@@ -846,7 +1013,7 @@ int new_enum(lua_State *L)
 
     ecs_entity_t component = ecs_new_component_id(w);
 
-    ecs_set(w, component, EcsName, {.alloc_value = (char*)name});
+    ecs_set_name(w, component, name);
 
     ecs_set(w, component, EcsMetaType,
     {
@@ -856,9 +1023,7 @@ int new_enum(lua_State *L)
         .descriptor = desc
     });
 
-    const EcsMetaType *meta = ecs_get(w, component, EcsMetaType);
-
-    ecs_new_component(w, component, NULL, meta->size, meta->alignment);
+    init_component(w, component);
 
     lua_pushinteger(L, component);
 
@@ -876,7 +1041,7 @@ int new_bitmask(lua_State *L)
 
     ecs_entity_t component = ecs_new_component_id(w);
 
-    ecs_set(w, component, EcsName, {.alloc_value = (char*)name});
+    ecs_set_name(w, component, name);
 
     ecs_set(w, component, EcsMetaType,
     {
@@ -886,9 +1051,7 @@ int new_bitmask(lua_State *L)
         .descriptor = desc
     });
 
-    const EcsMetaType *meta = ecs_get(w, component, EcsMetaType);
-
-    ecs_new_component(w, component, NULL, meta->size, meta->alignment);
+    init_component(w, component);
 
     lua_pushinteger(L, component);
 
@@ -915,13 +1078,11 @@ int new_array(lua_State *L)
 
     ecs_entity_t component = ecs_new_component_id(w);
 
-    ecs_set(w, component, EcsName, {.alloc_value = (char*)name});
+    ecs_set_name(w, component, name);
 
     ecs_set(w, component, EcsMetaType, {.kind = EcsArrayType, .descriptor = desc});
 
-    const EcsMetaType *meta = ecs_get(w, component, EcsMetaType);
-
-    ecs_new_component(w, component, NULL, meta->size, meta->alignment);
+    init_component(w, component);
 
     ecs_os_free(desc);
 
@@ -941,13 +1102,11 @@ int new_struct(lua_State *L)
 
     ecs_entity_t component = ecs_new_component_id(w);
 
-    ecs_set(w, component, EcsName, {.alloc_value = (char*)name});
+    ecs_set_name(w, component, name);
 
     ecs_set(w, component, EcsMetaType, {.kind = EcsStructType, .descriptor = desc});
 
-    const EcsMetaType *meta = ecs_get(w, component, EcsMetaType);
-
-    ecs_new_component(w, component, NULL, meta->size, meta->alignment);
+    init_component(w, component);
 
     lua_pushinteger(L, component);
 
@@ -975,11 +1134,11 @@ int new_alias(lua_State *L)
 
     ecs_entity_t component = ecs_new_component_id(w);
 
-    ecs_set(w, component, EcsName, {.alloc_value = (char*)alias});
+    ecs_set_name(w, component, alias);
 
     ecs_set(w, component, EcsMetaType, {.kind = meta->kind, .descriptor = meta->descriptor});
 
-    ecs_new_component(w, component, NULL, meta->size, meta->alignment);
+    init_component(w, component);
 
     lua_pushinteger(L, component);
 
@@ -993,7 +1152,7 @@ int get_func(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t component = luaL_checkinteger(L, 2);
 
-    const void *ptr = ecs_get_w_entity(w, e, component);
+    const void *ptr = ecs_get_id(w, e, component);
 
     if(ptr) ecs_ptr_to_lua(w, L, component, ptr);
     else lua_pushnil(L);
@@ -1004,7 +1163,7 @@ int get_func(lua_State *L)
 static int get_mutable(ecs_world_t *w, lua_State *L, ecs_entity_t e, ecs_entity_t component)
 {
     bool is_added = 0;
-    void *ptr = ecs_get_mut_w_entity(w, e, component, &is_added);
+    void *ptr = ecs_get_mut_id(w, e, component, &is_added);
 
     if(ptr) ecs_ptr_to_lua(w, L, component, ptr);
     else lua_pushnil(L);
@@ -1033,11 +1192,11 @@ int patch_func(lua_State *L)
     luaL_checktype(L, 3, LUA_TTABLE);
 
     bool is_added = 0;
-    void *ptr = ecs_get_mut_w_entity(w, e, component, &is_added);
+    void *ptr = ecs_get_mut_id(w, e, component, &is_added);
 
     ecs_lua_to_ptr(w, L, 3, component, ptr);
 
-    ecs_modified_w_entity(w, e, component);
+    ecs_modified_id(w, e, component);
 
     lua_pushboolean(L, is_added);
 
@@ -1051,11 +1210,18 @@ int set_func(lua_State *L)
     ecs_entity_t e = luaL_checkinteger(L, 1);
     ecs_entity_t component = luaL_checkinteger(L, 2);
 
-    void *ptr = ecs_get_mut_w_entity(w, e, component, NULL);
+    if(!e)
+    {
+        e = ecs_new_id(w);
+        ecs_entity_t scope = ecs_get_scope(w);
+        if(scope) ecs_add_pair(w, e, EcsChildOf, scope);
+    }
+
+    void *ptr = ecs_get_mut_id(w, e, component, NULL);
 
     ecs_lua_to_ptr(w, L, 3, component, ptr);
 
-    ecs_modified_w_entity(w, e, component);
+    ecs_modified_id(w, e, component);
 
     lua_pushinteger(L, e);
 
@@ -1088,7 +1254,7 @@ int get_ref(lua_State *L)
     ecs_lua_assert(L, !entity || !ref->entity || entity == ref->entity, NULL);
     ecs_lua_assert(L, !component || !ref->component || component == ref->component, NULL);
 
-    const void *ptr = ecs_get_ref_w_entity(w, ref, entity, component);
+    const void *ptr = ecs_get_ref_w_id(w, ref, entity, component);
 
     ecs_ptr_to_lua(w, L, ref->component, ptr);
 
@@ -1101,7 +1267,7 @@ int singleton_get(lua_State *L)
 
     ecs_entity_t component = luaL_checkinteger(L, 1);
 
-    const void *ptr = ecs_get_w_entity(w, component, component);
+    const void *ptr = ecs_get_id(w, component, component);
 
     if(ptr) ecs_ptr_to_lua(w, L, component, ptr);
     else lua_pushnil(L);
@@ -1117,11 +1283,11 @@ int singleton_patch(lua_State *L)
     luaL_checktype(L, 2, LUA_TTABLE);
 
     bool is_added = 0;
-    void *ptr = ecs_get_mut_w_entity(w, e, e, &is_added);
+    void *ptr = ecs_get_mut_id(w, e, e, &is_added);
 
     ecs_lua_to_ptr(w, L, 2, e, ptr);
 
-    ecs_modified_w_entity(w, e, e);
+    ecs_modified_id(w, e, e);
 
     lua_pushboolean(L, is_added);
 
@@ -1134,11 +1300,11 @@ int singleton_set(lua_State *L)
 
     ecs_entity_t component = luaL_checkinteger(L, 1);
 
-    void *ptr = ecs_get_mut_w_entity(w, component, component, NULL);
+    void *ptr = ecs_get_mut_id(w, component, component, NULL);
 
     ecs_lua_to_ptr(w, L, 2, component, ptr);
 
-    ecs_modified_w_entity(w, component, component);
+    ecs_modified_id(w, component, component);
 
     return 1;
 }
@@ -1155,15 +1321,20 @@ int new_prefab(lua_State *L)
     {
         e = ecs_new_id(w);
         ecs_entity_t scope = ecs_get_scope(w);
-        if(scope) ecs_add_entity(w, e, ECS_CHILDOF | scope);
-        ecs_add_entity(w, e, EcsPrefab);
+        if(scope) ecs_add_pair(w, e, EcsChildOf, scope);
+        ecs_add_id(w, e, EcsPrefab);
     }
     else if(args <= 2)
     {
         const char *id = luaL_checkstring(L, 1);
         const char *sig = luaL_optstring(L, 2, NULL);
-        e = ecs_new_prefab(w, 0, id, sig);
-        ecs_set(w, e, EcsName, { .alloc_value = (char*)id });
+
+        e = ecs_entity_init(w, &(ecs_entity_desc_t)
+        {
+            .name = id,
+            .add_expr = sig,
+            .add = {EcsPrefab}
+        });
     }
     else return luaL_argerror(L, args, "too many arguments");
 

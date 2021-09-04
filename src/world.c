@@ -81,7 +81,7 @@ int world_info(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
     const ecs_world_info_t *wi = ecs_get_world_info(w);
 
-    ecs_assert(ecs_typeid(EcsLuaWorldInfo) != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(ecs_id(EcsLuaWorldInfo) != 0, ECS_INTERNAL_ERROR, NULL);
 
     struct EcsLuaWorldInfo world_info =
     {
@@ -104,7 +104,7 @@ int world_info(lua_State *L)
         .systems_ran_frame = wi->systems_ran_frame,
     };
 
-    ecs_ptr_to_lua(w, L, ecs_typeid(EcsLuaWorldInfo), &world_info);
+    ecs_ptr_to_lua(w, L, ecs_id(EcsLuaWorldInfo), &world_info);
 
     return 1;
 }
@@ -112,38 +112,16 @@ int world_info(lua_State *L)
 int world_stats(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
-#if 0
-    ecs_assert(ecs_typeid(EcsLuaWorldStats) != 0, ECS_INTERNAL_ERROR, NULL);
+
+    ecs_assert(ecs_id(EcsLuaWorldStats) != 0, ECS_INTERNAL_ERROR, NULL);
 
     ecs_world_stats_t ws;
     ecs_get_world_stats(w, &ws);
 
-    EcsLuaWorldStats world_stats =
-    {
-        .entity_count = ws.entity_count,
-        .component_count = ws.component_count,
-        .query_count = ws.query_count,
-        .system_count = ws.system_count,
-        .table_count = ws.table_count,
-        .empty_table_count = ws.empty_table_count,
-        .singleton_table_count = ws.singleton_table_count,
-        .max_entities_per_table = ws.max_entities_per_table,
-        .max_components_per_table = ws.max_components_per_table,
-        .max_columns_per_table = ws.max_columns_per_table,
-        .max_matched_queries_per_table = ws.max_matched_queries_per_table,
-        .new_count = ws.new_count,
-        .bulk_new_count = ws.bulk_new_count,
-        .delete_count = ws.delete_count,
-        .clear_count = ws.clear_count,
-        .add_count = ws.add_count,
-        .remove_count = ws.remove_count,
-        .set_count = ws.set_count,
-        .discard_count = ws.discard_count,
-    };
+    EcsLuaWorldStats world_stats;
+    memcpy(&world_stats, &ws, sizeof(world_stats));
 
-    ecs_ptr_to_lua(w, L, ecs_typeid(EcsLuaWorldStats), &world_stats);
-#endif
-    lua_pushnil(L);
+    ecs_ptr_to_lua(w, L, ecs_id(EcsLuaWorldStats), &world_stats);
 
     return 1;
 }

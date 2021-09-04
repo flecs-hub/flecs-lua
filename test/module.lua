@@ -2,7 +2,7 @@ local t = require "test"
 local ecs = require "ecs"
 local u = require "util"
 
-ecs.progress_cb(function() ecs.log("progress()!") end)
+u.test_defaults()
 
 local m = require "modules.test"
 --u.print_packages()
@@ -32,7 +32,7 @@ local function import_func(name)
     assert(module ~= 0)
     print("MODULE ID: " .. module)
 
-    local it = ecs.scope_iter(module, { include = ecs.get_type(ecs.Name, true) })
+    local it = ecs.scope_iter(module, { include = ecs.get_type("(Identifier, Name)") })
     local export = {}
 
     while ecs.scope_next(it) do

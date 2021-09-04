@@ -44,4 +44,21 @@ function m.print_ecs_ints()
     end
 end
 
+function m.default_progress()
+    ecs.progress_cb(function() ecs.log("progress()!") end)
+end
+
+function m.test_defaults()
+    m.default_progress()
+    ecs.tracing_color_enable()
+end
+
+function m.asserteq(a, b)
+    if(a ~= b) then
+        a = a or "(nil)"
+        b = b or "(nil)"
+        error("assertion failed: " .. a .. " != " .. b, 2)
+    end
+end
+
 return m

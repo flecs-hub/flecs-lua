@@ -18,24 +18,14 @@ int bulk_new(lua_State *L)
     }
     else if(args >= 2) /* bulk_new(component, count, [noreturn]) */
     {
-        ecs_entity_t type_entity = 0;
+        ecs_entity_t type_entity = luaL_checkinteger(L, 1);
 
-        if(lua_isinteger(L, 1)) type_entity = luaL_checkinteger(L, 1);
-        else
-        {
-            const char *name = luaL_checkstring(L, 1);
-
-            type_entity = ecs_lookup(w, name);
-
-            if(!type_entity) return luaL_argerror(L, 2, "could not find type");
-        }
-
-        type = ecs_type_from_entity(w, type_entity);
+        type = ecs_type_from_id(w, type_entity);
 
         count = luaL_checkinteger(L, 2);
         noreturn = lua_toboolean(L, 3);
     }
-    else count = luaL_checkinteger(L, 1);
+    else count = luaL_checkinteger(L, 1); /* bulk_new(count) */
 
     entities = ecs_bulk_new_w_type(w, type, count);
 
@@ -56,9 +46,13 @@ int bulk_new(lua_State *L)
 int bulk_delete(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
-    ecs_filter_t filter = checkfilter(L, 1);
 
-    ecs_bulk_delete(w, &filter);
+    if(lua_gettop(L) > 0)
+    {
+        ecs_filter_t filter = checkfilter(L, 1);
+        ecs_bulk_delete(w, &filter);
+    }
+    else ecs_bulk_delete(w, NULL);
 
     return 0;
 }

@@ -2,7 +2,7 @@ local t = require "test"
 local ecs = require "ecs"
 local u = require "util"
 
-ecs.progress_cb(function() ecs.log("progress()!") end)
+u.test_defaults()
 
 local tstruct = ecs.lookup("lua_test_struct")
 local test_struct, added = ecs.singleton_get(tstruct)
@@ -74,7 +74,7 @@ assert(test_struct.i64 == 32)
 
 
 local MetaType = ecs.lookup_fullpath("flecs.meta.MetaType")
-local MetaTypeSerializer = ecs.lookup_fullpath("flecs.meta.EcsMetaTypeSerializer")
+local MetaTypeSerializer = ecs.lookup_fullpath("flecs.meta.MetaTypeSerializer")
 local ecs_type_op = ecs.lookup_fullpath("flecs.meta.ecs_type_op_t")
 
 local LuaEnum = ecs.enum("LuaEnum", "{ Red, Green, Blue = 4 }")
@@ -91,17 +91,16 @@ local meta = ecs.get(LuaStruct, MetaType)
 ---@type EcsMetaTypeSerializer
 local ser = ecs.get(LuaStruct, MetaTypeSerializer)
 
-local ref = ecs.ref(ecs.Singleton, tstruct)
+local ref = ecs.ref(tstruct, tstruct)
 
 test_struct = ecs.get_ref(ref)
 assert(test_struct ~= nil)
 
-test_struct = ecs.get_ref(ref, ecs.Singleton, tstruct)
+test_struct = ecs.get_ref(ref, tstruct, tstruct)
 assert(test_struct ~= nil)
 
-assert(not pcall(function () ecs.get_ref(ref, ecs.Singleton, 40) end))
 assert(not pcall(function () ecs.get_ref(ref, 123, 40) end))
-assert(not pcall(function () ecs.get_ref(ref, ecs.Singleton) end))
+assert(not pcall(function () ecs.get_ref(ref, tstruct) end))
 
 
 for i, op in pairs(ser.ops) do
@@ -121,9 +120,9 @@ local data =
   [2] = { { 111 }, { 11, 22, 33 }},
 }
 
-ecs.set(ecs.Singleton, LuaArray, data)
+ecs.singleton_set(LuaArray, data)
 
-data = ecs.get(ecs.Singleton, LuaArray)
+data = ecs.singleton_get(LuaArray)
 
 assert(data[1].blah[1] == 100)
 assert(data[2].blah[1] == 111)
@@ -131,18 +130,18 @@ assert(data[1].position.y == 20)
 assert(data[2].position.y == 22)
 
 --Structs without labels are allowed
-ecs.set(ecs.Singleton, LuaPosition, { 100, 200, 300 })
+ecs.singleton_set(LuaPosition, { 100, 200, 300 })
 
 --Mixed key types are not allowed
-assert(not pcall(function () ecs.set(ecs.Singleton, LuaPosition, { 100, x = 2, 200, 300}) end))
+assert(not pcall(function () ecs.singleton_set(LuaPosition, { 100, x = 2, 200, 300}) end))
 
 --Too many elements
-assert(not pcall(function () ecs.set(ecs.Singleton, LuaPosition, { 100, 200, 300, 400 }) end))
+assert(not pcall(function () ecs.singleton_set(LuaPosition, { 100, 200, 300, 400 }) end))
 
 --Invalid key type
 local lol = {}
 lol[ecs.get_type(LuaPosition)] = 245
-assert(not pcall(function () ecs.set(ecs.Singleton, LuaPosition, lol) end))
+assert(not pcall(function () ecs.singleton_set(LuaPosition, lol) end))
 
 local str = ecs.emmy_class(LuaPosition)
 ecs.log(str)

@@ -6,11 +6,16 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-ECS_COMPONENT_DECLARE(EcsLuaHost);
-ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
-ECS_COMPONENT_DECLARE(EcsLuaGauge);
-ECS_COMPONENT_DECLARE(EcsLuaCounter);
-ECS_COMPONENT_DECLARE(EcsLuaWorldStats);
+/* A 64-bit lua_Number is also recommended */
+#if (lua_Unsigned)-1 != UINT64_MAX
+    #error "flecs-lua requires a 64-bit lua_Integer"
+#endif
+
+extern ECS_COMPONENT_DECLARE(EcsLuaHost);
+extern ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
+extern ECS_COMPONENT_DECLARE(EcsLuaGauge);
+extern ECS_COMPONENT_DECLARE(EcsLuaCounter);
+extern ECS_COMPONENT_DECLARE(EcsLuaWorldStats);
 
 #define ECS_LUA_CONTEXT (1)
 #define ECS_LUA_CURSORS (2)
@@ -27,6 +32,39 @@ static inline ecs_world_t *ecs_lua_world(lua_State *L)
     if(!w) luaL_argerror(L, 0, "world was destroyed");
 
     return w;
+}
+
+/* Get the associated world for the userdata at the given index */
+static inline ecs_world_t *ecs_lua_object_world(lua_State *L, int idx)
+{
+    int type = lua_getuservalue(L, idx);
+
+    ecs_assert(type == LUA_TUSERDATA, ECS_INTERNAL_ERROR, NULL);
+
+    ecs_world_t *w = *(ecs_world_t**)lua_touserdata(L, -1);
+
+    lua_pop(L, 1);
+
+    if(!w) luaL_argerror(L, 0, "world was destroyed");
+
+    return w;
+}
+
+/* Check world against object world at the given index */
+static inline void ecs_lua_check_world(lua_State *L, const ecs_world_t *world, int idx)
+{
+    ecs_world_t *object_world = ecs_lua_object_world(L, 1);
+
+    if(object_world != world) luaL_argerror(L, 1, "world mismatch");
+}
+
+static inline lua_Integer checkentity(lua_State *L, ecs_world_t *world, int arg)
+{
+    lua_Integer entity = luaL_checkinteger(L, arg);
+
+    if(!ecs_is_valid(world, entity)) luaL_argerror(L, arg, "invalid entity");
+
+    return entity;
 }
 
 static inline bool ecs_lua_deferred(ecs_world_t *w)
@@ -51,7 +89,7 @@ static inline bool ecs_lua_deferred(ecs_world_t *w)
 #endif
 
 /* ecs */
-ecs_lua_ctx *ecs_lua_get_context(lua_State *L, ecs_world_t *world);
+ecs_lua_ctx *ecs_lua_get_context(lua_State *L, const ecs_world_t *world);
 
 /* Register object with the world to be __gc'd before ecs_fini() */
 void register_collectible(lua_State *L, ecs_world_t *w, int idx);
@@ -93,7 +131,6 @@ typedef struct ecs_lua_ctx
 
 typedef struct ecs_lua_system
 {
-    lua_State *L;
     const char *name;
     int func_ref;
     int param_ref;
@@ -176,46 +213,27 @@ ECS_STRUCT(EcsLuaWorldStats,
 });
 
 #define ECS_LUA_BUILTINS(XX) \
-    XX(Component) \
-    XX(ComponentLifecycle) \
-    XX(Type) \
-    XX(Name) \
-\
-    XX(Trigger) \
-    XX(System) \
-    XX(TickSource) \
-    XX(SignatureExpr) \
-    XX(Signature) \
-    XX(Query) \
-    XX(IterAction) \
-    XX(Context) \
-\
-    XX(PipelineQuery) \
-\
-    XX(Timer) \
-    XX(RateFilter)
-
-#define ECS_LUA_ENUMS(XX) \
-    XX(MatchDefault) \
-    XX(MatchAll) \
-    XX(MatchAny) \
-    XX(MatchExact) \
+    XX(World) \
+    XX(Wildcard) \
+    XX(Flecs) \
+    XX(FlecsCore) \
 \
     XX(Module) \
     XX(Prefab) \
-    XX(Hidden) \
     XX(Disabled) \
-    XX(DisabledIntern) \
-    XX(Inactive) \
-    XX(OnDemand) \
-    XX(Monitor) \
-    XX(Pipeline) \
+    XX(Hidden) \
 \
     XX(OnAdd) \
     XX(OnRemove) \
 \
     XX(OnSet) \
     XX(UnSet) \
+\
+    XX(OnDemand) \
+    XX(Monitor) \
+    XX(DisabledIntern) \
+    XX(Inactive) \
+    XX(Pipeline) \
 \
     XX(PreFrame) \
     XX(OnLoad) \
@@ -228,11 +246,17 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(OnStore) \
     XX(PostFrame) \
 \
-    XX(Flecs) \
-    XX(FlecsCore) \
-    XX(World) \
-    XX(Singleton) \
-    XX(Wildcard) \
+    XX(Tag) \
+    XX(Name) \
+    XX(Symbol) \
+    XX(ChildOf) \
+    XX(IsA)
+
+#define ECS_LUA_ENUMS(XX) \
+    XX(MatchDefault) \
+    XX(MatchAll) \
+    XX(MatchAny) \
+    XX(MatchExact) \
 \
     XX(PrimitiveType) \
     XX(BitmaskType) \
@@ -268,12 +292,17 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(OpPop) \
     XX(OpArray) \
     XX(OpVector) \
-    XX(OpMap)
+    XX(OpMap) \
+\
+    XX(DefaultSet) \
+    XX(Self) \
+    XX(SuperSet) \
+    XX(SubSet) \
+    XX(Cascade) \
+    XX(All) \
+    XX(Nothing)
 
 #define ECS_LUA_MACROS(XX) \
-    XX(INSTANCEOF) \
-    XX(CHILDOF) \
-    XX(TRAIT) \
     XX(AND) \
     XX(OR) \
     XX(XOR) \
@@ -283,6 +312,19 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(OWNED)
 
 #define ECS_LUA_TYPEIDS(XX) \
+    XX(Component) \
+    XX(ComponentLifecycle) \
+    XX(Type) \
+\
+    XX(Trigger) \
+    XX(Query) \
+    XX(System) \
+    XX(TickSource) \
+\
+    XX(PipelineQuery) \
+\
+    XX(Timer) \
+    XX(RateFilter) \
     XX(Primitive) \
     XX(Enum) \
     XX(Bitmask) \
@@ -292,8 +334,11 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(Vector) \
     XX(Map) \
     XX(MetaType) \
-    XX(MetaTypeSerializer)
-
+    XX(MetaTypeSerializer) \
+\
+    XX(LuaGauge) \
+    XX(LuaCounter) \
+    XX(LuaWorldStats)
 
 
 

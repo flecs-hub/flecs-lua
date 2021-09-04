@@ -39,6 +39,10 @@ int snapshot_take(lua_State *L)
     ecs_snapshot_t **ptr = lua_newuserdata(L, sizeof(ecs_snapshot_t*));
     *ptr = snapshot;
 
+    /* Tie object to world */
+    lua_pushvalue(L, lua_upvalueindex(1));
+    lua_setuservalue(L, -2);
+
     luaL_setmetatable(L, "ecs_snapshot_t");
     register_collectible(L, w, -1);
 
@@ -50,7 +54,13 @@ int snapshot_restore(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
     ecs_snapshot_t *snapshot = checksnapshot(L, 1);
 
+    ecs_lua_check_world(L, w, 1);
+
     ecs_snapshot_restore(w, snapshot);
+
+    /* Snapshot data is moved into world and is considered freed */
+    ecs_snapshot_t **ptr = lua_touserdata(L, 1);
+    *ptr = NULL;
 
     return 0;
 }
@@ -58,9 +68,16 @@ int snapshot_restore(lua_State *L)
 int snapshot_iter(lua_State *L)
 {
     ecs_snapshot_t *snapshot = checksnapshot(L, 1);
-    ecs_filter_t filter = checkfilter(L, 2);
+    ecs_filter_t filter;
+    ecs_filter_t *filter_ptr = NULL;
 
-    ecs_iter_t it = ecs_snapshot_iter(snapshot, &filter);
+    if(lua_gettop(L) > 1)
+    {
+        filter = checkfilter(L, 2);
+        filter_ptr = &filter;
+    }
+
+    ecs_iter_t it = ecs_snapshot_iter(snapshot, filter_ptr);
 
     ecs_iter_to_lua(&it, L, true);
 

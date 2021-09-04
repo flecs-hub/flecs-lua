@@ -90,3 +90,12 @@ int tracing_enable(lua_State *L)
 
     return 0;
 }
+
+int tracing_color_enable(lua_State *L)
+{
+    int enable = lua_toboolean(L, 1);
+
+    ecs_tracing_color_enable(enable);
+
+    return 0;
+}

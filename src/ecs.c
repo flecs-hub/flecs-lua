@@ -17,7 +17,7 @@ static const int ecs_lua__world;
 
 static ecs_lua_ctx *ctx_init(ecs_lua_ctx ctx);
 
-ecs_lua_ctx *ecs_lua_get_context(lua_State *L, ecs_world_t *world)
+ecs_lua_ctx *ecs_lua_get_context(lua_State *L, const ecs_world_t *world)
 {
     int type;
     ecs_lua_ctx *ctx;
@@ -30,7 +30,7 @@ ecs_lua_ctx *ecs_lua_get_context(lua_State *L, ecs_world_t *world)
         if(type == LUA_TNIL) return NULL;
 
         type = lua_rawgeti(L, -1, ECS_LUA_CONTEXT);
-        //ecs_assert(type == LUA_TUSERDATA, ECS_INTERNAL_ERROR, NULL);
+        ecs_assert(type == LUA_TUSERDATA, ECS_INTERNAL_ERROR, NULL);
 
         ctx = lua_touserdata(L, -1);
         lua_pop(L, 2);
@@ -95,13 +95,14 @@ void register_collectible(lua_State *L, ecs_world_t *w, int idx)
     int type = lua_rawgetp(L, LUA_REGISTRYINDEX, w);
     ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
+    /* registry[world].collect */
     type = lua_rawgeti(L, -1, ECS_LUA_COLLECT);
     ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
 
     lua_type(L, idx);
     lua_pushvalue(L, idx);
-    lua_pushboolean(L, 1);
-    lua_settable(L, -3);
+    lua_pushboolean(L, 1); /* dummy value */
+    lua_settable(L, -3); /* collect[obj] = true */
 
     lua_pop(L, 2);
     ecs_lua__epilog(L);
@@ -126,6 +127,7 @@ int entity_has(lua_State *L);
 int entity_owns(lua_State *L);
 int has_role(lua_State *L);
 int is_alive(lua_State *L);
+int is_valid(lua_State *L);
 int exists(lua_State *L);
 int entity_add(lua_State *L);
 int entity_remove(lua_State *L);
@@ -143,13 +145,17 @@ int enable_component(lua_State *L);
 int disable_component(lua_State *L);
 int is_component_enabled(lua_State *L);
 
-int add_trait(lua_State *L);
-int remove_trait(lua_State *L);
-int has_trait(lua_State *L);
-int set_trait(lua_State *L);
-int set_trait_tag(lua_State *L);
-int get_trait(lua_State *L);
-int get_trait_tag(lua_State *L);
+int add_pair(lua_State *L);
+int remove_pair(lua_State *L);
+int has_pair(lua_State *L);
+int set_pair(lua_State *L);
+int set_pair_object(lua_State *L);
+int get_pair(lua_State *L);
+int get_mut_pair(lua_State *L);
+int get_pair_object(lua_State *L);
+int get_mut_pair_object(lua_State *L);
+int make_pair(lua_State *L);
+int pair_object(lua_State *L);
 int add_instanceof(lua_State *L);
 int remove_instanceof(lua_State *L);
 int add_childof(lua_State *L);
@@ -197,7 +203,7 @@ int bulk_delete(lua_State *L);
 int column(lua_State *L);
 int columns(lua_State *L);
 int is_owned(lua_State *L);
-int column_entity(lua_State *L);
+int term_id(lua_State *L);
 int filter_iter(lua_State *L);
 int filter_next(lua_State *L);
 
@@ -233,10 +239,12 @@ int print_err(lua_State *L);
 int print_dbg(lua_State *L);
 int print_warn(lua_State *L);
 int tracing_enable(lua_State *L);
+int tracing_color_enable(lua_State *L);
 
 /* Misc */
 int assert_func(lua_State *L);
 int sizeof_component(lua_State *L);
+int is_primitive(lua_State *L);
 int createtable(lua_State *L);
 int zero_init_component(lua_State *L);
 int get_world_ptr(lua_State *L);
@@ -304,6 +312,7 @@ static const luaL_Reg ecs_lib[] =
     { "owns", entity_owns },
     { "has_role", has_role },
     { "is_alive", is_alive },
+    { "is_valid", is_valid },
     { "exists", exists },
     { "add", entity_add },
     { "remove", entity_remove },
@@ -321,13 +330,17 @@ static const luaL_Reg ecs_lib[] =
     { "disable_component", disable_component },
     { "is_component_enabled", is_component_enabled },
 
-    { "add_trait", add_trait },
-    { "remove_trait", remove_trait },
-    { "has_trait", has_trait },
-    { "set_trait", set_trait },
-    { "set_trait_tag", set_trait_tag },
-    { "get_trait", get_trait },
-    { "get_trait_tag", get_trait_tag },
+    { "add_pair", add_pair },
+    { "remove_pair", remove_pair },
+    { "has_pair", has_pair },
+    { "set_pair", set_pair },
+    { "set_pair_object", set_pair_object },
+    { "get_pair", get_pair },
+    { "get_mut_pair", get_mut_pair },
+    { "get_pair_object", get_pair_object },
+    { "get_mut_pair_object", get_mut_pair_object },
+    { "pair", make_pair },
+    { "pair_object", pair_object },
     { "add_instanceof", add_instanceof },
     { "remove_instanceof", remove_instanceof },
     { "add_childof", add_childof },
@@ -371,7 +384,8 @@ static const luaL_Reg ecs_lib[] =
     { "column", column },
     { "columns", columns },
     { "is_owned", is_owned },
-    { "column_entity", column_entity },
+    { "column_entity", term_id }, // compat
+    { "term_id", term_id },
     { "filter_iter", filter_iter },
     { "filter_next", filter_next },
 
@@ -400,9 +414,11 @@ static const luaL_Reg ecs_lib[] =
     { "dbg", print_dbg },
     { "warn", print_warn },
     { "tracing_enable", tracing_enable },
+    { "tracing_color_enable", tracing_color_enable },
 
     { "assert", assert_func },
     { "sizeof", sizeof_component },
+    { "is_primitive", is_primitive },
     { "createtable", createtable },
     { "zero_init", zero_init_component },
     { "world_ptr", get_world_ptr },
@@ -567,7 +583,10 @@ int luaopen_ecs(lua_State *L)
 
     luaL_setfuncs(L, ecs_lib, 1);
 
-#define XX(const) lua_pushinteger(L, ecs_typeid(Ecs##const)); lua_setfield(L, -2, #const);
+#define XX(type) lua_pushinteger(L, ecs_id(Ecs##type)); lua_setfield(L, -2, #type);
+    ECS_LUA_TYPEIDS(XX)
+#undef XX
+#define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
     ECS_LUA_BUILTINS(XX)
 #undef XX
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
@@ -576,14 +595,11 @@ int luaopen_ecs(lua_State *L)
 #define XX(const) lua_pushinteger(L, ECS_##const); lua_setfield(L, -2, #const);
     ECS_LUA_MACROS(XX)
 #undef XX
-#define XX(type) lua_pushinteger(L, ecs_typeid(Ecs##type)); lua_setfield(L, -2, #type);
-    ECS_LUA_TYPEIDS(XX)
-#undef XX
 
-    lua_pushinteger(L, ecs_typeid(ecs_type_op_kind_t));
+    lua_pushinteger(L, ecs_id(ecs_type_op_kind_t));
     lua_setfield(L, -2, "type_op_kind_t");
 
-    lua_pushinteger(L, ecs_typeid(ecs_type_op_t));
+    lua_pushinteger(L, ecs_id(ecs_type_op_t));
     lua_setfield(L, -2, "type_op_t");
 
     return 1;
@@ -687,13 +703,17 @@ ECS_CTOR(EcsLuaHost, ptr,
     memset(ptr, 0, sizeof(EcsLuaHost));
 });
 
-/* Should only be called on ecs_fini() */
-ECS_DTOR(EcsLuaHost, ptr,
+static void ecs_lua_atfini(ecs_world_t *world, void *ctx)
 {
+    EcsLuaHost *ptr = ecs_singleton_get_mut(world, EcsLuaHost);
+
+    ecs_assert(ptr != NULL, ECS_INTERNAL_ERROR, NULL);
+
     lua_State *L = ptr->L;
-    if(L == NULL) continue;
+    if(L == NULL) return;
 
     ecs_world_t *wdefault = ecs_lua_get_world(L);
+
     if(wdefault == world)
     {/* This is the default world in this VM */
         lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT_WORLD);
@@ -702,7 +722,9 @@ ECS_DTOR(EcsLuaHost, ptr,
         lua_close(L);
         ptr->L = NULL;
     }
-});
+
+    ecs_singleton_modified(world, EcsLuaHost);
+}
 
 /** Define a component with a high/entity id,
  * leaving the low id's to performance critical components.
@@ -724,15 +746,16 @@ void FlecsLuaImport(ecs_world_t *w)
     ECS_COMPONENT_DEFINE(w, EcsLuaHost);
 
     ECS_META_DEFINE(w, EcsLuaWorldInfo);
-    //ECS_LUA_META(w, EcsLuaGauge);
-    //ECS_LUA_META(w, EcsLuaCounter);
-    //ECS_LUA_META(w, EcsLuaWorldStats);
+    ECS_META_DEFINE(w, EcsLuaGauge);
+    ECS_META_DEFINE(w, EcsLuaCounter);
+    ECS_META_DEFINE(w, EcsLuaWorldStats);
 
     ecs_assert(sizeof(ecs_world_stats_t) == sizeof(EcsLuaWorldStats), ECS_INTERNAL_ERROR, NULL);
 
     ecs_set_component_actions(w, EcsLuaHost,
     {
         .ctor = ecs_ctor(EcsLuaHost),
-        .dtor = ecs_dtor(EcsLuaHost)
     });
+
+    ecs_atfini(w, ecs_lua_atfini, NULL);
 }

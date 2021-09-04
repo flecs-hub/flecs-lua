@@ -2,22 +2,14 @@ local t = require "test"
 local ecs = require "ecs"
 local u = require "util"
 
-ecs.progress_cb(function() ecs.log("progress()!") end)
+u.test_defaults()
 
+local struct_str = "{float x; float y; float z;}"
 
-local HealthBuff = ecs.struct("HealthBuff", "{float x;}")
+local Position = ecs.struct("Position", struct_str)
+local Velocity = ecs.struct("Velocity", struct_str)
+
 local ExpiryTimer = ecs.struct("ExpiryTimer", "{float expiry_time; float t;}");
-
-local e = ecs.new()
-
-ecs.add(e, HealthBuff)
---ecs.set(e, HealthBuff, { x = 10 })
-ecs.set_trait(e, HealthBuff, ExpiryTimer, { expiry_time = 5, t = 0 })
-
-local exp = ecs.get_trait(e, HealthBuff, ExpiryTimer)
-assert(exp)
-print("expiry_time: " .. exp.expiry_time)
-assert(exp.expiry_time == 5.0)
 
 local removed = false
 local iter_count = 0
@@ -25,11 +17,10 @@ local iter_count = 0
 local function ExpireComponents(it)
     local et = ecs.column(it, 1)
 
-    local trait = ecs.column_entity(it, 1)
-    local comp = trait & ((1 << 31) - 1)
+    local pair = ecs.column_entity(it, 1)
+    local comp = ecs.pair_object(pair)
 
-    assert(ecs.get_typeid(trait) == ExpiryTimer)
-    assert(comp == HealthBuff)
+    assert(ecs.get_typeid(pair) == ExpiryTimer)
 
     iter_count = iter_count + 1
 
@@ -41,30 +32,46 @@ local function ExpireComponents(it)
         et[i].t = et[i].t + it.delta_time;
 
         if(et[i].t >= et[i].expiry_time) then
-
-            assert(removed == false)
-            removed = true
-
             print("removing...")
-
             ecs.remove(it.entities[i], comp)
-            ecs.remove(it.entities[i], trait)
+            ecs.remove(it.entities[i], pair)
         end
     end
 end
 
-ecs.system(ExpireComponents, "ExpireComponents", ecs.OnUpdate, "TRAIT | ExpiryTimer")
+ecs.system(ExpireComponents, "ExpireComponents", ecs.OnUpdate, "(ExpiryTimer, *)")
+
+local e = ecs.new()
+
+ecs.add(e, Position)
+ecs.add(e, Velocity)
+
+ecs.set_pair(e, ExpiryTimer, Position, { expiry_time = 3, t = 0})
+ecs.set_pair(e, ExpiryTimer, Velocity, { expiry_time = 2, t = 0})
+
+assert(ecs.has_pair(e, ExpiryTimer, Position))
+
+
+local et = ecs.get_pair(e, ExpiryTimer, Position)
+assert(et)
+u.asserteq(et.expiry_time, 3)
+
+ecs.progress(1)
+
+assert(ecs.has_pair(e, ExpiryTimer, Velocity))
+
+ecs.progress(1)
+
+assert(not ecs.has_pair(e, ExpiryTimer, Velocity))
+assert(ecs.has_pair(e, ExpiryTimer, Position))
+
+
+ecs.progress(1)
+
+assert(not ecs.has_pair(e, ExpiryTimer, Position))
 
 ecs.progress(1)
 ecs.progress(1)
 ecs.progress(1)
-ecs.progress(1)
-ecs.progress(1)
-ecs.progress(1)
 
-
-assert(not ecs.has(e, HealthBuff))
-assert(not ecs.has(e, ExpiryTimer))
-
-assert(removed == true)
 print("iter_count: " .. iter_count)

@@ -4,11 +4,11 @@ This is a Lua script host library for [Flecs](https://github.com/SanderMertens/f
 
 ### Dependencies
 
-* Flecs v2.3+ with all modules and addons enabled
+* Flecs v2.4.3+ with all modules and addons enabled
 
 * [flecs-meta](https://github.com/flecs-hub/flecs-meta)
 
-* Lua 5.3 or later
+* Lua 5.3 or later (requires 64-bit integers)
 
 ## Build
 

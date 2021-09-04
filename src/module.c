@@ -15,7 +15,20 @@ static void import_entry_point(ecs_world_t *w)
 
     m->imported = 1;
 
-    ecs_new_module(w, 0, m->name, 4, 4);
+    ecs_component_desc_t desc =
+    {
+        .entity =
+        {
+            .name = m->name,
+            .add = {EcsModule},
+        },
+        .size = sizeof(int),
+        .alignment = ECS_ALIGNOF(int),
+    };
+
+    ecs_entity_t e = ecs_module_init(w, &desc);
+
+    ecs_set_scope(w, e);
 
     ctx->error = lua_pcall(L, 0, 0, 0);
 }
@@ -26,17 +39,21 @@ static void export_handles(lua_State *L, int idx, ecs_world_t *w, ecs_entity_t e
 
     luaL_checktype(L, idx, LUA_TTABLE);
 
-    ecs_filter_t filter = { .include = ecs_type(EcsName) };
-    ecs_iter_t it = ecs_scope_iter_w_filter(w, e, &filter);
+    ecs_type_t name_type = ecs_type_from_str(w, "(Identifier, Name)");
 
-    int i, type;
-    const char *name;
+    ecs_filter_t filter = { .include = name_type };
+    ecs_iter_t it = ecs_scope_iter_w_filter(w, e, &filter);
+    //ecs_iter_t it = ecs_term_iter(w, &(ecs_term_t){ .id = ecs_pair(ecs_id(EcsIdentifier), EcsName)});
+
     while(ecs_scope_next(&it))
     {
+        int i, type;
+        const char *name;
+
         for(i=0; i < it.count; i++)
         {
             e = it.entities[i];
-            name = ecs_get_name(w, e);
+            name = ecs_get_name(it.world, e);
             if(!name) continue;
 
             lua_pushinteger(L, e);

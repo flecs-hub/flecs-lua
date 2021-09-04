@@ -2,11 +2,11 @@
 
 ecs_query_t *checkquery(lua_State *L, int arg)
 {
-    ecs_query_t **query = luaL_checkudata(L, 1, "ecs_query_t");
+    ecs_query_t **query = luaL_checkudata(L, arg, "ecs_query_t");
 
-    if(!*query) luaL_argerror(L, 1, "query was collected");
+    if(!*query) luaL_argerror(L, arg, "query was collected");
 
-    if(ecs_query_orphaned(*query)) luaL_argerror(L, 1, "parent query was collected");
+    if(ecs_query_orphaned(*query)) luaL_argerror(L, arg, "parent query was collected");
 
     return *query;
 }
@@ -28,7 +28,9 @@ int query_new(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
 
     const char *sig = luaL_checkstring(L, 1);
-    ecs_query_t *query = ecs_query_new(w, sig);
+
+    ecs_query_desc_t desc = { .filter.expr = sig };
+    ecs_query_t *query = ecs_query_init(w, &desc);
 
     ecs_query_t **ptr = lua_newuserdata(L, sizeof(ecs_query_t*));
     *ptr = query;
@@ -46,7 +48,13 @@ int subquery_new(lua_State *L)
     ecs_query_t *parent = checkquery(L, 1);
     const char *sig = luaL_checkstring(L, 2);
 
-    ecs_query_t *query = ecs_subquery_new(w, parent, sig);
+    ecs_query_desc_t desc =
+    {
+        .filter.expr = sig,
+        .parent = parent
+    };
+
+    ecs_query_t *query = ecs_query_init(w, &desc);
 
     ecs_query_t **ptr = lua_newuserdata(L, sizeof(ecs_query_t*));
     *ptr = query;

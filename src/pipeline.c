@@ -7,9 +7,13 @@ int new_pipeline(lua_State *L)
     const char *name = luaL_checkstring(L, 2);
     const char *expr = luaL_checkstring(L, 2);
 
-    ecs_entity_t e = ecs_new_pipeline(w, 0, name, expr);
+    ecs_entity_t e = ecs_type_init(w, &(ecs_type_desc_t)
+    {
+        .entity = { .name = name, .add = {EcsPipeline} },
+        .ids_expr = expr
+    });
 
-    ecs_set(w, e, EcsName, { .alloc_value = (char*)name});
+    ecs_set_name(w, e, name);
 
     lua_pushinteger(L, e);
 

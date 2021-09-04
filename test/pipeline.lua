@@ -1,7 +1,8 @@
 local t = require "test"
 local ecs = require "ecs"
+local u = require "util"
 
-ecs.progress_cb(function () end)
+u.test_defaults()
 
 local P1 = ecs.pipeline("P1", "flecs.pipeline.OnUpdate, flecs.pipeline.PostUpdate")
 local P2 = ecs.pipeline("P2", "flecs.pipeline.OnUpdate")

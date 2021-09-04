@@ -102,12 +102,16 @@ void TestImport(ecs_world_t *w)
         .copy = ecs_copy(lua_test_struct),
     });
 
-    ecs_new_entity(w, 8192, "ecs_lua_test_c_ent", NULL);
+    ecs_entity_init(w, &(ecs_entity_desc_t)
+    {
+        .entity = 8192,
+        .name = "ecs_lua_test_c_ent"
+    });
+
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
 
-    ecs_set_ptr(w, EcsSingleton, lua_test_struct, &g.s);
     ecs_set_ptr(w, ecs_typeid(lua_test_struct), lua_test_struct, &g.s);
 
     ecs_set_scope(w, scope);
