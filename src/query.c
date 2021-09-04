@@ -16,7 +16,7 @@ int query_gc(lua_State *L)
     ecs_query_t **ptr = luaL_checkudata(L, 1, "ecs_query_t");
     ecs_query_t *query = *ptr;
 
-    if(query) ecs_query_free(query);
+    if(query) ecs_query_fini(query);
 
     *ptr = NULL;
 

@@ -117,7 +117,7 @@ int import_handles(lua_State *L)
     ecs_entity_t e = ecs_lookup_fullpath(w, name);
     ecs_os_free((char*)name);
 
-    if(!e || !ecs_has_entity(w, e, EcsModule)) return luaL_argerror(L, 1, "no such module");
+    if(!e || !ecs_has_id(w, e, EcsModule)) return luaL_argerror(L, 1, "no such module");
 
     if(lua_type(L, 2) != LUA_TTABLE) lua_createtable(L, 0, 4);
 

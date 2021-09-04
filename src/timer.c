@@ -85,7 +85,7 @@ int set_rate_filter(lua_State *L)
     lua_Integer rate = luaL_checkinteger(L, 2);
     ecs_entity_t src = luaL_checkinteger(L, 3);
 
-    ecs_entity_t e = ecs_set_rate_filter(w, filter, rate, src);
+    ecs_entity_t e = ecs_set_rate(w, filter, rate, src);
 
     lua_pushinteger(L, e);
 
