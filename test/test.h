@@ -64,17 +64,16 @@ ECS_STRUCT(lua_test_struct,
     lua_test_comp2 comp2;
 });
 
+extern ECS_DECLARE_COMPONENT(lua_test_comp);
+extern ECS_DECLARE_COMPONENT(lua_test_comp2);
+extern ECS_DECLARE_COMPONENT(lua_test_struct);
+
 typedef struct Test
 {
-    ECS_DECLARE_COMPONENT(lua_test_comp);
-    ECS_DECLARE_COMPONENT(lua_test_comp2);
-    ECS_DECLARE_COMPONENT(lua_test_struct);
+    int dummy;
 }Test;
 
-#define TestImportHandles(handles)\
-    ECS_IMPORT_COMPONENT(handles, lua_test_comp);\
-    ECS_IMPORT_COMPONENT(handles, lua_test_comp2);\
-    ECS_IMPORT_COMPONENT(handles, lua_test_struct);
+#define TestImportHandles(handles)
 
 FLECS_LUA_API void TestImport(ecs_world_t *w);
 

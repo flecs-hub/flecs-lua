@@ -1,5 +1,9 @@
 #include "test.h"
 
+ECS_DECLARE_COMPONENT(lua_test_comp);
+ECS_DECLARE_COMPONENT(lua_test_comp2);
+ECS_DECLARE_COMPONENT(lua_test_struct);
+
 struct vars
 {
     lua_test_struct s;
@@ -112,7 +116,7 @@ void TestImport(ecs_world_t *w)
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
     ecs_set(w, 0, lua_test_comp, TEST_COMP_INIT);
 
-    ecs_set_ptr(w, ecs_typeid(lua_test_struct), lua_test_struct, &g.s);
+    ecs_set_id(w, ecs_id(lua_test_struct), ecs_id(lua_test_struct), sizeof(lua_test_struct), &g.s);
 
     ecs_set_scope(w, scope);
 }
