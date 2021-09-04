@@ -252,6 +252,11 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(IsA)
 
 #define ECS_LUA_ENUMS(XX) \
+    XX(MatchDefault) \
+    XX(MatchAll) \
+    XX(MatchAny) \
+    XX(MatchExact) \
+\
     XX(PrimitiveType) \
     XX(BitmaskType) \
     XX(EnumType) \
@@ -302,9 +307,8 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(XOR) \
     XX(NOT) \
     XX(CASE) \
-    XX(SWITCH)
-
-    //XX(OVERRIDE)
+    XX(SWITCH) \
+    XX(OWNED)
 
 #define ECS_LUA_TYPEIDS(XX) \
     XX(Component) \
