@@ -899,7 +899,7 @@ ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
         if(it->query && ecs_term_is_readonly(it, i)) continue;
 
         int type = lua_rawgeti(L, -1, i); /* columns[i] */
-        bool is_owned = ecs_is_owned(it, i);
+        bool is_owned = ecs_term_is_owned(it, i);
 
         if(type == LUA_TNIL)
         {
