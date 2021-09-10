@@ -1011,7 +1011,7 @@ int new_enum(lua_State *L)
 
     if(ecs_lookup_fullpath(w, name) || ecs_lookup(w, name)) luaL_argerror(L, 1, "component already exists");
 
-    ecs_entity_t component = ecs_new_component_id(w);
+    ecs_entity_t component = ecs_entity_init(w, &(ecs_entity_desc_t){ .use_low_id = true });
 
     ecs_set_name(w, component, name);
 
@@ -1039,7 +1039,7 @@ int new_bitmask(lua_State *L)
 
     if(ecs_lookup_fullpath(w, name) || ecs_lookup(w, name)) luaL_argerror(L, 1, "component already exists");
 
-    ecs_entity_t component = ecs_new_component_id(w);
+    ecs_entity_t component = ecs_entity_init(w, &(ecs_entity_desc_t){ .use_low_id = true });
 
     ecs_set_name(w, component, name);
 
@@ -1076,7 +1076,7 @@ int new_array(lua_State *L)
 
     char *desc = ecs_strbuf_get(&buf);
 
-    ecs_entity_t component = ecs_new_component_id(w);
+    ecs_entity_t component = ecs_entity_init(w, &(ecs_entity_desc_t){ .use_low_id = true });
 
     ecs_set_name(w, component, name);
 
@@ -1100,7 +1100,7 @@ int new_struct(lua_State *L)
 
     if(ecs_lookup_fullpath(w, name) || ecs_lookup(w, name)) luaL_argerror(L, 1, "component already exists");
 
-    ecs_entity_t component = ecs_new_component_id(w);
+    ecs_entity_t component = ecs_entity_init(w, &(ecs_entity_desc_t){ .use_low_id = true });
 
     ecs_set_name(w, component, name);
 
@@ -1132,7 +1132,7 @@ int new_alias(lua_State *L)
 
     if(ecs_lookup_fullpath(w, alias) || ecs_lookup(w, alias)) return luaL_argerror(L, 2, "alias already exists");
 
-    ecs_entity_t component = ecs_new_component_id(w);
+    ecs_entity_t component = ecs_entity_init(w, &(ecs_entity_desc_t){ .use_low_id = true });
 
     ecs_set_name(w, component, alias);
 
