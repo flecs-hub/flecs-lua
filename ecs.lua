@@ -25,6 +25,11 @@ local ecs_snapshot_t = {}
 
 ---@class ecs_iter_t
 ---@field count integer
+---@field total_count integer
+---@field system integer
+---@field event integer
+---@field event_id integer
+---@field self integer
 ---@field columns table[]
 ---@field entities integer[]
 ---@field system integer
@@ -33,6 +38,7 @@ local ecs_snapshot_t = {}
 ---@field delta_system_time number
 ---@field world_time number
 ---@field interrupted_by integer
+---@field term_index integer
 local ecs_iter_t = {}
 
 ---Create a new entity

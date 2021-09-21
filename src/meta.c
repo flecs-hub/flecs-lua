@@ -674,29 +674,38 @@ static void push_iter_metadata(lua_State *L, ecs_iter_t *it)
     lua_pushinteger(L, it->count);
     lua_setfield(L, -2, "count");
 
-    /* it.system */
+    lua_pushinteger(L, it->total_count);
+    lua_setfield(L, -2, "total_count");
+
     lua_pushinteger(L, it->system);
     lua_setfield(L, -2, "system");
 
-    /* it.delta_time */
+    lua_pushinteger(L, it->event);
+    lua_setfield(L, -2, "event");
+
+    lua_pushinteger(L, it->event_id);
+    lua_setfield(L, -2, "event_id");
+
+    lua_pushinteger(L, it->self);
+    lua_setfield(L, -2, "self");
+
     lua_pushnumber(L, it->delta_time);
     lua_setfield(L, -2, "delta_time");
 
-    /* it.delta_system_time */
     lua_pushnumber(L, it->delta_system_time);
     lua_setfield(L, -2, "delta_system_time");
 
-    /* it.world_time */
     lua_pushnumber(L, it->world_time);
     lua_setfield(L, -2, "world_time");
 
-    /* it.table_count */
     lua_pushinteger(L, it->table_count);
     lua_setfield(L, -2, "table_count");
 
-    /* it.interrupted_by */
     lua_pushinteger(L, it->interrupted_by);
     lua_setfield(L, -2, "interrupted_by");
+
+    lua_pushinteger(L, it->term_index);
+    lua_setfield(L, -2, "term_index");
 
     if(it->system)
     {
