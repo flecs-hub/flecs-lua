@@ -64,9 +64,9 @@ ECS_STRUCT(lua_test_struct,
     lua_test_comp2 comp2;
 });
 
-extern ECS_DECLARE_COMPONENT(lua_test_comp);
-extern ECS_DECLARE_COMPONENT(lua_test_comp2);
-extern ECS_DECLARE_COMPONENT(lua_test_struct);
+ECS_COMPONENT_EXTERN(lua_test_comp);
+ECS_COMPONENT_EXTERN(lua_test_comp2);
+ECS_COMPONENT_EXTERN(lua_test_struct);
 
 typedef struct Test
 {
