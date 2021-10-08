@@ -4,6 +4,12 @@ local u = require "util"
 
 local runs = 0
 
+assert(arg)
+assert(arg[0])
+assert(u.ends_with(arg[0], "misc.lua"))
+
+ecs.tracing_color_enable(false)
+
 ecs.progress_cb(function(delta_time)
 
     ecs.log("progress()!")

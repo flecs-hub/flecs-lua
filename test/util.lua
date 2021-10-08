@@ -61,4 +61,12 @@ function m.asserteq(a, b)
     end
 end
 
+function m.starts_with(str, start)
+    return str:sub(1, #start) == start
+end
+
+function m.ends_with(str, ending)
+    return ending == "" or str:sub(-#ending) == ending
+end
+
 return m

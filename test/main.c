@@ -56,6 +56,19 @@ int main(int argc, char **argv)
     ecs_assert(L != NULL, ECS_INTERNAL_ERROR, NULL);
 
     L = new_test_state();
+
+    lua_newtable(L);
+
+    int i;
+    for(i=1; i < argc; i++)
+    {
+        lua_pushstring(L, argv[i]);
+        lua_rawseti(L, -2, i - 1);
+    }
+
+    /* arg = { [0] = "<script_path>", ... } */
+    lua_setglobal(L, "arg");
+
     ecs_lua_set_state(w, L);
 
     /* The pointer shouldn't change */
