@@ -67,15 +67,6 @@ static inline lua_Integer checkentity(lua_State *L, ecs_world_t *world, int arg)
     return entity;
 }
 
-static inline bool ecs_lua_deferred(ecs_world_t *w)
-{
-    bool b = !ecs_defer_begin(w);
-
-    ecs_defer_end(w);
-
-    return b;
-}
-
 #ifdef NDEBUG
     #define ecs_lua_dbg(fmt, ...)
 
@@ -129,13 +120,22 @@ typedef struct ecs_lua_ctx
     int prefix_ref;
 }ecs_lua_ctx;
 
-typedef struct ecs_lua_system
+typedef enum EcsLuaCallbackType
 {
-    const char *name;
+    EcsLuaSystem = 0,
+    EcsLuaTrigger,
+    EcsLuaObserver
+}EcsLuaCallbackType;
+
+typedef struct ecs_lua_callback
+{
+    int self_ref;
     int func_ref;
     int param_ref;
-    bool trigger;
-}ecs_lua_system;
+
+    EcsLuaCallbackType type;
+    const char *type_name;
+}ecs_lua_callback;
 
 ECS_STRUCT(EcsLuaWorldInfo,
 {

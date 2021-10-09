@@ -173,8 +173,36 @@ end
 ecs.trigger(trigger, "OnAdd", ecs.OnAdd, "LuaStruct")
 
 assert(not pcall(function () ecs.trigger(trigger, "name", ecs.OnAdd) end))
-assert(not pcall(function () ecs.trigger(trigger, "name", ecs.OnUpdate, "LuaStruct") end))
+assert(not pcall(function () ecs.trigger(trigger, "name", ecs.invalid_id, "LuaStruct") end))
 
 ecs.add(ecs.new(), Struct)
 ecs.add(ecs.new(), Struct)
 ecs.add(ecs.new(), Struct)
+
+local triggered = { [ecs.OnSet] = 0, [ecs.OnAdd] = 0, [ecs.OnRemove] = 0 }
+
+local function observer(it)
+    local s = ecs.column(it, 1)
+
+    triggered[it.event] = 1
+end
+
+ecs.observer(observer, "obs", { ecs.OnSet, ecs.OnAdd, ecs.OnRemove }, "LuaStruct")
+
+local ent = ecs.new_id()
+
+ecs.add(ent, Struct)
+
+assert(triggered[ecs.OnAdd] > 0)
+assert(triggered[ecs.OnSet] == 0)
+
+ecs.set(ent, Struct, { 4 })
+
+assert(triggered[ecs.OnSet] > 0)
+
+ecs.remove(ent, Struct)
+
+assert(triggered[ecs.OnRemove] > 0)
+
+
+assert(not pcall(function () ecs.observer(observer, "name", ecs.invalid_id, "LuaStruct") end))

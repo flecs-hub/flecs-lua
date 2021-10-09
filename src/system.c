@@ -24,21 +24,20 @@ static ecs_world_t **world_buf(lua_State *L, const ecs_world_t *world)
     return wbuf;
 }
 
-/* Also used for triggers */
-static void system_entry_point(ecs_iter_t *it)
+/* Used for systems, triggers and observers */
+static void ecs_lua__callback(ecs_iter_t *it)
 {
-    const char *ame = ecs_get_name(it->world, it->system);
-
     ecs_assert(it->binding_ctx != NULL, ECS_INTERNAL_ERROR, NULL);
 
     ecs_world_t *w = it->world;
-    ecs_lua_system *sys = it->binding_ctx;
+    ecs_lua_callback *cb = it->binding_ctx;
     const ecs_world_t *real_world = ecs_get_world(it->world);
 
     int stage_id = ecs_get_stage_id(w);
     int stage_count = ecs_get_stage_count(w);
+    const char *name = ecs_get_name(it->world, it->system);
 
-    ecs_assert(stage_id == 0, ECS_INTERNAL_ERROR, "Lua systems must run on the main thread");
+    ecs_assert(stage_id == 0, ECS_INTERNAL_ERROR, "Lua callbacks must run on the main thread");
 
     const EcsLuaHost *host = ecs_singleton_get(w, EcsLuaHost);
     ecs_assert(host != NULL, ECS_INVALID_PARAMETER, NULL);
@@ -60,10 +59,9 @@ static void system_entry_point(ecs_iter_t *it)
     ecs_time_t time;
 
     ecs_lua_dbg("Lua %s: \"%s\", %d columns, count %d, func ref %d",
-        sys->trigger ? "trigger" : "system", ecs_get_name(w, it->system),
-        it->column_count, it->count, sys->func_ref);
+                cb->type_name, name, it->column_count, it->count, cb->func_ref);
 
-    int type = lua_rawgeti(L, LUA_REGISTRYINDEX, sys->func_ref);
+    int type = lua_rawgeti(L, LUA_REGISTRYINDEX, cb->func_ref);
 
     ecs_assert(type == LUA_TFUNCTION, ECS_INTERNAL_ERROR, NULL);
 
@@ -86,9 +84,8 @@ static void system_entry_point(ecs_iter_t *it)
 
     if(ret)
     {
-        const char *name = ecs_get_name(w, it->system);
         const char *err = lua_tostring(L, lua_gettop(L));
-        ecs_os_err("error running system \"%s\" (%d): %s", name, ret, err);
+        ecs_os_err("error in %s callback \"%s\" (%d): %s", cb->type_name, name, ret, err);
     }
 
     ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
@@ -109,53 +106,116 @@ static void system_entry_point(ecs_iter_t *it)
     ecs_lua__epilog(L);
 }
 
-static int new_whatever(lua_State *L, ecs_world_t *w, bool trigger)
+static int check_events(lua_State *L, ecs_world_t *w, ecs_entity_t *events, int arg)
+{
+    ecs_entity_t event = 0;
+
+    int type = lua_type(L, arg);
+
+    if(type == LUA_TTABLE)
+    {
+        int len = luaL_len(L, arg);
+
+        if(len > ECS_TRIGGER_DESC_EVENT_COUNT_MAX) return luaL_argerror(L, arg, "too many events");
+
+        int i;
+        for(i=1; i <= len; i++)
+        {
+            type = lua_rawgeti(L, arg, i);
+
+            if(type != LUA_TNUMBER) return luaL_argerror(L, arg, "invalid event");
+
+            event = luaL_checkinteger(L, -1);
+            lua_pop(L, 1);
+
+            if(!event || !ecs_is_valid(w, event)) return luaL_argerror(L, arg, "invalid event");
+
+            events[i - 1] = event;
+        }
+    }
+    else if(type == LUA_TNUMBER)
+    {
+        event = luaL_checkinteger(L, arg);
+
+        if(!event || !ecs_is_valid(w, event)) return luaL_argerror(L, arg, "invalid event");
+
+        events[0] = event;
+    }
+    else return luaL_argerror(L, arg, "invalid event type");
+
+    return 1;
+}
+
+static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType type)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L, w);
 
     ecs_entity_t e = 0;
     luaL_checktype(L, 1, LUA_TFUNCTION);
-    const char *name = luaL_checkstring(L, 2);
-    ecs_entity_t phase = luaL_optinteger(L, 3, 0);
+    const char *name = luaL_optstring(L, 2, NULL);
+    /* phase, event or event[] expected for arg 3 */
     const char *signature = luaL_optstring(L, 4, NULL);
 
-    ecs_lua_system *sys = lua_newuserdata(L, sizeof(ecs_lua_system));
+    ecs_lua_callback *cb = lua_newuserdata(L, sizeof(ecs_lua_callback));
 
-    if(trigger)
+    /* Prevent GC of callback userdata */
+    cb->self_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    if(type == EcsLuaTrigger)
     {
-        if(phase != EcsOnAdd && phase != EcsOnRemove) return luaL_argerror(L, 3, "invalid kind");
         if(signature == NULL) return luaL_argerror(L, 4, "missing signature");
 
-        e = ecs_trigger_init(w, &(ecs_trigger_desc_t)
+        ecs_trigger_desc_t desc =
         {
             .entity.name = name,
-            .callback = system_entry_point,
+            .callback = ecs_lua__callback,
             .expr = signature,
-            .events = phase,
-            .binding_ctx = sys
-        });
+            .binding_ctx = cb
+        };
+
+        check_events(L, w, desc.events, 3);
+
+        e = ecs_trigger_init(w, &desc);
+
+        cb->type_name = "trigger";
+    }
+    else if(type == EcsLuaObserver)
+    {
+        ecs_observer_desc_t desc =
+        {
+            .entity.name = name,
+            .callback = ecs_lua__callback,
+            .filter.expr = signature,
+            .binding_ctx = cb
+        };
+
+        check_events(L, w, desc.events, 3);
+
+        e = ecs_observer_init(w, &desc);
+
+        cb->type_name = "observer";
     }
     else
     {
+        ecs_entity_t phase = luaL_checkinteger(L, 3);
+
         e = ecs_system_init(w, &(ecs_system_desc_t)
         {
             .entity = { .name = name, .add = phase },
             .query.filter.expr = signature,
-            .callback = system_entry_point,
-            .binding_ctx = sys
+            .callback = ecs_lua__callback,
+            .binding_ctx = cb
         });
+
+        cb->type_name = "system";
     }
 
-    if(!e) return luaL_error(L, "failed to create system");
-
-    luaL_ref(L, LUA_REGISTRYINDEX); /* *sys */
+    if(!e) return luaL_error(L, "failed to create %s", cb->type_name);
 
     lua_pushvalue(L, 1);
-    sys->func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
-    sys->param_ref = LUA_NOREF;
-    sys->trigger = trigger;
-
-    ecs_set_name(w, e, name); // XXX: no longer needed?
+    cb->func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    cb->param_ref = LUA_NOREF;
+    cb->type = type;
 
     lua_pushinteger(L, e);
 
@@ -164,12 +224,17 @@ static int new_whatever(lua_State *L, ecs_world_t *w, bool trigger)
 
 int new_system(lua_State *L)
 {
-    return new_whatever(L, ecs_lua_world(L), false);
+    return new_callback(L, ecs_lua_world(L), EcsLuaSystem);
 }
 
 int new_trigger(lua_State *L)
 {
-    return new_whatever(L, ecs_lua_world(L), true);
+    return new_callback(L, ecs_lua_world(L), EcsLuaTrigger);
+}
+
+int new_observer(lua_State *L)
+{
+    return new_callback(L, ecs_lua_world(L), EcsLuaObserver);
 }
 
 int run_system(lua_State *L)
@@ -179,7 +244,7 @@ int run_system(lua_State *L)
     ecs_entity_t system = luaL_checkinteger(L, 1);
     lua_Number delta_time = luaL_checknumber(L, 2);
 
-    ecs_lua_system *sys = ecs_get_system_binding_ctx(w, system);
+    ecs_lua_callback *sys = ecs_get_system_binding_ctx(w, system);
 
     if(sys == NULL) return luaL_argerror(L, 1, "not a Lua system");
 
@@ -207,7 +272,7 @@ int set_system_context(lua_State *L)
     ecs_entity_t system = luaL_checkinteger(L, 1);
     if(lua_gettop(L) < 2) lua_pushnil(L);
 
-    ecs_lua_system *sys = ecs_get_system_binding_ctx(w, system);
+    ecs_lua_callback *sys = ecs_get_system_binding_ctx(w, system);
 
     luaL_unref(L, LUA_REGISTRYINDEX, sys->param_ref);
 

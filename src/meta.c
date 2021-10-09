@@ -709,7 +709,7 @@ static void push_iter_metadata(lua_State *L, ecs_iter_t *it)
 
     if(it->system)
     {
-        ecs_lua_system *sys = it->binding_ctx;
+        ecs_lua_callback *sys = it->binding_ctx;
 
         if(sys->param_ref >= 0)
         {

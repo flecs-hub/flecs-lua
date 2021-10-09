@@ -226,6 +226,7 @@ int snapshot_gc(lua_State *L);
 /* System */
 int new_system(lua_State *L);
 int new_trigger(lua_State *L);
+int new_observer(lua_State *L);
 int run_system(lua_State *L);
 int set_system_context(lua_State *L);
 
@@ -398,6 +399,7 @@ static const luaL_Reg ecs_lib[] =
 
     { "system", new_system },
     { "trigger", new_trigger },
+    { "observer", new_observer },
     { "run", run_system },
     { "set_system_context", set_system_context },
 

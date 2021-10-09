@@ -702,10 +702,19 @@ end
 ---Create a trigger for a single component
 ---@param func fun(it: ecs_iter_t)
 ---@param name string
----@param kind integer @OnAdd or OnRemove
----@param component string
+---@param events integer|integer[]
+---@param expression string
 ---@return integer @entity
-function ecs.trigger(func, name, kind, component)
+function ecs.trigger(func, name, events, expression)
+end
+
+---Create an observer
+---@param callback fun(it: ecs_iter_t)
+---@param name string
+---@param events integer|integer[]
+---@param expression string
+---@return integer @entity
+function ecs.observer(callback, name, events, expression)
 end
 
 ---Run a specific system manually
