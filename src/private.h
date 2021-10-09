@@ -129,7 +129,7 @@ typedef enum EcsLuaCallbackType
 
 typedef struct ecs_lua_callback
 {
-    int self_ref;
+    lua_State *L;
     int func_ref;
     int param_ref;
 

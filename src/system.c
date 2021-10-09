@@ -146,6 +146,19 @@ static int check_events(lua_State *L, ecs_world_t *w, ecs_entity_t *events, int 
     return 1;
 }
 
+static void callback_free(void *ctx)
+{
+    ecs_lua_callback *cb = ctx;
+    lua_State *L = cb->L;
+
+    luaL_unref(L, LUA_REGISTRYINDEX, cb->func_ref);
+    luaL_unref(L, LUA_REGISTRYINDEX, cb->param_ref);
+
+    memset(cb, 0, sizeof(ecs_lua_callback));
+
+    ecs_os_free(cb);
+}
+
 static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType type)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L, w);
@@ -156,10 +169,7 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
     /* phase, event or event[] expected for arg 3 */
     const char *signature = luaL_optstring(L, 4, NULL);
 
-    ecs_lua_callback *cb = lua_newuserdata(L, sizeof(ecs_lua_callback));
-
-    /* Prevent GC of callback userdata */
-    cb->self_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    ecs_lua_callback *cb = ecs_os_malloc(sizeof(ecs_lua_callback));
 
     if(type == EcsLuaTrigger)
     {
