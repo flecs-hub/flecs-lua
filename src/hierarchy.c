@@ -85,12 +85,12 @@ int set_name_prefix(lua_State *L)
 
     if(ctx->prefix_ref != LUA_NOREF)
     {
-        luaL_unref(L, LUA_REGISTRYINDEX, ctx->prefix_ref);
+        ecs_lua_unref(L, w, ctx->prefix_ref);
         ctx->prefix_ref = LUA_NOREF;
     }
 
     lua_pushvalue(L, 1);
-    ctx->prefix_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    ctx->prefix_ref = ecs_lua_ref(L, w);
 
     return 1;
 }

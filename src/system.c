@@ -61,7 +61,7 @@ static void ecs_lua__callback(ecs_iter_t *it)
     ecs_lua_dbg("Lua %s: \"%s\", %d columns, count %d, func ref %d",
                 cb->type_name, name, it->column_count, it->count, cb->func_ref);
 
-    int type = lua_rawgeti(L, LUA_REGISTRYINDEX, cb->func_ref);
+    int type = ecs_lua_rawgeti(L, w, cb->func_ref);
 
     ecs_assert(type == LUA_TFUNCTION, ECS_INTERNAL_ERROR, NULL);
 
@@ -146,19 +146,6 @@ static int check_events(lua_State *L, ecs_world_t *w, ecs_entity_t *events, int 
     return 1;
 }
 
-static void callback_free(void *ctx)
-{
-    ecs_lua_callback *cb = ctx;
-    lua_State *L = cb->L;
-
-    luaL_unref(L, LUA_REGISTRYINDEX, cb->func_ref);
-    luaL_unref(L, LUA_REGISTRYINDEX, cb->param_ref);
-
-    memset(cb, 0, sizeof(ecs_lua_callback));
-
-    ecs_os_free(cb);
-}
-
 static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType type)
 {
     ecs_lua_ctx *ctx = ecs_lua_get_context(L, w);
@@ -169,7 +156,9 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
     /* phase, event or event[] expected for arg 3 */
     const char *signature = luaL_optstring(L, 4, NULL);
 
-    ecs_lua_callback *cb = ecs_os_malloc(sizeof(ecs_lua_callback));
+    ecs_lua_callback *cb = lua_newuserdata(L, sizeof(ecs_lua_callback));
+
+    ecs_lua_ref(L, w);
 
     if(type == EcsLuaTrigger)
     {
@@ -223,7 +212,7 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
     if(!e) return luaL_error(L, "failed to create %s", cb->type_name);
 
     lua_pushvalue(L, 1);
-    cb->func_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    cb->func_ref = ecs_lua_ref(L, w);
     cb->param_ref = LUA_NOREF;
     cb->type = type;
 
@@ -260,13 +249,13 @@ int run_system(lua_State *L)
 
     int tmp = sys->param_ref;
 
-    if(!lua_isnoneornil(L, 3)) sys->param_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    if(!lua_isnoneornil(L, 3)) sys->param_ref = ecs_lua_ref(L, w);
 
     ecs_entity_t ret = ecs_run(w, system, delta_time, NULL);
 
     if(tmp != sys->param_ref)
     {/* Restore previous value */
-        luaL_unref(L, LUA_REGISTRYINDEX, sys->param_ref);
+        ecs_lua_unref(L, w, sys->param_ref);
         sys->param_ref = tmp;
     }
 
@@ -284,9 +273,9 @@ int set_system_context(lua_State *L)
 
     ecs_lua_callback *sys = ecs_get_system_binding_ctx(w, system);
 
-    luaL_unref(L, LUA_REGISTRYINDEX, sys->param_ref);
+    ecs_lua_unref(L, w, sys->param_ref);
 
-    sys->param_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+    sys->param_ref = ecs_lua_ref(L, w);
 
     return 0;
 }

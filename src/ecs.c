@@ -108,6 +108,57 @@ void register_collectible(lua_State *L, ecs_world_t *w, int idx)
     ecs_lua__epilog(L);
 }
 
+int ecs_lua_ref(lua_State *L, ecs_world_t *world)
+{
+    int type = lua_rawgetp(L, LUA_REGISTRYINDEX, ecs_get_world(world));
+    ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    type = lua_rawgeti(L, -1, ECS_LUA_REGISTRY);
+    ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    lua_pushvalue(L, -3);
+    int ref = luaL_ref(L, -2);
+
+    lua_pop(L, 3);
+
+    return ref;
+}
+
+int ecs_lua_rawgeti(lua_State *L, ecs_world_t *world, int ref)
+{
+    int type = lua_rawgetp(L, LUA_REGISTRYINDEX, ecs_get_world(world));
+    ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    type = lua_rawgeti(L, -1, ECS_LUA_REGISTRY);
+    ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    type = lua_rawgeti(L, -1, ref);
+
+    lua_replace(L, -3);
+
+    lua_pop(L, 1);
+
+    return type;
+}
+
+void ecs_lua_unref(lua_State *L, ecs_world_t *world, int ref)
+{
+    ecs_lua__prolog(L);
+
+    int type = lua_rawgetp(L, LUA_REGISTRYINDEX, ecs_get_world(world));
+    ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    type = lua_rawgeti(L, -1, ECS_LUA_REGISTRY);
+    ecs_assert(type == LUA_TTABLE, ECS_INTERNAL_ERROR, NULL);
+
+    luaL_unref(L, -1, ref);
+
+    lua_pop(L, 2);
+
+    ecs_lua__epilog(L);
+}
+
+
 /* Entity */
 int new_entity(lua_State *L);
 int new_id(lua_State *L);
@@ -577,6 +628,9 @@ int luaopen_ecs(lua_State *L)
         lua_createtable(L, 0, 16);
         luaL_setmetatable(L, "ecs_collect_t");
         lua_rawseti(L, -2, ECS_LUA_COLLECT);
+
+        lua_createtable(L, 0, 16);
+        lua_rawseti(L, -2, ECS_LUA_REGISTRY);
 
         lua_pushvalue(L, -2); /* world userdata */
         lua_rawseti(L, -2, ECS_LUA_APIWORLD);

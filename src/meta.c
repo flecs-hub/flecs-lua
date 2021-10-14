@@ -713,7 +713,7 @@ static void push_iter_metadata(lua_State *L, ecs_iter_t *it)
 
         if(sys->param_ref >= 0)
         {
-            int type = lua_rawgeti(L, LUA_REGISTRYINDEX, sys->param_ref);
+            int type = ecs_lua_rawgeti(L, it->world, sys->param_ref);
             ecs_assert(type != LUA_TNIL, ECS_INTERNAL_ERROR, NULL);
         }
         else lua_pushnil(L);

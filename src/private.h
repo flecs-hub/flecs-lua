@@ -17,12 +17,12 @@ ECS_COMPONENT_EXTERN(EcsLuaGauge);
 ECS_COMPONENT_EXTERN(EcsLuaCounter);
 ECS_COMPONENT_EXTERN(EcsLuaWorldStats);
 
-#define ECS_LUA_CONTEXT (1)
-#define ECS_LUA_CURSORS (2)
-#define ECS_LUA_TYPES   (3)
-#define ECS_LUA_COLLECT (4)
-#define ECS_LUA_SYSTEMS (5)
-#define ECS_LUA_APIWORLD (6)
+#define ECS_LUA_CONTEXT    (1)
+#define ECS_LUA_CURSORS    (2)
+#define ECS_LUA_TYPES      (3)
+#define ECS_LUA_COLLECT    (4)
+#define ECS_LUA_REGISTRY   (5)
+#define ECS_LUA_APIWORLD   (6)
 
 /* Internal version for API functions */
 static inline ecs_world_t *ecs_lua_world(lua_State *L)
@@ -85,6 +85,16 @@ ecs_lua_ctx *ecs_lua_get_context(lua_State *L, const ecs_world_t *world);
 /* Register object with the world to be __gc'd before ecs_fini() */
 void register_collectible(lua_State *L, ecs_world_t *w, int idx);
 
+/* Creates and returns a reference in the world's registry,
+   for the object on the top of the stack (and pops the object) */
+int ecs_lua_ref(lua_State *L, ecs_world_t *world);
+
+/* Pushes onto the stack the value t[ref], where t is the registry for the given world */
+int ecs_lua_rawgeti(lua_State *L, ecs_world_t *world, int ref);
+
+/* Releases the reference ref from the registry for the given world  */
+void ecs_lua_unref(lua_State *L, ecs_world_t *world, int ref);
+
 /* meta */
 bool ecs_lua_query_next(lua_State *L, int idx);
 int meta_constants(lua_State *L);
@@ -129,7 +139,6 @@ typedef enum EcsLuaCallbackType
 
 typedef struct ecs_lua_callback
 {
-    lua_State *L;
     int func_ref;
     int param_ref;
 
