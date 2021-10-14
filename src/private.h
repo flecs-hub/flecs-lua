@@ -222,11 +222,19 @@ ECS_STRUCT(EcsLuaWorldStats,
 });
 
 #define ECS_LUA_BUILTINS(XX) \
-    XX(World) \
-    XX(Wildcard) \
     XX(Flecs) \
     XX(FlecsCore) \
+    XX(World) \
+    XX(Wildcard) \
+    XX(This) \
+    XX(Transitive) \
+    XX(Final) \
+    XX(Tag) \
+    XX(Name) \
+    XX(Symbol) \
+    XX(ChildOf) \
 \
+    XX(IsA) \
     XX(Module) \
     XX(Prefab) \
     XX(Disabled) \
@@ -237,12 +245,18 @@ ECS_STRUCT(EcsLuaWorldStats,
 \
     XX(OnSet) \
     XX(UnSet) \
+    XX(OnDelete) \
+    XX(OnDeleteObject) \
+    XX(Remove) \
+    XX(Delete) \
+    XX(Throw) \
 \
+    XX(OnDemand) \
     XX(Monitor) \
     XX(DisabledIntern) \
     XX(Inactive) \
-    XX(Pipeline) \
 \
+    XX(Pipeline) \
     XX(PreFrame) \
     XX(OnLoad) \
     XX(PostLoad) \
@@ -252,13 +266,7 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(PostUpdate) \
     XX(PreStore) \
     XX(OnStore) \
-    XX(PostFrame) \
-\
-    XX(Tag) \
-    XX(Name) \
-    XX(Symbol) \
-    XX(ChildOf) \
-    XX(IsA)
+    XX(PostFrame)
 
 #define ECS_LUA_ENUMS(XX) \
     XX(MatchDefault) \
@@ -317,7 +325,9 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(NOT) \
     XX(CASE) \
     XX(SWITCH) \
-    XX(OWNED)
+    XX(PAIR) \
+    XX(OWNED) \
+    XX(DISABLED)
 
 #define ECS_LUA_TYPEIDS(XX) \
     XX(Component) \
