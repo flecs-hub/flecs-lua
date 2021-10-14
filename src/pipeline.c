@@ -9,11 +9,10 @@ int new_pipeline(lua_State *L)
 
     ecs_entity_t e = ecs_type_init(w, &(ecs_type_desc_t)
     {
+        .entity.name = name,
         .entity = { .name = name, .add = {EcsPipeline} },
         .ids_expr = expr
     });
-
-    ecs_set_name(w, e, name);
 
     lua_pushinteger(L, e);
 
