@@ -99,7 +99,7 @@ tests = [
     'module',
     'pipeline',
     'query',
-    'trait',
+    'pair',
     'prefab',
     'timer'
 ]
