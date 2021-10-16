@@ -11,10 +11,6 @@ local ecs_ref_t = {}
 
 ---@class ecs_filter_t
 ---@field expr string
----@field include ecs_type_t
----@field exclude ecs_type_t
----@field include_kind integer @ecs.Match*
----@field exclude_kind integer @ecs.Match*
 local ecs_filter_t = {}
 
 ---@class ecs_query_t
@@ -32,7 +28,6 @@ local ecs_snapshot_t = {}
 ---@field self integer
 ---@field columns table[]
 ---@field entities integer[]
----@field system integer
 ---@field table_count integer
 ---@field delta_time number
 ---@field delta_system_time number
@@ -1190,10 +1185,6 @@ ecs.OnStore = 329
 ecs.PostFrame = 330
 
 --Enum values
-ecs.MatchDefault = 0
-ecs.MatchAll = 1
-ecs.MatchAny = 2
-ecs.MatchExact = 3
 ecs.PrimitiveType = 0
 ecs.BitmaskType = 1
 ecs.EnumType = 2

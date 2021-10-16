@@ -4,7 +4,7 @@ local u = require "util"
 
 u.test_defaults()
 
-u.print_constants("MatchAll", "Module", "OnStore", "XOR")
+u.print_constants("Module", "OnStore", "XOR")
 
 local lua_test_comp = ecs.lookup("lua_test_comp")
 
@@ -131,7 +131,6 @@ print("entities with ecs.Identifier: " .. with_name)
 
 assert(with_name > 0)
 assert(with_name == ecs.count(ecs.get_type("(Identifier, Name)")))
-assert(with_name == ecs.count({ include = ecs.get_type("(Identifier, Name)")}))
 assert(with_name <= ecs.count({ expr = "(Identifier, Name)"})) --larger count, is it expected?
 
 local parent = ecs.new()
@@ -221,7 +220,7 @@ local ent = ecs.new(nil, "LuaPosition")
 
 assert(ecs.is_alive(ent))
 
-ecs.bulk_delete({ include = ecs.get_type(ent) })
+ecs.bulk_delete({ expr = "LuaPosition" })
 
 assert(not ecs.is_alive(ent))
 

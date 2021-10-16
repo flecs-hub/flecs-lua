@@ -16,60 +16,16 @@ ecs_filter_t checkfilter(lua_State *L, int arg)
 
     int fields = 0;
     int expr_type = lua_getfield(L, arg, "expr");
-    int include_type = lua_getfield(L, arg, "include");
-    int exclude_type = lua_getfield(L, arg, "exclude");
-    int include_kind_type = lua_getfield(L, arg, "include_kind");
-    int exclude_kind_type = lua_getfield(L, arg, "exclude_kind");
 
     if(expr_type != LUA_TNIL)
     {
         if(expr_type != LUA_TSTRING) luaL_argerror(L, arg, "expected string (expr)");
 
-        filter.expr = (char*)luaL_checkstring(L, -5);
+        filter.expr = (char*)luaL_checkstring(L, -1);
         fields++;
     }
 
-    if(include_type != LUA_TNIL)
-    {
-        if(include_type != LUA_TUSERDATA) luaL_argerror(L, arg, "expected ecs_type_t (include)");
-
-        filter.include = checktype(L, -4);
-        fields++;
-    }
-
-    if(exclude_type != LUA_TNIL)
-    {
-        if(include_type != LUA_TUSERDATA) luaL_argerror(L, arg, "expected ecs_type_t (exclude)");
-
-        filter.exclude = checktype(L, -3);
-        fields++;
-    }
-
-    if(include_kind_type != LUA_TNIL)
-    {
-        if(!lua_isinteger(L, -2)) luaL_argerror(L, arg, "expected integer (include_kind)");
-
-        filter.include_kind = luaL_checkinteger(L, -2);
-
-        if(filter.include_kind < 0 || filter.include_kind > 3)
-            luaL_argerror(L, 1, "invalid enum (include_kind)");
-
-        fields++;
-    }
-
-    if(exclude_kind_type != LUA_TNIL)
-    {
-        if(!lua_isinteger(L, -1)) luaL_argerror(L, arg, "expected integer (exclude_kind)");
-
-        filter.exclude_kind = luaL_checkinteger(L, -1);
-
-        if(filter.exclude_kind < 0 || filter.exclude_kind > 3)
-            luaL_argerror(L, 1, "invalid enum (exclude_kind)");
-
-        fields++;
-    }
-
-    lua_pop(L, 5);
+    lua_pop(L, 1);
 
     if(!fields) luaL_argerror(L, arg, "empty filter");
 

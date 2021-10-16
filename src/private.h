@@ -269,11 +269,6 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(PostFrame)
 
 #define ECS_LUA_ENUMS(XX) \
-    XX(MatchDefault) \
-    XX(MatchAll) \
-    XX(MatchAny) \
-    XX(MatchExact) \
-\
     XX(PrimitiveType) \
     XX(BitmaskType) \
     XX(EnumType) \
