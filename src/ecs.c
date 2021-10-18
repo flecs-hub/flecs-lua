@@ -257,6 +257,8 @@ int is_owned(lua_State *L);
 int term_id(lua_State *L);
 int filter_iter(lua_State *L);
 int filter_next(lua_State *L);
+int term_iter(lua_State *L);
+int term_next(lua_State *L);
 
 /* Query */
 int query_gc(lua_State *L);
@@ -440,6 +442,8 @@ static const luaL_Reg ecs_lib[] =
     { "term_id", term_id },
     { "filter_iter", filter_iter },
     { "filter_next", filter_next },
+    { "term_iter", term_iter },
+    { "term_next", term_next },
 
     { "query", query_new },
     { "subquery", subquery_new },

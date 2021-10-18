@@ -104,6 +104,7 @@ void ecs_lua_iter_update(lua_State *L, int idx, ecs_iter_t *it);
 
 /* iter */
 ecs_iter_t *ecs_lua__checkiter(lua_State *L, int idx);
+ecs_term_t checkterm(lua_State *L, const ecs_world_t *world, int arg);
 
 /* misc */
 ecs_type_t checktype(lua_State *L, int arg);
@@ -311,7 +312,20 @@ ECS_STRUCT(EcsLuaWorldStats,
     XX(SubSet) \
     XX(Cascade) \
     XX(All) \
-    XX(Nothing)
+    XX(Nothing) \
+\
+    XX(InOutDefault) \
+    XX(InOut) \
+    XX(In) \
+    XX(Out) \
+\
+    XX(And) \
+    XX(Or) \
+    XX(Not) \
+    XX(Optional) \
+    XX(AndFrom) \
+    XX(OrFrom) \
+    XX(NotFrom)
 
 #define ECS_LUA_MACROS(XX) \
     XX(AND) \

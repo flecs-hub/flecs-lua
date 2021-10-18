@@ -32,10 +32,10 @@ local function import_func(name)
     assert(module ~= 0)
     print("MODULE ID: " .. module)
 
-    local it = ecs.scope_iter(module)
+    local it = ecs.term_iter(ecs.pair(ecs.ChildOf, module))
     local export = {}
 
-    while ecs.scope_next(it) do
+    while ecs.term_next(it) do
         for i=1, it.count do
             local e = it.entities[i]
             if ecs.name(e) then

@@ -12,6 +12,19 @@ ecs_iter_t *ecs_lua__checkiter(lua_State *L, int arg)
     return it;
 }
 
+ecs_term_t checkterm(lua_State *L, const ecs_world_t *world, int arg)
+{
+    ecs_term_t term = {0};
+
+    luaL_checktype(L, arg, LUA_TNUMBER);
+
+    term.id = luaL_checkinteger(L, arg);
+
+    if(ecs_term_finalize(world, NULL, NULL, &term)) luaL_argerror(L, arg, "invalid term");
+
+    return term;
+}
+
 ecs_iter_t *get_iter_columns(lua_State *L)
 {
     ecs_iter_t *it = ecs_lua__checkiter(L, 1);
@@ -94,6 +107,32 @@ int filter_next(lua_State *L)
     ecs_iter_t *it = ecs_lua_to_iter(L, 1);
 
     int b = ecs_filter_next(it);
+
+    if(b) ecs_lua_iter_update(L, 1, it);
+
+    lua_pushboolean(L, b);
+
+    return 1;
+}
+
+int term_iter(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_term_t term = checkterm(L, w, 1);
+
+    ecs_iter_t it = ecs_term_iter(w, &term);
+
+    ecs_iter_to_lua(&it, L, true);
+
+    return 1;
+}
+
+int term_next(lua_State *L)
+{
+    ecs_iter_t *it = ecs_lua_to_iter(L, 1);
+
+    int b = ecs_term_next(it);
 
     if(b) ecs_lua_iter_update(L, 1, it);
 

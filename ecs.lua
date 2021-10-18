@@ -644,6 +644,17 @@ end
 function ecs.fiter_next(it)
 end
 
+---Create a term iterator
+---@param term integer
+function ecs.term_iter(term)
+end
+
+---Progress the term iterator
+---@param it ecs_iter_t
+---@return boolean
+function ecs.term_next(it)
+end
+
 ---Create a query
 ---@param sig string
 ---@return ecs_query_t
@@ -1225,6 +1236,17 @@ ecs.SubSet = 4
 ecs.Cascade = 8
 ecs.All = 16
 ecs.Nothing = 32
+ecs.InOutDefault = 0
+ecs.InOut = 1
+ecs.In = 2
+ecs.Out = 3
+ecs.And = 0
+ecs.Or = 1
+ecs.Not = 2
+ecs.Optional = 3
+ecs.AndFrom = 4
+ecs.OrFrom = 5
+ecs.NotFrom = 6
 
 --Macros
 ecs.AND = 0xF900000000000000
