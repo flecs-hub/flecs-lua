@@ -200,13 +200,17 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
     {
         ecs_entity_t phase = luaL_checkinteger(L, 3);
 
-        e = ecs_system_init(w, &(ecs_system_desc_t)
+        ecs_system_desc_t desc =
         {
             .entity = { .name = name, .add = phase },
             .query.filter.expr = signature,
             .callback = ecs_lua__callback,
             .binding_ctx = cb
-        });
+        };
+
+        if(signature == NULL && !lua_isnoneornil(L, 4)) check_filter_desc(L, w, &desc.query.filter, 4);
+
+        e = ecs_system_init(w, &desc);
 
         cb->type_name = "system";
     }

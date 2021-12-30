@@ -735,9 +735,9 @@ end
 ---@param callback fun(it: ecs_iter_t)
 ---@param name string
 ---@param phase integer
----@param signature string @optional
+---@param desc ecs_filter_t @optional
 ---@return integer @entity
-function ecs.system(callback, name, phase, signature)
+function ecs.system(callback, name, phase, desc)
 end
 
 ---Create a trigger for a single component
