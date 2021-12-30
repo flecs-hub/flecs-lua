@@ -595,7 +595,7 @@ static int columns__index(lua_State *L)
 
     lua_Integer i = luaL_checkinteger(L, 2);
 
-    if(i < 1 || i > it->column_count) luaL_argerror(L, 1, "invalid column index");
+    if(i < 1 || i > it->column_count) luaL_argerror(L, 1, "invalid term index");
 
     if(!it->count)
     {
@@ -606,7 +606,7 @@ static int columns__index(lua_State *L)
     ecs_entity_t type = ecs_get_typeid(world, ecs_term_id(it, i));
     const EcsMetaTypeSerializer *ser = get_serializer(L, world, type);
 
-    if(!ser) luaL_error(L, "column %d cannot be serialized", i);
+    if(!ser) luaL_error(L, "term %d cannot be serialized", i);
 
     lua_settop(L, 1); /* (it.)columns */
 
@@ -909,7 +909,7 @@ ecs_iter_t *ecs_lua_to_iter(lua_State *L, int idx)
 
         if(type == LUA_TNIL)
         {
-            ecs_lua_dbg("skipping empty column %d (not serialized?)", i);
+            ecs_lua_dbg("skipping empty term %d (not serialized?)", i);
             lua_pop(L, 1);
             continue;
         }

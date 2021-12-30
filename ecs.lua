@@ -639,18 +639,17 @@ ecs.bulk_new(Component, 10, true)
 function ecs.bulk_delete(filter)
 end
 
----Get column from iterator
+---Get term from iterator
 ---@param it ecs_iter_t
----@param col integer
+---@param idx integer
 ---@return table
-function ecs.column(it, col)
+function ecs.term(it, idx)
 end
 
----Returns all columns, the last return value
----is the array of matched entities
+---Returns all terms, including the entity array
 ---@param it ecs_iter_t
 ---@return any
-function ecs.columns(it)
+function ecs.terms(it)
 end
 
 ---Test if column is owned

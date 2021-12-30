@@ -58,7 +58,7 @@ static void ecs_lua__callback(ecs_iter_t *it)
 
     ecs_time_t time;
 
-    ecs_lua_dbg("Lua %s: \"%s\", %d columns, count %d, func ref %d",
+    ecs_lua_dbg("Lua %s: \"%s\", %d terms, count %d, func ref %d",
                 cb->type_name, name, it->column_count, it->count, cb->func_ref);
 
     int type = ecs_lua_rawgeti(L, w, cb->func_ref);

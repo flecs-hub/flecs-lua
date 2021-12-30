@@ -74,20 +74,20 @@ static ecs_iter_t *get_iter_columns(lua_State *L)
     return it;
 }
 
-int column(lua_State *L)
+int iter_term(lua_State *L)
 {
     ecs_iter_t *it = get_iter_columns(L);
 
     lua_Integer i = luaL_checkinteger(L, 2);
 
-    if(i < 1 || i > it->column_count) luaL_argerror(L, 2, "invalid column index");
+    if(i < 1 || i > it->column_count) luaL_argerror(L, 2, "invalid term index");
 
     lua_geti(L, -1, i);
 
     return 1;
 }
 
-int columns(lua_State *L)
+int iter_terms(lua_State *L)
 {
     ecs_iter_t *it = get_iter_columns(L);
 
@@ -107,7 +107,7 @@ int is_owned(lua_State *L)
     ecs_iter_t *it = ecs_lua__checkiter(L, 1);
     lua_Integer col = luaL_checkinteger(L, 2);
 
-    if(col < 1 || col > it->column_count) luaL_argerror(L, 2, "invalid column index");
+    if(col < 1 || col > it->column_count) luaL_argerror(L, 2, "invalid term index");
 
     int b = ecs_term_is_owned(it, col);
 
@@ -121,7 +121,7 @@ int term_id(lua_State *L)
     ecs_iter_t *it = ecs_lua__checkiter(L, 1);
     lua_Integer col = luaL_checkinteger(L, 2);
 
-    if(col < 1 || col > it->column_count) luaL_argerror(L, 2, "invalid column index");
+    if(col < 1 || col > it->column_count) luaL_argerror(L, 2, "invalid term index");
 
     ecs_entity_t e = ecs_term_id(it, col);
 

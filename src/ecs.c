@@ -256,8 +256,8 @@ int bulk_new(lua_State *L);
 int bulk_delete(lua_State *L);
 
 /* Iterator */
-int column(lua_State *L);
-int columns(lua_State *L);
+int iter_term(lua_State *L);
+int iter_terms(lua_State *L);
 int is_owned(lua_State *L);
 int term_id(lua_State *L);
 int filter_iter(lua_State *L);
@@ -442,8 +442,10 @@ static const luaL_Reg ecs_lib[] =
     { "bulk_new", bulk_new },
     { "bulk_delete", bulk_delete },
 
-    { "column", column },
-    { "columns", columns },
+    { "term", iter_term },
+    { "terms", iter_terms },
+    { "column", iter_term }, // compat
+    { "columns", iter_terms }, // compat
     { "is_owned", is_owned },
     { "column_entity", term_id }, // compat
     { "term_id", term_id },
