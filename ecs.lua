@@ -45,7 +45,6 @@ local ecs_snapshot_t = {}
 
 ---@class ecs_iter_t
 ---@field count integer
----@field total_count integer
 ---@field system integer
 ---@field event integer
 ---@field event_id integer

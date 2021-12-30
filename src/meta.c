@@ -674,9 +674,6 @@ static void push_iter_metadata(lua_State *L, ecs_iter_t *it)
     lua_pushinteger(L, it->count);
     lua_setfield(L, -2, "count");
 
-    lua_pushinteger(L, it->total_count);
-    lua_setfield(L, -2, "total_count");
-
     lua_pushinteger(L, it->system);
     lua_setfield(L, -2, "system");
 
