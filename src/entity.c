@@ -385,6 +385,30 @@ int is_valid(lua_State *L)
     return 1;
 }
 
+int get_alive(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    ecs_entity_t id = ecs_get_alive(w, e);
+
+    lua_pushinteger(L, id);
+
+    return 1;
+}
+
+int ensure(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    ecs_entity_t e = luaL_checkinteger(L, 1);
+
+    ecs_ensure(w, e);
+
+    return 0;
+}
+
 int exists(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);

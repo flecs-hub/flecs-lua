@@ -205,6 +205,17 @@ end
 function ecs.is_valid(entity)
 end
 
+---Get alive identifier
+---@param entity integer
+---@return integer
+function ecs.get_alive(entity)
+end
+
+---Ensure id is alive
+---@param entity integer
+function ecs.ensure(entity)
+end
+
 ---Test whether an entity exists
 ---Similar to ecs.is_alive, but ignores entity generation count
 ---@param entity integer

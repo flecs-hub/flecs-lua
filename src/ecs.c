@@ -179,6 +179,8 @@ int entity_owns(lua_State *L);
 int has_role(lua_State *L);
 int is_alive(lua_State *L);
 int is_valid(lua_State *L);
+int get_alive(lua_State *L);
+int ensure(lua_State *L);
 int exists(lua_State *L);
 int entity_add(lua_State *L);
 int entity_remove(lua_State *L);
@@ -367,6 +369,8 @@ static const luaL_Reg ecs_lib[] =
     { "has_role", has_role },
     { "is_alive", is_alive },
     { "is_valid", is_valid },
+    { "get_alive", get_alive },
+    { "ensure", ensure },
     { "exists", exists },
     { "add", entity_add },
     { "remove", entity_remove },
