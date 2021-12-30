@@ -108,7 +108,7 @@ ecs_term_t checkterm(lua_State *L, const ecs_world_t *world, int arg);
 
 /* misc */
 ecs_type_t checktype(lua_State *L, int arg);
-ecs_filter_t checkfilter(lua_State *L, int idx);
+int checkfilter(lua_State *L, const ecs_world_t *world, ecs_filter_t *filter, int arg);
 ecs_query_t *checkquery(lua_State *L, int arg);
 int ecs_lua__readonly(lua_State *L);
 void ecs_lua__assert(lua_State *L, bool condition, const char *param, const char *condition_str);

@@ -22,10 +22,12 @@ ecs_term_t checkterm(lua_State *L, const ecs_world_t *world, int arg)
 
     if(ecs_term_finalize(world, NULL, NULL, &term)) luaL_argerror(L, arg, "invalid term");
 
+    if(term.id == 0) luaL_argerror(L, arg, "empty term");
+
     return term;
 }
 
-ecs_iter_t *get_iter_columns(lua_State *L)
+static ecs_iter_t *get_iter_columns(lua_State *L)
 {
     ecs_iter_t *it = ecs_lua__checkiter(L, 1);
 
@@ -93,7 +95,9 @@ int term_id(lua_State *L)
 int filter_iter(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
-    ecs_filter_t filter = checkfilter(L, 1);
+
+    ecs_filter_t filter;
+    checkfilter(L, w, &filter, 1);
 
     ecs_iter_t it = ecs_filter_iter(w, &filter);
 

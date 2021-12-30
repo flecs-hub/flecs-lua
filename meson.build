@@ -68,6 +68,7 @@ if meson.version().version_compare('>= 0.54.0')
     meson.override_dependency('flecs-lua', flecs_lua_dep)
 endif
 
+emmy_src = files('ecs.lua')
 
 if tests.disabled()
     subdir_done()
@@ -94,7 +95,7 @@ tests = [
     'meta_limits',
     'meta',
     'snapshot',
-
+    'iter',
     'system',
     'module',
     'pipeline',

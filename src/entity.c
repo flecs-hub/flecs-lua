@@ -521,7 +521,8 @@ int entity_count(lua_State *L)
     }
     else
     {
-        ecs_filter_t filter = checkfilter(L, 1);
+        ecs_filter_t filter;
+        checkfilter(L, w, &filter, 1);
         count = ecs_count_filter(w, &filter);
     }
 

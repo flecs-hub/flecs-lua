@@ -67,13 +67,15 @@ int snapshot_restore(lua_State *L)
 
 int snapshot_iter(lua_State *L)
 {
+    ecs_world_t *w = ecs_lua_world(L);
     ecs_snapshot_t *snapshot = checksnapshot(L, 1);
+
     ecs_filter_t filter;
     ecs_filter_t *filter_ptr = NULL;
 
     if(lua_gettop(L) > 1)
     {
-        filter = checkfilter(L, 2);
+        checkfilter(L, w, &filter, 2);
         filter_ptr = &filter;
     }
 

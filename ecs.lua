@@ -9,7 +9,31 @@ local ecs_type_t = {}
 ---@class ecs_ref_t
 local ecs_ref_t = {}
 
+---@class ecs_term_set_t
+---@field relation integer
+---@field mask integer
+---@field min_depth integer
+---@field max_depth integer
+local ecs_term_set_t = {}
+
+---@class ecs_term_id_t
+---@field entity integer
+---@field var integer
+---@field set ecs_term_set_t
+local ecs_term_id_t = {}
+
+---@class ecs_term_t
+---@field id integer
+---@field inout integer
+---@field pred ecs_term_id_t
+---@field subj ecs_term_id_t
+---@field obj ecs_term_id_t
+---@field oper integer
+---@field role integer
+local ecs_term_t = {}
+
 ---@class ecs_filter_t
+---@field terms ecs_term_t|ecs_term_t[]
 ---@field expr string
 local ecs_filter_t = {}
 
@@ -646,6 +670,7 @@ end
 
 ---Create a term iterator
 ---@param term integer
+---@return ecs_iter_t
 function ecs.term_iter(term)
 end
 

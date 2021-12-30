@@ -95,15 +95,3 @@ for foo, e in ecs.each(q) do
 end
 
 assert(q_count == 5)
-
---[[ XXX: fix this
-local ent = ecs.new("ent", "Velocity")
-
-q = ecs.query("ent:Velocity")
-it = ecs.query_iter(q)
-
-assert(ecs.has(ent, Velocity))
-
-print("COUNT: ", it.count)
---assert(it.count == 1)
-]]--

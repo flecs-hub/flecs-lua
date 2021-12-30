@@ -23,7 +23,8 @@ int scope_iter(lua_State *L)
 
     if(lua_gettop(L) > 1)
     {
-        ecs_filter_t filter = checkfilter(L, 2);
+        ecs_filter_t filter;
+        checkfilter(L, w, &filter, 2);
         it = ecs_scope_iter_w_filter(w, parent, &filter);
     }
     else it = ecs_scope_iter(w, parent);
