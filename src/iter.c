@@ -12,13 +12,51 @@ ecs_iter_t *ecs_lua__checkiter(lua_State *L, int arg)
     return it;
 }
 
+static inline void copy_term_set(ecs_term_set_t *dst, EcsLuaTermSet *src)
+{
+    dst->relation = src->relation;
+    dst->mask = src->mask;
+    dst->min_depth = src->min_depth;
+    dst->max_depth = src->max_depth;
+}
+
+static inline void copy_term_id(ecs_term_id_t *dst, EcsLuaTermID *src)
+{
+    dst->entity = src->entity;
+    dst->var = src->var;
+    copy_term_set(&dst->set, &src->set);
+}
+
+static inline void copy_term(ecs_term_t *dst, EcsLuaTerm *src)
+{
+    dst->id = src->id;
+
+    dst->inout = src->inout;
+    copy_term_id(&dst->pred, &src->pred);
+    copy_term_id(&dst->args[0], &src->subj);
+    copy_term_id(&dst->args[1], &src->obj);
+    dst->oper = src->oper;
+    dst->role = src->role;
+}
+
 ecs_term_t checkterm(lua_State *L, const ecs_world_t *world, int arg)
 {
     ecs_term_t term = {0};
 
-    luaL_checktype(L, arg, LUA_TNUMBER);
+    int type = lua_type(L, arg);
 
-    term.id = luaL_checkinteger(L, arg);
+    if(type == LUA_TTABLE)
+    {
+        EcsLuaTerm lua_term = {0};
+
+        ecs_lua_to_ptr(world, L, arg, ecs_id(EcsLuaTerm), &lua_term);
+
+        copy_term(&term, &lua_term);
+    }
+    else
+    {
+        term.id = luaL_checkinteger(L, arg);
+    }
 
     if(ecs_term_finalize(world, NULL, NULL, &term)) luaL_argerror(L, arg, "invalid term");
 

@@ -16,6 +16,9 @@ ECS_COMPONENT_EXTERN(EcsLuaWorldInfo);
 ECS_COMPONENT_EXTERN(EcsLuaGauge);
 ECS_COMPONENT_EXTERN(EcsLuaCounter);
 ECS_COMPONENT_EXTERN(EcsLuaWorldStats);
+ECS_COMPONENT_EXTERN(EcsLuaTermSet);
+ECS_COMPONENT_EXTERN(EcsLuaTermID);
+ECS_COMPONENT_EXTERN(EcsLuaTerm);
 
 #define ECS_LUA_CONTEXT    (1)
 #define ECS_LUA_CURSORS    (2)
@@ -221,6 +224,34 @@ ECS_STRUCT(EcsLuaWorldStats,
     EcsLuaCounter systems_ran_frame;
 
     int32_t t;
+});
+
+ECS_STRUCT(EcsLuaTermSet,
+{
+    ecs_entity_t relation;
+    uint8_t mask;
+    int32_t min_depth;
+    int32_t max_depth;
+});
+
+ECS_STRUCT(EcsLuaTermID,
+{
+    ecs_entity_t entity;
+    /*const char *name;*/
+    int32_t var;
+    EcsLuaTermSet set;
+});
+
+ECS_STRUCT(EcsLuaTerm,
+{
+    int64_t id;
+
+    int32_t inout;
+    EcsLuaTermID pred;
+    EcsLuaTermID subj;
+    EcsLuaTermID obj;
+    int32_t oper;
+    int64_t role;
 });
 
 #define ECS_LUA_BUILTINS(XX) \

@@ -5,6 +5,9 @@ ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
 ECS_COMPONENT_DECLARE(EcsLuaGauge);
 ECS_COMPONENT_DECLARE(EcsLuaCounter);
 ECS_COMPONENT_DECLARE(EcsLuaWorldStats);
+ECS_COMPONENT_DECLARE(EcsLuaTermSet);
+ECS_COMPONENT_DECLARE(EcsLuaTermID);
+ECS_COMPONENT_DECLARE(EcsLuaTerm);
 
 static const int ecs_lua__ctx;
 static const int ecs_lua__world;
@@ -813,6 +816,9 @@ void FlecsLuaImport(ecs_world_t *w)
     ECS_META_DEFINE(w, EcsLuaGauge);
     ECS_META_DEFINE(w, EcsLuaCounter);
     ECS_META_DEFINE(w, EcsLuaWorldStats);
+    ECS_META_DEFINE(w, EcsLuaTermSet);
+    ECS_META_DEFINE(w, EcsLuaTermID);
+    ECS_META_DEFINE(w, EcsLuaTerm);
 
     ecs_assert(sizeof(ecs_world_stats_t) == sizeof(EcsLuaWorldStats), ECS_INTERNAL_ERROR, NULL);
 
