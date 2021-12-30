@@ -27,9 +27,12 @@ int query_new(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
-    const char *sig = luaL_checkstring(L, 1);
+    const char *sig = luaL_optstring(L, 1, NULL);
 
     ecs_query_desc_t desc = { .filter.expr = sig };
+
+    if(sig == NULL) check_filter_desc(L, w, &desc.filter, 1);
+
     ecs_query_t *query = ecs_query_init(w, &desc);
 
     ecs_query_t **ptr = lua_newuserdata(L, sizeof(ecs_query_t*));
@@ -46,13 +49,15 @@ int subquery_new(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
 
     ecs_query_t *parent = checkquery(L, 1);
-    const char *sig = luaL_checkstring(L, 2);
+    const char *sig = luaL_optstring(L, 2, NULL);
 
     ecs_query_desc_t desc =
     {
         .filter.expr = sig,
         .parent = parent
     };
+
+    if(sig == NULL) check_filter_desc(L, w, &desc.filter, 2);
 
     ecs_query_t *query = ecs_query_init(w, &desc);
 

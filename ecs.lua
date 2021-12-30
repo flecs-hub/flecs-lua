@@ -691,16 +691,16 @@ function ecs.term_next(it)
 end
 
 ---Create a query
----@param sig string
+---@param desc ecs_filter_t
 ---@return ecs_query_t
-function ecs.query(sig)
+function ecs.query(desc)
 end
 
 ---Create a subquery
 ---@param query ecs_query_t
----@param sig string
+---@param desc ecs_filter_t
 ---@return ecs_query_t
-function ecs.subquery(query, sig)
+function ecs.subquery(query, desc)
 end
 
 ---Create a query iterator
