@@ -108,6 +108,7 @@ ecs_term_t checkterm(lua_State *L, const ecs_world_t *world, int arg);
 
 /* misc */
 ecs_type_t checktype(lua_State *L, int arg);
+int check_filter_desc(lua_State *L, const ecs_world_t *world, ecs_filter_desc_t *desc, int arg);
 int checkfilter(lua_State *L, const ecs_world_t *world, ecs_filter_t *filter, int arg);
 ecs_query_t *checkquery(lua_State *L, int arg);
 int ecs_lua__readonly(lua_State *L);

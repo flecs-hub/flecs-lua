@@ -8,14 +8,11 @@ ecs_type_t checktype(lua_State *L, int arg)
     return *type;
 }
 
-int checkfilter(lua_State *L, const ecs_world_t *world, ecs_filter_t *filter, int arg)
+int check_filter_desc(lua_State *L, const ecs_world_t *world, ecs_filter_desc_t *desc, int arg)
 {
     luaL_checktype(L, arg, LUA_TTABLE);
 
-    memset(filter, 0, sizeof(ecs_filter_t));
-
-    ecs_filter_desc_t filter_desc = {0};
-    ecs_term_t *terms = filter_desc.terms;
+    ecs_term_t *terms = desc->terms;
 
     int fields = 0;
     int terms_type = lua_getfield(L, arg, "terms");
@@ -38,7 +35,7 @@ int checkfilter(lua_State *L, const ecs_world_t *world, ecs_filter_t *filter, in
             {
                 len = luaL_len(L, -2);
 
-                if(len > ECS_TERM_DESC_CACHE_SIZE) luaL_argerror(L, arg, "too many terms");
+                if(len > ECS_TERM_CACHE_SIZE) return luaL_argerror(L, arg, "too many terms");
 
                 for(i=0; i < len; i++)
                 {
@@ -52,25 +49,34 @@ int checkfilter(lua_State *L, const ecs_world_t *world, ecs_filter_t *filter, in
                 terms[0] = checkterm(L, world, -2);
             }
         }
-        else
-        {
-            luaL_argerror(L, arg, "invalid term type");
-        }
+        else return luaL_argerror(L, arg, "invalid term type");
 
         fields++;
     }
 
     if(expr_type != LUA_TNIL)
     {
-        if(expr_type != LUA_TSTRING) luaL_argerror(L, arg, "expected string (expr)");
+        if(expr_type != LUA_TSTRING) return luaL_argerror(L, arg, "expected string (expr)");
 
-        filter->expr = (char*)luaL_checkstring(L, -1);
+        desc->expr = (char*)luaL_checkstring(L, -1);
+
         fields++;
     }
 
     lua_pop(L, 2);
 
     if(!fields) return luaL_argerror(L, arg, "empty filter");
+
+    return 0;
+}
+
+int checkfilter(lua_State *L, const ecs_world_t *world, ecs_filter_t *filter, int arg)
+{
+    memset(filter, 0, sizeof(ecs_filter_t));
+
+    ecs_filter_desc_t filter_desc = {0};
+
+    check_filter_desc(L, world, &filter_desc, arg);
 
     if(ecs_filter_init(world, filter, &filter_desc)) return luaL_argerror(L, arg, "invalid filter");
 

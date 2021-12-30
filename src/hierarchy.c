@@ -26,6 +26,7 @@ int scope_iter(lua_State *L)
         ecs_filter_t filter;
         checkfilter(L, w, &filter, 2);
         it = ecs_scope_iter_w_filter(w, parent, &filter);
+        ecs_filter_fini(&filter);
     }
     else it = ecs_scope_iter(w, parent);
 

@@ -84,6 +84,7 @@ int query_next(lua_State *L)
         ecs_filter_t filter;
         checkfilter(L, it->world, &filter, 2);
         b = ecs_query_next_w_filter(it, &filter);
+        ecs_filter_fini(&filter);
     }
     else b = ecs_query_next(it);
 

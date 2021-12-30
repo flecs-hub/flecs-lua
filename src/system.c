@@ -162,8 +162,6 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
 
     if(type == EcsLuaTrigger)
     {
-        if(signature == NULL) return luaL_argerror(L, 4, "missing signature");
-
         ecs_trigger_desc_t desc =
         {
             .entity.name = name,
@@ -173,6 +171,8 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
         };
 
         check_events(L, w, desc.events, 3);
+
+        if(signature == NULL) desc.term = checkterm(L, w, 4);
 
         e = ecs_trigger_init(w, &desc);
 
@@ -187,6 +187,8 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
             .filter.expr = signature,
             .binding_ctx = cb
         };
+
+        if(signature == NULL) check_filter_desc(L, w, &desc.filter, 4);
 
         check_events(L, w, desc.events, 3);
 

@@ -52,6 +52,7 @@ int bulk_delete(lua_State *L)
         ecs_filter_t filter;
         checkfilter(L, w, &filter, 1);
         ecs_bulk_delete(w, &filter);
+        ecs_filter_fini(&filter);
     }
     else ecs_bulk_delete(w, NULL);
 

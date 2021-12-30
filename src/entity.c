@@ -548,6 +548,7 @@ int entity_count(lua_State *L)
         ecs_filter_t filter;
         checkfilter(L, w, &filter, 1);
         count = ecs_count_filter(w, &filter);
+        ecs_filter_fini(&filter);
     }
 
     lua_pushinteger(L, count);

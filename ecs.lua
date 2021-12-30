@@ -733,30 +733,30 @@ function ecs.each(query)
 end
 
 ---Create a system
----@param func fun(it: ecs_iter_t)
+---@param callback fun(it: ecs_iter_t)
 ---@param name string
 ---@param phase integer
 ---@param signature string @optional
 ---@return integer @entity
-function ecs.system(func, name, phase, signature)
+function ecs.system(callback, name, phase, signature)
 end
 
 ---Create a trigger for a single component
----@param func fun(it: ecs_iter_t)
+---@param callback fun(it: ecs_iter_t)
 ---@param name string
 ---@param events integer|integer[]
----@param expression string
+---@param desc string|ecs_term_t @expression or term
 ---@return integer @entity
-function ecs.trigger(func, name, events, expression)
+function ecs.trigger(callback, name, events, desc)
 end
 
 ---Create an observer
 ---@param callback fun(it: ecs_iter_t)
 ---@param name string
 ---@param events integer|integer[]
----@param expression string
+---@param filter ecs_filter_t
 ---@return integer @entity
-function ecs.observer(callback, name, events, expression)
+function ecs.observer(callback, name, events, filter)
 end
 
 ---Run a specific system manually

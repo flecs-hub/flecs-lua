@@ -81,6 +81,8 @@ int snapshot_iter(lua_State *L)
 
     ecs_iter_t it = ecs_snapshot_iter(snapshot, filter_ptr);
 
+    if(filter_ptr) ecs_filter_fini(filter_ptr);
+
     ecs_iter_to_lua(&it, L, true);
 
     return 1;
