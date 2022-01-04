@@ -65,22 +65,22 @@ ecs_term_t checkterm(lua_State *L, const ecs_world_t *world, int arg)
     return term;
 }
 
-static ecs_iter_t *get_iter_columns(lua_State *L)
+static ecs_iter_t *get_iter_columns(lua_State *L, int arg)
 {
-    ecs_iter_t *it = ecs_lua__checkiter(L, 1);
+    ecs_iter_t *it = ecs_lua__checkiter(L, arg);
 
-    luaL_getsubtable(L, 1, "columns");
+    luaL_getsubtable(L, arg, "columns");
 
     return it;
 }
 
 int iter_term(lua_State *L)
 {
-    ecs_iter_t *it = get_iter_columns(L);
+    ecs_iter_t *it = get_iter_columns(L, 1);
 
     lua_Integer i = luaL_checkinteger(L, 2);
 
-    if(i < 1 || i > it->column_count) luaL_argerror(L, 2, "invalid term index");
+    if(i < 1 || i > it->column_count) return luaL_argerror(L, 2, "invalid term index");
 
     lua_geti(L, -1, i);
 
@@ -89,7 +89,7 @@ int iter_term(lua_State *L)
 
 int iter_terms(lua_State *L)
 {
-    ecs_iter_t *it = get_iter_columns(L);
+    ecs_iter_t *it = get_iter_columns(L, 1);
 
     int i;
     for(i=1; i <= it->column_count; i++)
