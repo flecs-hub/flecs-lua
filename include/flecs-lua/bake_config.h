@@ -20,7 +20,6 @@
 /* Headers of public dependencies */
 #include <lua.h>
 #include <flecs.h>
-#include <flecs_meta.h>
 
 /* Convenience macro for exporting symbols */
 #ifndef flecs_lua_STATIC

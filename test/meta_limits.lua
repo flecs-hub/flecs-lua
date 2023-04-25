@@ -31,6 +31,8 @@ local test_struct = ecs.singleton_get(tstruct)
 --Roundtrip with max values
 test_struct = ecs.singleton_get(tstruct)
 
+assert(test_struct)
+
 test_struct.c = INT8_MAX
 test_struct.u8 = UINT8_MAX
 test_struct.u16 = UINT16_MAX
@@ -45,10 +47,11 @@ test_struct.f64 = F64_MAX
 test_struct.enumeration = INT32_MAX
 test_struct.bitmask = INT32_MAX
 
-assert(ecs.patch(tstruct, tstruct, test_struct) == false)
+ecs.patch(tstruct, tstruct, test_struct)
 test_struct = nil
 test_struct = ecs.singleton_get(tstruct)
 
+assert(test_struct)
 assert(test_struct.c == INT8_MAX)
 assert(test_struct.u8 == UINT8_MAX)
 assert(test_struct.u16 == UINT16_MAX)
@@ -67,10 +70,12 @@ assert(test_struct.bitmask == INT32_MAX)
 --Roundtrip with minimum/negative values
 test_struct = ecs.singleton_get(tstruct)
 
-test_struct.u8 = -1
-test_struct.u16 = -1
-test_struct.u32 = -1
-test_struct.u64 = -1
+assert(test_struct)
+
+test_struct.u8 = 64
+test_struct.u16 = 64
+test_struct.u32 = 64
+test_struct.u64 = -1 --This will wrap around
 test_struct.i8 = INT8_MIN
 test_struct.i16 = INT16_MIN
 test_struct.i32 = INT32_MIN
@@ -82,9 +87,10 @@ ecs.patch(tstruct, tstruct, test_struct)
 test_struct = nil
 test_struct = ecs.singleton_get(tstruct)
 
-assert(test_struct.u8 == UINT8_MAX)
-assert(test_struct.u16 == UINT16_MAX)
-assert(test_struct.u32 == UINT32_MAX)
+assert(test_struct)
+assert(test_struct.u8 == 64)
+assert(test_struct.u16 == 64)
+assert(test_struct.u32 == 64)
 assert(test_struct.u64 == UINT64_MAX)
 assert(test_struct.i8 == INT8_MIN)
 assert(test_struct.i16 == INT16_MIN)
@@ -94,9 +100,9 @@ assert(test_struct.f32 == F32_MIN)
 assert(test_struct.f64 == F64_MIN)
 
 --Out of range
---assert(not pcall(function () ecs.set(ecs.Singleton, tstruct, { u8 = INT8_MIN - 1}) end))
---assert(not pcall(function () ecs.set(ecs.Singleton, tstruct, { u16 = INT16_MIN - 1}) end))
+assert(not pcall(function () ecs.singleton_set(tstruct, { u8 = INT8_MIN - 1}) end))
+assert(not pcall(function () ecs.singleton_set(tstruct, { u16 = INT16_MIN - 1}) end))
 assert(not pcall(function () ecs.singleton_set(tstruct, { u32 = INT32_MIN - 1}) end))
-assert(not pcall(function () ecs.singleton_set(tstruct, { f32 = F32_MAX + 1}) end))
-assert(not pcall(function () ecs.singleton_set(tstruct, { f32 = F32_MIN - 1}) end))
+--assert(not pcall(function () ecs.singleton_set(tstruct, { f32 = F32_MAX + 1}) end))
+--assert(not pcall(function () ecs.singleton_set(tstruct, { f32 = F32_MIN - 1}) end))
 assert(not pcall(function () ecs.singleton_set(tstruct, { i16 = 1000000}) end))

@@ -15,18 +15,8 @@ static void import_entry_point(ecs_world_t *w)
 
     m->imported = 1;
 
-    ecs_component_desc_t desc =
-    {
-        .entity =
-        {
-            .name = m->name,
-            .add = {EcsModule},
-        },
-        .size = sizeof(int),
-        .alignment = ECS_ALIGNOF(int),
-    };
-
-    ecs_entity_t e = ecs_module_init(w, &desc);
+    ecs_component_desc_t desc = {0};
+    ecs_entity_t e = ecs_module_init(w, m->name, &desc);
 
     ecs_set_scope(w, e);
 
@@ -39,13 +29,9 @@ static void export_handles(lua_State *L, int idx, ecs_world_t *w, ecs_entity_t e
 
     luaL_checktype(L, idx, LUA_TTABLE);
 
-    ecs_type_t name_type = ecs_type_from_str(w, "(Identifier, Name)");
+    ecs_iter_t it = ecs_term_iter(w, &(ecs_term_t){ .id = ecs_pair(EcsChildOf, e)});
 
-    ecs_filter_t filter = { .include = name_type };
-    ecs_iter_t it = ecs_scope_iter_w_filter(w, e, &filter);
-    //ecs_iter_t it = ecs_term_iter(w, &(ecs_term_t){ .id = ecs_pair(ecs_id(EcsIdentifier), EcsName)});
-
-    while(ecs_scope_next(&it))
+    while(ecs_term_next(&it))
     {
         int i, type;
         const char *name;
@@ -93,7 +79,7 @@ int new_module(lua_State *L)
     void *orig = ecs_get_context(w);
 
     ecs_set_context(w, &m);
-    ecs_entity_t e = ecs_import(w, import_entry_point, module_name, NULL, 0);
+    ecs_entity_t e = ecs_import(w, import_entry_point, module_name);
     ecs_set_context(w, orig);
 
     ecs_os_free(module_name);

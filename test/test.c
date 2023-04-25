@@ -1,8 +1,7 @@
+#define FLECS_LUA_TEST_IMPL
 #include "test.h"
 
-ECS_DECLARE_COMPONENT(lua_test_comp);
-ECS_DECLARE_COMPONENT(lua_test_comp2);
-ECS_DECLARE_COMPONENT(lua_test_struct);
+ECS_COMPONENT_DECLARE(lua_test_vector);
 
 struct vars
 {
@@ -54,11 +53,6 @@ static const luaL_Reg test_lib[] =
     { NULL, NULL }
 };
 
-ECS_CTOR(lua_test_struct, ptr,
-{
-    ptr->str = NULL;
-});
-
 ECS_DTOR(lua_test_struct, ptr,
 {
     ecs_os_free(ptr->str);
@@ -81,6 +75,8 @@ ECS_COPY(lua_test_struct, dst, src,
     dst->str = t;
 });
 
+static ecs_entity_t ecs_id(ecs_meta_type_op_t);
+
 void TestImport(ecs_world_t *w)
 {
     ECS_MODULE(w, Test);
@@ -91,24 +87,31 @@ void TestImport(ecs_world_t *w)
 
     init_globals();
 
-    ECS_META(w, lua_test_comp);
-    ECS_META(w, lua_test_comp2);
-    ECS_META(w, lua_test_enum);
-    ECS_META(w, lua_test_bitmask);
-    ECS_META(w, lua_test_vector);
-    ECS_META(w, lua_test_mapi32);
-    ECS_META(w, lua_test_struct);
+    ECS_META_COMPONENT(w, lua_test_comp);
+    ECS_META_COMPONENT(w, lua_test_comp2);
+    ECS_META_COMPONENT(w, lua_test_enum);
+    ECS_META_COMPONENT(w, lua_test_bitmask);
+    ECS_COMPONENT_DEFINE(w, lua_test_vector);
 
-    ecs_set_component_actions(w, lua_test_struct,
+    ecs_id(lua_test_vector) = ecs_vector_init(w, &(ecs_vector_desc_t)
     {
-        .ctor = ecs_ctor(lua_test_struct),
+        .entity = ecs_id(lua_test_vector),
+        .type = ecs_id(ecs_f32_t)
+    });
+    //ECS_META_COMPONENT(w, lua_test_vector);
+    //ECS_META_COMPONENT(w, lua_test_mapi32);
+    ECS_META_COMPONENT(w, lua_test_struct);
+
+    ecs_set_hooks(w, lua_test_struct,
+    {
+        .ctor = ecs_default_ctor,
         .dtor = ecs_dtor(lua_test_struct),
         .copy = ecs_copy(lua_test_struct),
     });
 
     ecs_entity_init(w, &(ecs_entity_desc_t)
     {
-        .entity = 8192,
+        .id = 8192,
         .name = "ecs_lua_test_c_ent"
     });
 

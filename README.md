@@ -1,12 +1,11 @@
 # flecs-lua
 
-This is a Lua script host library for [Flecs](https://github.com/SanderMertens/flecs).
+This is a Lua binding for [Flecs](https://github.com/SanderMertens/flecs),
+it can be used to extend an application or as a standalone module.
 
 ### Dependencies
 
-* Flecs v2.4.3+ with all modules and addons enabled
-
-* [flecs-meta](https://github.com/flecs-hub/flecs-meta)
+* Flecs v3.2.0 with most addons enabled - backward and forward compatibility is limited due to dependencies on semi-private API's
 
 * Lua 5.3 or later (requires 64-bit integers)
 
@@ -27,7 +26,7 @@ ninja test
 
 Scripts are hosted by the `FlecsLua` module for the world it's imported into.
 
-The ability to `require "ecs"` as a standalone Lua module is currently not maintained.
+Using this library as a standalone Lua module is possible but is not the main focus of the project.
 
 ```c
 /* Creates a script host for the world */
@@ -47,7 +46,7 @@ Most of the functions are bound to their native counterparts,
 components are (de-)serialized to- and from Lua, it is not designed
 to be used with LuaJIT where FFI is preferred.
 
-Components defined from the host with flecs-meta and from Lua are
+Components defined from the host with the `meta` module and from Lua are
 handled the same way and can be mixed in systems, queries, etc.
 
 The script executed on init should be similar to the host's `main()`.
@@ -67,9 +66,13 @@ end
 
 Modules can be stuctured like normal Lua modules.
 
-Flecs modules are defined with `ecs.module()`, note that they are imported automatically,
-all components and entities should be registered inside the callback function
-for proper scoping.
+Importing native modules or other Lua scripts is left to the host application.
+`ecs.import()` does not load flecs modules, instead it returns a table with
+all components and named entities from an already imported flecs module.
+
+Flecs modules are defined and imported with `ecs.module()`,
+it takes an import callback which is called immediately and returns the imported module ID.
+All components and entities should be registered inside the callback function for proper scoping.
 
 #### **module.lua**
 
@@ -101,7 +104,7 @@ return m
 
 * A default Lua state is created when the module is imported
 
-* To set a custom state use `ecs_lua_set_state()`
+* To set a custom `lua_State` use `ecs_lua_set_state()`, this will destroy the default state.
 
 * In both cases `lua_close()` is called on `ecs_fini()`
 to trigger `__gc` metamethods before the world is destroyed.

@@ -39,7 +39,7 @@ local function ExpireComponents(it)
     end
 end
 
-ecs.system(ExpireComponents, "ExpireComponents", ecs.OnUpdate, "(ExpiryTimer, *)")
+ecs.system(ExpireComponents, "ExpireComponents", ecs.OnUpdate, { expr = "(ExpiryTimer, *)" })
 
 local e = ecs.new()
 

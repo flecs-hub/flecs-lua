@@ -1,13 +1,7 @@
+#define FLECS_LUA_IMPL
 #include "private.h"
 
 ECS_COMPONENT_DECLARE(EcsLuaHost);
-ECS_COMPONENT_DECLARE(EcsLuaWorldInfo);
-ECS_COMPONENT_DECLARE(EcsLuaGauge);
-ECS_COMPONENT_DECLARE(EcsLuaCounter);
-ECS_COMPONENT_DECLARE(EcsLuaWorldStats);
-ECS_COMPONENT_DECLARE(EcsLuaTermSet);
-ECS_COMPONENT_DECLARE(EcsLuaTermID);
-ECS_COMPONENT_DECLARE(EcsLuaTerm);
 
 static const int ecs_lua__ctx;
 static const int ecs_lua__world;
@@ -192,7 +186,6 @@ int enable_entity(lua_State *L);
 int disable_entity(lua_State *L);
 int entity_count(lua_State *L);
 int delete_children(lua_State *L);
-int new_type(lua_State *L);
 int get_type(lua_State *L);
 int get_typeid(lua_State *L);
 int get_parent(lua_State *L);
@@ -211,17 +204,13 @@ int get_mut_pair(lua_State *L);
 int get_pair_object(lua_State *L);
 int get_mut_pair_object(lua_State *L);
 int make_pair(lua_State *L);
+int is_pair(lua_State *L);
 int pair_object(lua_State *L);
 int add_instanceof(lua_State *L);
 int remove_instanceof(lua_State *L);
 int add_childof(lua_State *L);
 int remove_childof(lua_State *L);
-int add_owned(lua_State *L);
-int add_switch(lua_State *L);
-int remove_switch(lua_State *L);
-int get_case(lua_State *L);
-int add_case(lua_State *L);
-int remove_case(lua_State *L);
+int entity_override(lua_State *L);
 
 int new_enum(lua_State *L);
 int new_bitmask(lua_State *L);
@@ -245,15 +234,12 @@ int new_prefab(lua_State *L);
 
 /* Hierarchy */
 int get_child_count(lua_State *L);
-int scope_iter(lua_State *L);
-int scope_next(lua_State *L);
 int set_scope(lua_State *L);
 int get_scope(lua_State *L);
 int set_name_prefix(lua_State *L);
 
 /* Bulk */
 int bulk_new(lua_State *L);
-int bulk_delete(lua_State *L);
 
 /* Iterator */
 int iter_term(lua_State *L);
@@ -264,6 +250,7 @@ int filter_iter(lua_State *L);
 int filter_next(lua_State *L);
 int term_iter(lua_State *L);
 int term_next(lua_State *L);
+int iter_next(lua_State *L);
 
 /* Query */
 int query_gc(lua_State *L);
@@ -297,8 +284,8 @@ int print_log(lua_State *L);
 int print_err(lua_State *L);
 int print_dbg(lua_State *L);
 int print_warn(lua_State *L);
-int tracing_enable(lua_State *L);
-int tracing_color_enable(lua_State *L);
+int log_set_level(lua_State *L);
+int log_enable_colors(lua_State *L);
 
 /* Misc */
 int assert_func(lua_State *L);
@@ -330,14 +317,15 @@ int set_pipeline(lua_State *L);
 int get_pipeline(lua_State *L);
 int progress(lua_State *L);
 int progress_cb(lua_State *L);
+int measure_frame_time(lua_State *L);
+int measure_system_time(lua_State *L);
 int set_target_fps(lua_State *L);
 int set_time_scale(lua_State *L);
 int reset_clock(lua_State *L);
 int lquit(lua_State *L);
-int deactivate_systems(lua_State *L);
 int set_threads(lua_State *L);
 int get_threads(lua_State *L);
-int get_thread_index(lua_State *L);
+int get_thread_index(lua_State *L); //compat
 
 /* World */
 int world_new(lua_State *L);
@@ -346,7 +334,6 @@ int world_gc(lua_State *L);
 int world_info(lua_State *L);
 int world_stats(lua_State *L);
 int dim(lua_State *L);
-int dim_type(lua_State *L);
 
 /* EmmyLua */
 int emmy_class(lua_State *L);
@@ -369,7 +356,7 @@ static const luaL_Reg ecs_lib[] =
     { "use", use_alias },
     { "has", entity_has },
     { "owns", entity_owns },
-    { "has_role", has_role },
+    //{ "has_role", has_role },
     { "is_alive", is_alive },
     { "is_valid", is_valid },
     { "get_alive", get_alive },
@@ -383,7 +370,6 @@ static const luaL_Reg ecs_lib[] =
     { "count", entity_count },
     { "delete_children", delete_children },
     { "get_parent", get_parent },
-    { "type", new_type },
     { "get_type", get_type },
     { "get_typeid", get_typeid },
 
@@ -401,17 +387,14 @@ static const luaL_Reg ecs_lib[] =
     { "get_pair_object", get_pair_object },
     { "get_mut_pair_object", get_mut_pair_object },
     { "pair", make_pair },
+    { "is_pair", is_pair },
     { "pair_object", pair_object },
     { "add_instanceof", add_instanceof },
     { "remove_instanceof", remove_instanceof },
     { "add_childof", add_childof },
     { "remove_childof", remove_childof },
-    { "add_owned", add_owned },
-    { "add_switch", add_switch },
-    { "remove_switch", remove_switch },
-    { "get_case", get_case },
-    { "add_case", add_case },
-    { "remove_case", remove_case },
+    { "override", entity_override },
+    { "add_owned", entity_override }, // compat
 
     { "enum", new_enum },
     { "bitmask", new_bitmask },
@@ -432,15 +415,12 @@ static const luaL_Reg ecs_lib[] =
 
     { "prefab", new_prefab },
 
-    { "get_child_count", get_child_count },
-    { "scope_iter", scope_iter },
-    { "scope_next", scope_next },
+    { "get_child_count" , get_child_count },
     { "set_scope", set_scope },
     { "get_scope", get_scope },
     { "set_name_prefix", set_name_prefix },
 
     { "bulk_new", bulk_new },
-    { "bulk_delete", bulk_delete },
 
     { "term", iter_term },
     { "terms", iter_terms },
@@ -453,6 +433,7 @@ static const luaL_Reg ecs_lib[] =
     { "filter_next", filter_next },
     { "term_iter", term_iter },
     { "term_next", term_next },
+    { "iter_next", iter_next },
 
     { "query", query_new },
     { "subquery", subquery_new },
@@ -479,8 +460,10 @@ static const luaL_Reg ecs_lib[] =
     { "err", print_err },
     { "dbg", print_dbg },
     { "warn", print_warn },
-    { "tracing_enable", tracing_enable },
-    { "tracing_color_enable", tracing_color_enable },
+    { "log_set_level", log_set_level },
+    { "tracing_enable", log_set_level }, //compat
+    { "log_enable_colors", log_enable_colors },
+    { "tracing_color_enable", log_enable_colors }, //compat
 
     { "assert", assert_func },
     { "sizeof", sizeof_component },
@@ -507,14 +490,15 @@ static const luaL_Reg ecs_lib[] =
     { "get_pipeline", get_pipeline },
     { "progress", progress },
     { "progress_cb", progress_cb },
+    { "measure_frame_time", measure_frame_time },
+    { "measure_system_time", measure_system_time },
     { "set_target_fps", set_target_fps },
     { "set_time_scale", set_time_scale },
     { "reset_clock", reset_clock },
     { "quit", lquit },
-    { "deactivate_systems", deactivate_systems },
     { "set_threads", set_threads },
-    { "get_threads", get_threads },
-    { "get_thread_index", get_thread_index },
+    { "get_threads", get_threads }, //compat: get_stage_count
+    { "get_thread_index", get_thread_index }, //compat: get_stage_id
 
     { "get_stage_count", get_threads },
     { "get_stage_id", get_thread_index },
@@ -524,7 +508,6 @@ static const luaL_Reg ecs_lib[] =
     { "world_info", world_info },
     { "world_stats", world_stats },
     { "dim", dim },
-    { "dim_type", dim_type },
 
     { "emmy_class", emmy_class },
 
@@ -655,21 +638,30 @@ int luaopen_ecs(lua_State *L)
 #define XX(type) lua_pushinteger(L, ecs_id(Ecs##type)); lua_setfield(L, -2, #type);
     ECS_LUA_TYPEIDS(XX)
 #undef XX
+
+#define XX(type) lua_pushinteger(L, ecs_id(ecs_##type##_t)); lua_setfield(L, -2, #type);
+    ECS_LUA_PRIMITIVES(XX)
+#undef XX
+
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
     ECS_LUA_BUILTINS(XX)
 #undef XX
+
 #define XX(const) lua_pushinteger(L, Ecs##const); lua_setfield(L, -2, #const);
     ECS_LUA_ENUMS(XX)
 #undef XX
+
 #define XX(const) lua_pushinteger(L, ECS_##const); lua_setfield(L, -2, #const);
     ECS_LUA_MACROS(XX)
 #undef XX
 
-    lua_pushinteger(L, ecs_id(ecs_type_op_kind_t));
-    lua_setfield(L, -2, "type_op_kind_t");
+/*
+    lua_pushinteger(L, ecs_id(ecs_meta_type_op_kind_t));
+    lua_setfield(L, -2, "meta_type_op_kind_t");
+*/
+    lua_pushinteger(L, ecs_lookup_fullpath(w, "flecs.meta.ecs_meta_type_op_t"));
+    lua_setfield(L, -2, "meta_type_op_t");
 
-    lua_pushinteger(L, ecs_id(ecs_type_op_t));
-    lua_setfield(L, -2, "type_op_t");
 
     return 1;
 }
@@ -767,23 +759,18 @@ int ecs_lua_set_state(ecs_world_t *world, lua_State *L)
     return 0;
 }
 
-ECS_CTOR(EcsLuaHost, ptr,
-{
-    memset(ptr, 0, sizeof(EcsLuaHost));
-});
+static ecs_entity_t ecs_id(ecs_meta_type_op_t);
 
-static void ecs_lua_atfini(ecs_world_t *world, void *ctx)
+void EcsLuaHost__OnRemove(ecs_iter_t *it)
 {
-    EcsLuaHost *ptr = ecs_singleton_get_mut(world, EcsLuaHost);
-
-    ecs_assert(ptr != NULL, ECS_INTERNAL_ERROR, NULL);
+    EcsLuaHost *ptr = ecs_field(it, EcsLuaHost, 1);
 
     lua_State *L = ptr->L;
     if(L == NULL) return;
 
     ecs_world_t *wdefault = ecs_lua_get_world(L);
 
-    if(wdefault == world)
+    if(wdefault == it->real_world)
     {/* This is the default world in this VM */
         lua_rawgetp(L, LUA_REGISTRYINDEX, ECS_LUA_DEFAULT_WORLD);
         luaL_callmeta(L, -1, "__gc");
@@ -791,18 +778,7 @@ static void ecs_lua_atfini(ecs_world_t *world, void *ctx)
         lua_close(L);
         ptr->L = NULL;
     }
-
-    ecs_singleton_modified(world, EcsLuaHost);
 }
-
-/** Define a component with a high/entity id,
- * leaving the low id's to performance critical components.
-*
-* Must be used together with ECS_COMPONENT_DECLARE.
-*/
-#define ECS_LUA_META(world, T)\
-    ECS_COMPONENT_DEFINE(world, T);\
-    ecs_new_meta(world, ecs_entity(T), &__##T##__);
 
 void FlecsLuaImport(ecs_world_t *w)
 {
@@ -814,20 +790,83 @@ void FlecsLuaImport(ecs_world_t *w)
 
     ECS_COMPONENT_DEFINE(w, EcsLuaHost);
 
-    ECS_META_DEFINE(w, EcsLuaWorldInfo);
-    ECS_META_DEFINE(w, EcsLuaGauge);
-    ECS_META_DEFINE(w, EcsLuaCounter);
-    ECS_META_DEFINE(w, EcsLuaWorldStats);
-    ECS_META_DEFINE(w, EcsLuaTermSet);
-    ECS_META_DEFINE(w, EcsLuaTermID);
-    ECS_META_DEFINE(w, EcsLuaTerm);
+    ECS_META_COMPONENT(w, EcsLuaWorldInfo);
+    ECS_META_COMPONENT(w, EcsLuaGauge);
+    ECS_META_COMPONENT(w, EcsLuaGauge_);
+    ECS_META_COMPONENT(w, EcsLuaCounter);
+    ECS_META_COMPONENT(w, EcsLuaWorldStats);
+    ECS_META_COMPONENT(w, EcsLuaTermID);
+    ECS_META_COMPONENT(w, EcsLuaTerm);
 
-    ecs_assert(sizeof(ecs_world_stats_t) == sizeof(EcsLuaWorldStats), ECS_INTERNAL_ERROR, NULL);
+    ecs_entity_t old_scope = ecs_set_scope(w, 0);
 
-    ecs_set_component_actions(w, EcsLuaHost,
+    /* flecs only defines ecs_uptr_t */
+    ecs_entity_t e = ecs_entity_init(w, &(ecs_entity_desc_t) { .name = "uintptr_t", .symbol = "uintptr_t" });
+    ecs_set(w, e, EcsPrimitive, {.kind = EcsUPtr});
+
+    ecs_set_scope(w, old_scope);
+
+    ecs_set_scope(w, ecs_lookup_fullpath(w, "flecs.meta"));
+
+    //ECS_META_COMPONENT(w, ecs_meta_type_op_t);
+
+    ecs_entity_init(w, &(ecs_entity_desc_t)
     {
-        .ctor = ecs_ctor(EcsLuaHost),
+        .id = ecs_id(ecs_meta_type_op_t),
+        .use_low_id = true,
+        .name = "ecs_meta_type_op_t"
     });
 
-    ecs_atfini(w, ecs_lua_atfini, NULL);
+    ecs_id(ecs_meta_type_op_t) = ecs_component_init(w, &(ecs_component_desc_t)
+    {
+        .entity = ecs_id(ecs_meta_type_op_t),
+        .type =
+        {
+            .component = ecs_id(ecs_meta_type_op_t),
+            .size = sizeof(ecs_meta_type_op_t),
+            .alignment = ECS_ALIGNOF(ecs_meta_type_op_t)
+        }
+    });
+
+    ecs_struct_init(w, &(ecs_struct_desc_t)
+    {
+        .entity = ecs_id(ecs_meta_type_op_t),
+        .members =
+        {
+            {.name = (char*)"kind", .type = ecs_id(ecs_i32_t)},
+            {.name = (char*)"offset", .type = ecs_id(ecs_i32_t)},
+            {.name = (char*)"count", .type = ecs_id(ecs_i32_t)},
+            {.name = (char*)"name", .type = ecs_id(ecs_string_t)},
+            {.name = (char*)"op_count", .type = ecs_id(ecs_i32_t)},
+            {.name = (char*)"size", .type = ecs_id(ecs_i32_t)},
+            {.name = (char*)"type", .type = ecs_id(ecs_entity_t)},
+            {.name = (char*)"unit", .type = ecs_id(ecs_entity_t)},
+        }
+    });
+
+    ecs_struct_init(w, &(ecs_struct_desc_t)
+    {
+        .entity = ecs_id(EcsMetaTypeSerialized),
+        .members =
+        {
+            {.name = (char*)"*ops", .type = ecs_id(EcsVector)},
+        }
+    });
+
+    ecs_set_scope(w, old_scope);
+
+    /*printf("gauge size %zu\n", sizeof(EcsLuaGauge));
+    printf("counter size %zu\n", sizeof(EcsLuaCounter));
+    printf("metric size %zu\n", sizeof(ecs_metric_t));
+    printf("worldstats: %zu, world_stats: %zu\n", sizeof(EcsWorldStats), sizeof(ecs_world_stats_t));*/
+
+    ecs_assert(sizeof(EcsLuaGauge) == sizeof(ecs_metric_t), ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(sizeof(EcsLuaCounter) == sizeof(ecs_metric_t), ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(sizeof(EcsLuaWorldStats) == sizeof(ecs_world_stats_t), ECS_INTERNAL_ERROR, NULL);
+
+    ecs_set_hooks(w, EcsLuaHost,
+    {
+        .ctor = ecs_default_ctor,
+        .on_remove = EcsLuaHost__OnRemove // atfini's are called too early (e.g. before OnRemove observers) since at least v3.2.0
+    });
 }

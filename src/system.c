@@ -42,6 +42,9 @@ static void ecs_lua__callback(ecs_iter_t *it)
     const EcsLuaHost *host = ecs_singleton_get(w, EcsLuaHost);
     ecs_assert(host != NULL, ECS_INVALID_PARAMETER, NULL);
 
+    ecs_lua_dbg("Lua %s: \"%s\", %d terms, count %d, func ref %d",
+            cb->type_name, name, it->field_count, it->count, cb->func_ref);
+
     lua_State *L = host->L; // host->states[stage_id];
 
     ecs_lua_ctx *ctx = ecs_lua_get_context(L, real_world);
@@ -57,9 +60,6 @@ static void ecs_lua__callback(ecs_iter_t *it)
     *wbuf = it->world;
 
     ecs_time_t time;
-
-    ecs_lua_dbg("Lua %s: \"%s\", %d terms, count %d, func ref %d",
-                cb->type_name, name, it->column_count, it->count, cb->func_ref);
 
     int type = ecs_lua_rawgeti(L, w, cb->func_ref);
 
@@ -85,7 +85,8 @@ static void ecs_lua__callback(ecs_iter_t *it)
     if(ret)
     {
         const char *err = lua_tostring(L, lua_gettop(L));
-        ecs_os_err("error in %s callback \"%s\" (%d): %s", cb->type_name, name, ret, err);
+        /* TODO: switch to ecs_os_err() with message handler */
+        ecs_lua_dbg("error in %s callback \"%s\" (%d): %s", cb->type_name, name, ret, err);
     }
 
     ecs_assert(!ret, ECS_INTERNAL_ERROR, NULL);
@@ -116,7 +117,7 @@ static int check_events(lua_State *L, ecs_world_t *w, ecs_entity_t *events, int 
     {
         int len = luaL_len(L, arg);
 
-        if(len > ECS_TRIGGER_DESC_EVENT_COUNT_MAX) return luaL_argerror(L, arg, "too many events");
+        if(len > ECS_OBSERVER_DESC_EVENT_COUNT_MAX) return luaL_argerror(L, arg, "too many events");
 
         int i;
         for(i=1; i <= len; i++)
@@ -154,35 +155,20 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
     luaL_checktype(L, 1, LUA_TFUNCTION);
     const char *name = luaL_optstring(L, 2, NULL);
     /* phase, event or event[] expected for arg 3 */
-    const char *signature = luaL_optstring(L, 4, NULL);
+    const char *signature = lua_type(L, 4) == LUA_TSTRING ? luaL_checkstring(L, 4) : NULL;
 
     ecs_lua_callback *cb = lua_newuserdata(L, sizeof(ecs_lua_callback));
 
     ecs_lua_ref(L, w);
 
-    if(type == EcsLuaTrigger)
+    if(type == EcsLuaObserver)
     {
-        ecs_trigger_desc_t desc =
-        {
-            .entity.name = name,
-            .callback = ecs_lua__callback,
-            .expr = signature,
-            .binding_ctx = cb
-        };
+        ecs_entity_desc_t edesc = { .name = name };
+        e = ecs_entity_init(w, &edesc);
 
-        check_events(L, w, desc.events, 3);
-
-        if(signature == NULL) desc.term = checkterm(L, w, 4);
-
-        e = ecs_trigger_init(w, &desc);
-
-        cb->type_name = "trigger";
-    }
-    else if(type == EcsLuaObserver)
-    {
         ecs_observer_desc_t desc =
         {
-            .entity.name = name,
+            .entity = e,
             .callback = ecs_lua__callback,
             .filter.expr = signature,
             .binding_ctx = cb
@@ -196,17 +182,21 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
 
         cb->type_name = "observer";
     }
-    else
+    else /* EcsLuaSystem */
     {
         ecs_entity_t phase = luaL_checkinteger(L, 3);
 
-        ecs_system_desc_t desc =
-        {
-            .entity = { .name = name, .add = phase },
-            .query.filter.expr = signature,
-            .callback = ecs_lua__callback,
-            .binding_ctx = cb
-        };
+        ecs_entity_desc_t edesc = {0};
+        edesc.name = name;
+        edesc.add[0] = phase ? ecs_dependson(phase) : 0;
+        edesc.add[1] = phase;
+        e = ecs_entity_init(w, &edesc);
+
+        ecs_system_desc_t desc = {0};
+        desc.entity = e;
+        desc.query.filter.expr = signature;
+        desc.callback = ecs_lua__callback;
+        desc.binding_ctx = cb;
 
         if(signature == NULL && !lua_isnoneornil(L, 4)) check_filter_desc(L, w, &desc.query.filter, 4);
 
@@ -229,17 +219,19 @@ static int new_callback(lua_State *L, ecs_world_t *w, enum EcsLuaCallbackType ty
 
 int new_system(lua_State *L)
 {
-    return new_callback(L, ecs_lua_world(L), EcsLuaSystem);
+    ecs_world_t *w = ecs_lua_world(L);
+    return new_callback(L, w, EcsLuaSystem);
 }
 
 int new_trigger(lua_State *L)
 {
-    return new_callback(L, ecs_lua_world(L), EcsLuaTrigger);
+    return luaL_error(L, "use ecs.observer()");
 }
 
 int new_observer(lua_State *L)
 {
-    return new_callback(L, ecs_lua_world(L), EcsLuaObserver);
+    ecs_world_t *w = ecs_lua_world(L);
+    return new_callback(L, w, EcsLuaObserver);
 }
 
 int run_system(lua_State *L)

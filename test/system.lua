@@ -161,7 +161,7 @@ ecs.set_system_context(em, nil)
 ecs.run(em, 1.0)
 assert(custom_context == false)
 
-local function trigger(it)
+local function OnAdd(it)
     local s = ecs.column(it, 1)
 
     for i=1, it.count do
@@ -170,10 +170,10 @@ local function trigger(it)
     end
 end
 
-ecs.trigger(trigger, "OnAdd", ecs.OnAdd, "LuaStruct")
+ecs.observer(OnAdd, "OnAdd", ecs.OnAdd, "LuaStruct")
 
-assert(not pcall(function () ecs.trigger(trigger, "name", ecs.OnAdd) end))
-assert(not pcall(function () ecs.trigger(trigger, "name", ecs.invalid_id, "LuaStruct") end))
+assert(not pcall(function () ecs.observer(OnAdd, "name", ecs.OnAdd) end))
+assert(not pcall(function () ecs.observer(OnAdd, "name", ecs.invalid_id, "LuaStruct") end))
 
 ecs.add(ecs.new(), Struct)
 ecs.add(ecs.new(), Struct)

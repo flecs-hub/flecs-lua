@@ -83,7 +83,7 @@ int world_info(lua_State *L)
 
     ecs_assert(ecs_id(EcsLuaWorldInfo) != 0, ECS_INTERNAL_ERROR, NULL);
 
-    struct EcsLuaWorldInfo world_info =
+    EcsLuaWorldInfo world_info =
     {
         .last_component_id = wi->last_component_id,
         .last_id = wi->last_id,
@@ -115,13 +115,13 @@ int world_stats(lua_State *L)
 
     ecs_assert(ecs_id(EcsLuaWorldStats) != 0, ECS_INTERNAL_ERROR, NULL);
 
-    ecs_world_stats_t ws;
-    ecs_get_world_stats(w, &ws);
+    //sizeof(EcsLuaWorldStats)
+    //sizeof(ecs_world_stats_t)
 
-    EcsLuaWorldStats world_stats;
-    memcpy(&world_stats, &ws, sizeof(world_stats));
+    EcsLuaWorldStats ws;
+    ecs_world_stats_get(w, (ecs_world_stats_t*)&ws);
 
-    ecs_ptr_to_lua(w, L, ecs_id(EcsLuaWorldStats), &world_stats);
+    ecs_ptr_to_lua(w, L, ecs_id(EcsLuaWorldStats), &ws);
 
     return 1;
 }
@@ -133,18 +133,6 @@ int dim(lua_State *L)
     lua_Integer count = luaL_checkinteger(L, 1);
 
     ecs_dim(w, count);
-
-    return 0;
-}
-
-int dim_type(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_world(L);
-
-    lua_Integer count = luaL_checkinteger(L, 1);
-    ecs_type_t type = checktype(L, 2);
-
-    ecs_dim_type(w, type, count);
 
     return 0;
 }

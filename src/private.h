@@ -11,14 +11,12 @@
     #error "flecs-lua requires a 64-bit lua_Integer"
 #endif
 
-ECS_COMPONENT_EXTERN(EcsLuaHost);
-ECS_COMPONENT_EXTERN(EcsLuaWorldInfo);
-ECS_COMPONENT_EXTERN(EcsLuaGauge);
-ECS_COMPONENT_EXTERN(EcsLuaCounter);
-ECS_COMPONENT_EXTERN(EcsLuaWorldStats);
-ECS_COMPONENT_EXTERN(EcsLuaTermSet);
-ECS_COMPONENT_EXTERN(EcsLuaTermID);
-ECS_COMPONENT_EXTERN(EcsLuaTerm);
+#undef ECS_META_IMPL
+#ifndef FLECS_LUA_IMPL
+    #define ECS_META_IMPL EXTERN
+#endif
+
+extern ECS_COMPONENT_DECLARE(EcsLuaHost);
 
 #define ECS_LUA_CONTEXT    (1)
 #define ECS_LUA_CURSORS    (2)
@@ -27,8 +25,8 @@ ECS_COMPONENT_EXTERN(EcsLuaTerm);
 #define ECS_LUA_REGISTRY   (5)
 #define ECS_LUA_APIWORLD   (6)
 
-/* Internal version for API functions */
-static inline ecs_world_t *ecs_lua_world(lua_State *L)
+/* For internal API functions */
+static inline ecs_world_t *ecs_lua_world_internal(lua_State *L)
 {
     ecs_world_t *w = *(ecs_world_t**)lua_touserdata(L, lua_upvalueindex(1));
 
@@ -72,14 +70,18 @@ static inline lua_Integer checkentity(lua_State *L, ecs_world_t *world, int arg)
 
 #ifdef NDEBUG
     #define ecs_lua_dbg(fmt, ...)
+    #define ecs_lua_dbg_pad(depth)
 
     #define ecs_lua__prolog(L)
     #define ecs_lua__epilog(L)
+    #define ecs_lua_world(L) ecs_lua_world_internal(L)
 #else
-    #define ecs_lua_dbg(fmt, ...) //ecs_os_dbg(fmt, __VA_ARGS__)
+    #define ecs_lua_dbg(fmt, ...) printf(fmt "\n", __VA_ARGS__)
+    #define ecs_lua_dbg_pad(depth) printf("%*s", depth*2, "")
 
     #define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
     #define ecs_lua__epilog(L) ecs_assert(ecs_lua__stackguard == lua_gettop(L), ECS_INTERNAL_ERROR, NULL)
+    #define ecs_lua_world(L) ecs_lua_world_internal(L); lua_Debug ar = {0}; if(lua_getstack(L, 1, &ar)) lua_getinfo(L, "Sl", &ar)
 #endif
 
 /* ecs */
@@ -112,7 +114,7 @@ ecs_term_t checkterm(lua_State *L, const ecs_world_t *world, int arg);
 /* misc */
 ecs_type_t checktype(lua_State *L, int arg);
 int check_filter_desc(lua_State *L, const ecs_world_t *world, ecs_filter_desc_t *desc, int arg);
-int checkfilter(lua_State *L, const ecs_world_t *world, ecs_filter_t *filter, int arg);
+ecs_filter_t *checkfilter(lua_State *L, const ecs_world_t *world, int arg);
 ecs_query_t *checkquery(lua_State *L, int arg);
 int ecs_lua__readonly(lua_State *L);
 void ecs_lua__assert(lua_State *L, bool condition, const char *param, const char *condition_str);
@@ -138,7 +140,6 @@ typedef struct ecs_lua_ctx
 typedef enum EcsLuaCallbackType
 {
     EcsLuaSystem = 0,
-    EcsLuaTrigger,
     EcsLuaObserver
 }EcsLuaCallbackType;
 
@@ -151,6 +152,13 @@ typedef struct ecs_lua_callback
     const char *type_name;
 }ecs_lua_callback;
 
+typedef struct EcsLuaIter
+{
+    int ptr_only;
+    ecs_iter_t *it;
+    ecs_iter_t storage;
+}EcsLuaIter;
+
 ECS_STRUCT(EcsLuaWorldInfo,
 {
     ecs_entity_t last_component_id;
@@ -158,15 +166,15 @@ ECS_STRUCT(EcsLuaWorldInfo,
     ecs_entity_t min_id;
     ecs_entity_t max_id;
 
-    double delta_time_raw;
-    double delta_time;
-    double time_scale;
-    double target_fps;
-    double frame_time_total;
-    double system_time_total;
-    double merge_time_total;
-    double world_time_total;
-    double world_time_total_raw;
+    float delta_time_raw; //float_t
+    float delta_time; //float_t
+    float time_scale; //float_t
+    float target_fps; //float_t
+    float frame_time_total; //float_t
+    float system_time_total;
+    float merge_time_total;
+    float world_time_total; //float_t
+    float world_time_total_raw; //float_t
 
     int32_t frame_count_total;
     int32_t merge_count_total;
@@ -174,7 +182,20 @@ ECS_STRUCT(EcsLuaWorldInfo,
     int32_t systems_ran_frame;
 });
 
+#define ECS_LUA_STAT_WINDOW 60
+
+/* These two are padded to the same size as the ecs_metric_t union */
 ECS_STRUCT(EcsLuaGauge,
+{
+    float avg[60];
+    float min[60];
+    float max[60];
+
+//ECS_PRIVATE
+    double pad[60];
+});
+
+ECS_STRUCT(EcsLuaGauge_,
 {
     float avg[60];
     float min[60];
@@ -183,63 +204,116 @@ ECS_STRUCT(EcsLuaGauge,
 
 ECS_STRUCT(EcsLuaCounter,
 {
-    EcsLuaGauge rate;
-    float value[60];
+    EcsLuaGauge_ rate;
+    double value[60];
 });
 
 ECS_STRUCT(EcsLuaWorldStats,
 {
-    int32_t dummy_;
+    int64_t first_;
 
     EcsLuaGauge entity_count;
-    EcsLuaGauge component_count;
-    EcsLuaGauge query_count;
-    EcsLuaGauge system_count;
+    EcsLuaGauge entity_not_alive_count;
+
+    EcsLuaGauge id_count;
+    EcsLuaGauge tag_id_count;
+    EcsLuaGauge component_id_count;
+    EcsLuaGauge pair_id_count;
+    EcsLuaGauge wildcard_id_count;
+    EcsLuaGauge type_count;
+    EcsLuaCounter id_create_count;
+    EcsLuaCounter id_delete_count;
+
     EcsLuaGauge table_count;
     EcsLuaGauge empty_table_count;
-    EcsLuaGauge singleton_table_count;
-    EcsLuaGauge matched_entity_count;
-    EcsLuaGauge matched_table_count;
+    EcsLuaGauge tag_table_count;
+    EcsLuaGauge trivial_table_count;
+    EcsLuaGauge table_record_count;
+    EcsLuaGauge table_storage_count;
+    EcsLuaCounter table_create_count;
+    EcsLuaCounter table_delete_count;
 
-    EcsLuaCounter new_count;
-    EcsLuaCounter bulk_new_count;
-    EcsLuaCounter delete_count;
-    EcsLuaCounter clear_count;
+    EcsLuaGauge query_count;
+    EcsLuaGauge observer_count;
+    EcsLuaGauge system_count;
+
     EcsLuaCounter add_count;
     EcsLuaCounter remove_count;
+    EcsLuaCounter delete_count;
+    EcsLuaCounter clear_count;
     EcsLuaCounter set_count;
+    EcsLuaCounter get_mut_count;
+    EcsLuaCounter modified_count;
+    EcsLuaCounter other_count;
     EcsLuaCounter discard_count;
+    EcsLuaCounter batched_entity_count;
+    EcsLuaCounter batched_count;
 
-    EcsLuaCounter world_time_total_raw;
-    EcsLuaCounter world_time_total;
-    EcsLuaCounter frame_time_total;
-    EcsLuaCounter system_time_total;
-    EcsLuaCounter merge_time_total;
+    EcsLuaCounter frame_count;
+    EcsLuaCounter merge_count;
+    EcsLuaCounter rematch_count;
+    EcsLuaCounter pipeline_build_count;
+    EcsLuaCounter systems_ran;
+    EcsLuaCounter observers_ran;
+    EcsLuaCounter event_emit_count;
+
+    EcsLuaCounter world_time_raw;
+    EcsLuaCounter world_time;
+    EcsLuaCounter frame_time;
+    EcsLuaCounter system_time;
+    EcsLuaCounter emit_time;
+    EcsLuaCounter merge_time;
+    EcsLuaCounter rematch_time;
     EcsLuaGauge fps;
     EcsLuaGauge delta_time;
 
-    EcsLuaCounter frame_count_total;
-    EcsLuaCounter merge_count_total;
-    EcsLuaCounter pipeline_build_count_total;
-    EcsLuaCounter systems_ran_frame;
+    EcsLuaCounter alloc_count;
+    EcsLuaCounter realloc_count;
+    EcsLuaCounter free_count;
+    EcsLuaCounter outstanding_alloc_count;
 
+    EcsLuaCounter block_alloc_count;
+    EcsLuaCounter block_free_count;
+    EcsLuaCounter block_outstanding_alloc_count;
+    EcsLuaCounter stack_alloc_count;
+    EcsLuaCounter stack_free_count;
+    EcsLuaCounter stack_outstanding_alloc_count;
+
+    EcsLuaCounter rest_request_count;
+    EcsLuaCounter rest_entity_count;
+    EcsLuaCounter rest_entity_error_count;
+    EcsLuaCounter rest_query_count;
+    EcsLuaCounter rest_query_error_count;
+    EcsLuaCounter rest_query_name_count;
+    EcsLuaCounter rest_query_name_error_count;
+    EcsLuaCounter rest_query_name_from_cache_count;
+    EcsLuaCounter rest_enable_count;
+    EcsLuaCounter rest_enable_error_count;
+    EcsLuaCounter rest_world_stats_count;
+    EcsLuaCounter rest_pipeline_stats_count;
+    EcsLuaCounter rest_stats_error_count;
+
+    EcsLuaCounter http_request_received_count;
+    EcsLuaCounter http_request_invalid_count;
+    EcsLuaCounter http_request_handled_ok_count;
+    EcsLuaCounter http_request_handled_error_count;
+    EcsLuaCounter http_request_not_handled_count;
+    EcsLuaCounter http_request_preflight_count;
+    EcsLuaCounter http_send_ok_count;
+    EcsLuaCounter http_send_error_count;
+    EcsLuaCounter http_busy_count;
+
+    int64_t last_;
+//ECS_PRIVATE
     int32_t t;
-});
-
-ECS_STRUCT(EcsLuaTermSet,
-{
-    ecs_entity_t relation;
-    uint8_t mask;
-    int32_t min_depth;
-    int32_t max_depth;
 });
 
 ECS_STRUCT(EcsLuaTermID,
 {
-    ecs_entity_t entity;
+    ecs_entity_t id;
     /*const char *name;*/
-    int32_t var;
-    EcsLuaTermSet set;
+    ecs_entity_t trav;
+    uint32_t flags;
 });
 
 ECS_STRUCT(EcsLuaTerm,
@@ -247,11 +321,10 @@ ECS_STRUCT(EcsLuaTerm,
     int64_t id;
 
     int32_t inout;
-    EcsLuaTermID pred;
-    EcsLuaTermID subj;
-    EcsLuaTermID obj;
+    EcsLuaTermID src;
+    EcsLuaTermID first;
+    EcsLuaTermID second;
     int32_t oper;
-    int64_t role;
 });
 
 #define ECS_LUA_BUILTINS(XX) \
@@ -264,14 +337,17 @@ ECS_STRUCT(EcsLuaTerm,
     XX(Final) \
     XX(Tag) \
     XX(Name) \
+    XX(Union) \
     XX(Symbol) \
     XX(ChildOf) \
+\
+    XX(Query) \
+    XX(System) \
 \
     XX(IsA) \
     XX(Module) \
     XX(Prefab) \
     XX(Disabled) \
-    XX(Hidden) \
 \
     XX(OnAdd) \
     XX(OnRemove) \
@@ -279,17 +355,13 @@ ECS_STRUCT(EcsLuaTerm,
     XX(OnSet) \
     XX(UnSet) \
     XX(OnDelete) \
-    XX(OnDeleteObject) \
     XX(Remove) \
     XX(Delete) \
-    XX(Throw) \
+    XX(Panic) \
 \
-    XX(OnDemand) \
     XX(Monitor) \
-    XX(DisabledIntern) \
-    XX(Inactive) \
+    XX(Empty) \
 \
-    XX(Pipeline) \
     XX(PreFrame) \
     XX(OnLoad) \
     XX(PostLoad) \
@@ -301,6 +373,25 @@ ECS_STRUCT(EcsLuaTerm,
     XX(OnStore) \
     XX(PostFrame)
 
+#define ECS_LUA_PRIMITIVES(XX) \
+    XX(bool) \
+    XX(char) \
+    XX(byte) \
+    XX(u8) \
+    XX(u16) \
+    XX(u32) \
+    XX(u64) \
+    XX(uptr) \
+    XX(i8) \
+    XX(i16) \
+    XX(i32) \
+    XX(i64) \
+    XX(iptr) \
+    XX(f32) \
+    XX(f64) \
+    XX(string) \
+    XX(entity)
+
 #define ECS_LUA_ENUMS(XX) \
     XX(PrimitiveType) \
     XX(BitmaskType) \
@@ -308,7 +399,6 @@ ECS_STRUCT(EcsLuaTerm,
     XX(StructType) \
     XX(ArrayType) \
     XX(VectorType) \
-    XX(MapType) \
 \
     XX(Bool) \
     XX(Char) \
@@ -328,7 +418,6 @@ ECS_STRUCT(EcsLuaTerm,
     XX(String) \
     XX(Entity) \
 \
-    XX(OpHeader) \
     XX(OpPrimitive) \
     XX(OpEnum) \
     XX(OpBitmask) \
@@ -336,15 +425,9 @@ ECS_STRUCT(EcsLuaTerm,
     XX(OpPop) \
     XX(OpArray) \
     XX(OpVector) \
-    XX(OpMap) \
 \
-    XX(DefaultSet) \
     XX(Self) \
-    XX(SuperSet) \
-    XX(SubSet) \
     XX(Cascade) \
-    XX(All) \
-    XX(Nothing) \
 \
     XX(InOutDefault) \
     XX(InOut) \
@@ -361,28 +444,19 @@ ECS_STRUCT(EcsLuaTerm,
 
 #define ECS_LUA_MACROS(XX) \
     XX(AND) \
-    XX(OR) \
-    XX(XOR) \
-    XX(NOT) \
-    XX(CASE) \
-    XX(SWITCH) \
     XX(PAIR) \
-    XX(OWNED) \
-    XX(DISABLED)
+    XX(OVERRIDE) \
+    XX(TOGGLE)
 
 #define ECS_LUA_TYPEIDS(XX) \
     XX(Component) \
-    XX(ComponentLifecycle) \
-    XX(Type) \
+    XX(Identifier) \
 \
-    XX(Trigger) \
-    XX(Query) \
-    XX(System) \
     XX(TickSource) \
 \
-    XX(PipelineQuery) \
-\
     XX(Timer) \
+    XX(MetaType) \
+    XX(MetaTypeSerialized) \
     XX(RateFilter) \
     XX(Primitive) \
     XX(Enum) \
@@ -390,14 +464,7 @@ ECS_STRUCT(EcsLuaTerm,
     XX(Member) \
     XX(Struct) \
     XX(Array) \
-    XX(Vector) \
-    XX(Map) \
-    XX(MetaType) \
-    XX(MetaTypeSerializer) \
-\
-    XX(LuaGauge) \
-    XX(LuaCounter) \
-    XX(LuaWorldStats)
+    XX(Vector)
 
 
 

@@ -4,7 +4,7 @@ local u = require "util"
 
 u.test_defaults()
 
-u.print_constants("Module", "OnStore", "XOR")
+u.print_constants("Module", "OnStore", "Or")
 
 local lua_test_comp = ecs.lookup("lua_test_comp")
 
@@ -16,7 +16,7 @@ local id_name_comp = ecs.new(10000, "with_comp", "lua_test_struct")
 local no_id_comp = ecs.new("no_id", "lua_test_comp")
 local id_comp = ecs.new(6000, nil, "lua_test_comp")
 local just_comp = ecs.new(nil, "lua_test_comp")
-local id_name_comps = ecs.new(10001, "multiple_comps", "lua_test_struct, lua_test_comp")
+local id_name_comps = ecs.new(65536, "multiple_comps", "lua_test_struct, lua_test_comp")
 local bulk = ecs.bulk_new(10)
 local bulk_comp = ecs.bulk_new(lua_test_comp, 10)
 assert(ecs.bulk_new(lua_test_comp, 10, true) == nil)
@@ -76,16 +76,14 @@ ecs.delete(bulk)
 
 local type = ecs.get_type(lua_test_comp)
 ecs.dim(400)
-ecs.dim_type(400, type)
 
-ecs.struct("LuaPosition", "{float x; float y; float z;}")
-ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")
+local LuaPosition = ecs.struct("LuaPosition", "{float x; float y; float z;}")
+local LuaStruct = ecs.struct("LuaStruct", "{char blah[6]; LuaPosition position;}")
 
 assert(not pcall(function() ecs.struct("LuaPosition", "{float x; float y; float z;}") end))
 
 local alias = ecs.alias("LuaStruct", "LuaAlias")
 assert(ecs.name(alias) == "LuaAlias")
-ecs.add(alias, type)
 ecs.add(alias, lua_test_comp)
 assert(ecs.has(alias, lua_test_comp))
 assert(not pcall(function() ecs.alias("error", "newname") end))
@@ -93,14 +91,13 @@ assert(not pcall(function() ecs.alias("name_only", "newname") end))
 assert(not pcall(function() ecs.alias("LuaStruct", "LuaAlias") end))
 assert(not pcall(function() ecs.alias("name_only", "LuaAlias") end))
 
-local arr = ecs.array("LuaArray", "LuaStruct", 4)
+local arr = ecs.array("LuaArray", LuaStruct, 4)
 assert(ecs.name(arr) == "LuaArray")
 
-assert(not pcall(function() ecs.array("LuaArray", "LuaStruct", 4) end))
+assert(not pcall(function() ecs.array("LuaArray", LuaStruct, 4) end))
 
 assert(not ecs.has(id_name_comp, arr))
 
-assert(ecs.owns(id_name_comp, ecs.get_type(arr)) == false)
 assert(ecs.owns(id_name_comp, arr) == false)
 
 ecs.add(id_name_comp, arr)
@@ -123,18 +120,17 @@ assert(ecs.is_component_enabled(id_name_comp, arr) == true)
 
 ecs.remove(id_name_comp, arr)
 assert(not ecs.has(id_name_comp, arr))
-assert(not pcall(function () ecs.has(id_name_comp, "does_not_exist") end))
+assert(not pcall(function () ecs.has(id_name_comp, "invalid type") end))
 
-local with_name = ecs.count(ecs.get_type("(Identifier, Name)"))
+local with_name = ecs.count(ecs.pair(ecs.Identifier, ecs.Name))
 assert(with_name > 0)
 print("entities with ecs.Identifier: " .. with_name)
 
 assert(with_name > 0)
-assert(with_name == ecs.count(ecs.get_type("(Identifier, Name)")))
-assert(with_name <= ecs.count({ expr = "(Identifier, Name)"})) --larger count, is it expected?
+assert(with_name == ecs.count(ecs.pair(ecs.Identifier, ecs.Name)))
 
 local parent = ecs.new()
-local child = 16666
+local child = ecs.new(16666)
 ecs.add(child, ecs.ChildOf, parent)
 
 assert(ecs.get_parent(child) == parent)
@@ -174,7 +170,7 @@ assert(only_name == ecs.new("name_only"))
 assert(id_n_name == ecs.new(5120, "id_and_name"))
 assert(id_name_comp == ecs.new(10000, "with_comp", "lua_test_struct"))
 assert(no_id_comp == ecs.new("no_id", "lua_test_comp"))
-assert(id_name_comps == ecs.new(10001, "multiple_comps", "lua_test_struct, lua_test_comp"))
+assert(id_name_comps == ecs.new(65536, "multiple_comps", "lua_test_struct, lua_test_comp"))
 
 assert(ecs.has(id_name_comps, ecs.lookup("lua_test_struct")))
 ecs.clear(id_name_comps)
@@ -220,14 +216,3 @@ local ent = ecs.new(nil, "LuaPosition")
 
 assert(ecs.is_alive(ent))
 
-ecs.bulk_delete({ expr = "LuaPosition" })
-
-assert(not ecs.is_alive(ent))
-
-
-assert(not pcall(function () ecs.bulk_delete({include_kind = 0xD00D00}) end))
-assert(not pcall(function () ecs.bulk_delete({exclude_kind = ecs.MatchExact + 1}) end))
-assert(not pcall(function () ecs.bulk_delete({include_kind = false}) end))
-assert(not pcall(function () ecs.bulk_delete({exclude_kind = false}) end))
-assert(not pcall(function () ecs.bulk_delete({include = 0xD00D00}) end))
-assert(not pcall(function () ecs.bulk_delete({exclude = 0xD00D00}) end))

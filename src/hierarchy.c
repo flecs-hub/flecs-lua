@@ -4,46 +4,18 @@ int get_child_count(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
-    lua_Integer e = luaL_checkinteger(L, 1);
+    ecs_entity_t e = luaL_checkinteger(L, 1);
 
-    int32_t count = ecs_get_child_count(w, e);
+    ecs_iter_t it = ecs_term_iter(w, &(ecs_term_t){ ecs_pair(EcsChildOf, e) });
+
+    int32_t count = 0;
+
+    while (ecs_term_next(&it))
+    {
+        count += it.count;
+    }
 
     lua_pushinteger(L, count);
-
-    return 1;
-}
-
-int scope_iter(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_world(L);
-
-    ecs_entity_t parent = luaL_checkinteger(L, 1);
-
-    ecs_iter_t it;
-
-    if(lua_gettop(L) > 1)
-    {
-        ecs_filter_t filter;
-        checkfilter(L, w, &filter, 2);
-        it = ecs_scope_iter_w_filter(w, parent, &filter);
-        ecs_filter_fini(&filter);
-    }
-    else it = ecs_scope_iter(w, parent);
-
-    ecs_iter_to_lua(&it, L, true);
-
-    return 1;
-}
-
-int scope_next(lua_State *L)
-{
-    ecs_iter_t *it = ecs_lua_to_iter(L, 1);
-
-    int b = ecs_scope_next(it);
-
-    if(b) ecs_lua_iter_update(L, 1, it);
-
-    lua_pushboolean(L, b);
 
     return 1;
 }

@@ -1,3 +1,4 @@
+---@diagnostic disable: missing-return
 --EmmyLua annotations and documentation for flecs-lua
 --NOTE: ecs is a native module, this is not used at runtime.
 
@@ -9,27 +10,19 @@ local ecs_type_t = {}
 ---@class ecs_ref_t
 local ecs_ref_t = {}
 
----@class ecs_term_set_t
----@field relation integer
----@field mask integer
----@field min_depth integer
----@field max_depth integer
-local ecs_term_set_t = {}
-
 ---@class ecs_term_id_t
----@field entity integer
----@field var integer
----@field set ecs_term_set_t
+---@field id integer
+---@field trav integer
+---@field flags integer
 local ecs_term_id_t = {}
 
 ---@class ecs_term_t
 ---@field id integer
 ---@field inout integer
----@field pred ecs_term_id_t
----@field subj ecs_term_id_t
----@field obj ecs_term_id_t
+---@field src ecs_term_id_t
+---@field first ecs_term_id_t
+---@field second ecs_term_id_t
 ---@field oper integer
----@field role integer
 local ecs_term_t = {}
 
 ---@class ecs_filter_t
@@ -54,12 +47,16 @@ local ecs_snapshot_t = {}
 ---@field table_count integer
 ---@field delta_time number
 ---@field delta_system_time number
----@field world_time number
 ---@field interrupted_by integer
 ---@field term_index integer
 local ecs_iter_t = {}
 
 ---Create a new entity
+---@overload fun()
+---@overload fun(name: string)
+---@overload fun(name: string, components: string)
+---@overload fun(entity: integer)
+---@overload fun(entity: integer, name: string)
 ---@param entity integer
 ---@param name string
 ---@param components string
@@ -131,7 +128,7 @@ end
 
 ---Look up an entity by name
 ---@param name string
----@return string @entity name
+---@return integer
 function ecs.lookup(name)
 end
 
@@ -143,6 +140,7 @@ function ecs.lookup_child(entity, name)
 end
 
 ---Lookup an entity from a path
+---@overload fun(parent: integer, path: string)
 ---@param parent integer
 ---@param path string
 ---@param sep string @optional
@@ -153,7 +151,7 @@ end
 
 ---Lookup an entity from a full path
 ---@param name string
----@return string @entity name
+---@return integer
 function ecs.lookup_fullpath(name)
 end
 
@@ -171,7 +169,6 @@ end
 
 ---Test if an entity has a component, type or tag
 ---@overload fun(subject: integer, relation: integer, object: integer)
----@overload fun(entity: integer, to_check: ecs_type_t)
 ---@param entity integer
 ---@param to_check integer
 ---@return boolean
@@ -183,13 +180,6 @@ end
 ---@param component integer
 ---@return boolean
 function ecs.owns(entity, component)
-end
-
----Test if an entity has a role
----@param entity integer
----@param role integer
----@return boolean
-function ecs.has_role(entity, role)
 end
 
 ---Test whether an entity is alive
@@ -225,13 +215,12 @@ end
 ---Add a component, type or tag to an entity
 ---@overload fun(subject: integer, relation: integer, object: integer)
 ---@param entity integer
----@param to_add integer|ecs_type_t
+---@param to_add integer
 function ecs.add(entity, to_add)
 end
 
 ---Remove a component, type or tag from an entity
 ---@overload fun(subject: integer, relation: integer, object: integer)
----@overload fun(subject: integer, to_remove: ecs_type_t)
 ---@param entity integer
 ---@param to_remove integer
 function ecs.remove(entity, to_remove)
@@ -244,6 +233,7 @@ end
 
 ---Enable an entity or entity's component,
 ---depending on the number of arguments
+---@overload fun(entity: integer)
 ---@param entity integer
 ---@param component integer
 function ecs.enable(entity, component)
@@ -251,15 +241,16 @@ end
 
 ---Disable an entity or entity's component,
 ---depending on the number of arguments
+---@overload fun(entity: integer)
 ---@param entity integer
 ---@param component integer
 function ecs.disable(entity, component)
 end
 
----Count entities that have a component, type, tag or match a filter
----@param param integer|ecs_type_t|ecs_filter_t
+---Count entities that have a component or tag
+---@param entity integer
 ---@return integer
-function ecs.count(param)
+function ecs.count(entity)
 end
 
 ---Delete children of an entity
@@ -267,15 +258,7 @@ end
 function ecs.delete_children(parent)
 end
 
----Declare a type
----@param name string
----@param expr string
----@return integer entity
-function ecs.type(name, expr)
-end
-
 ---Get the type of an entity
----@overload fun(expr: string)
 ---@param entity integer
 ---@param from_entity boolean @return a type containing entity
 ---@return ecs_type_t|nil
@@ -288,12 +271,10 @@ end
 function ecs.get_typeid(entity)
 end
 
----Get parent for entity with component
----@overload fun(entity: integer)
+---Get parent for entity
 ---@param entity integer
----@param component integer
 ---@return integer parent
-function ecs.get_parent(entity, component)
+function ecs.get_parent(entity)
 end
 
 ---Enable component for entity
@@ -367,7 +348,7 @@ end
 ---@param subject integer
 ---@param relation integer
 ---@param object integer
----@return any, boolean
+---@return any
 function ecs.get_mut_pair(subject, relation, object)
 end
 
@@ -375,7 +356,7 @@ end
 ---@param subject integer
 ---@param relation integer
 ---@param object integer
----@return any, boolean
+---@return any
 function ecs.get_pair_object(subject, relation, object)
 end
 
@@ -383,7 +364,7 @@ end
 ---@param subject integer
 ---@param relation integer
 ---@param object integer
----@return any, boolean
+---@return any
 function ecs.get_mut_pair_object(subject, relation, object)
 end
 
@@ -392,6 +373,12 @@ end
 ---@param object integer
 ---@return integer
 function ecs.pair(predicate, object)
+end
+
+---Check if id is pair
+---@param id integer
+---@return boolean
+function ecs.is_pair(id)
 end
 
 ---Get object from pair
@@ -424,41 +411,16 @@ end
 function ecs.remove_childof(entity, parent)
 end
 
----Add owned flag for component (forces ownership when instantiating)
+---Add override flag for component (forces ownership when instantiating)
+---@param entity integer
+---@param component integer
+function ecs.override(entity, component)
+end
+
+---Deprecated, use ecs.override()
 ---@param entity integer
 ---@param component integer
 function ecs.add_owned(entity, component)
-end
-
----Get case for switch
----@param entity integer
----@param sw integer switch
----@return integer
-function ecs.get_case(entity, sw)
-end
-
----Add switch to an entity
----@param entity integer
----@param sw integer
-function ecs.add_switch(entity, sw)
-end
-
----Remove switch from an entity
----@param entity integer
----@param sw integer
-function ecs.remove_switch(entity, sw)
-end
-
----Add case to an entity
----@param entity integer
----@param sw integer
-function ecs.add_case(entity, sw)
-end
-
----Remove case from an entity
----@param entity integer
----@param sw integer
-function ecs.remove_case(entity, sw)
 end
 
 ---Create a bitmask component
@@ -477,7 +439,7 @@ end
 
 ---Create an array component
 ---@param name string name
----@param type string
+---@param type integer
 ---@param count integer
 ---@return integer @entity
 function ecs.array(name, type, count)
@@ -510,7 +472,7 @@ end
 ---the second return value indicates whether it was added
 ---@param entity integer
 ---@param component integer
----@return table, boolean
+---@return table
 function ecs.get_mut(entity, component)
 end
 
@@ -519,7 +481,6 @@ end
 ---@param entity integer
 ---@param component integer
 ---@param value table
----@return boolean
 function ecs.patch(entity, component, value)
 end
 
@@ -543,10 +504,9 @@ end
 ---Get component value from cached reference
 ---@overload fun(ref: ecs_ref_t)
 ---@param ref ecs_ref_t
----@param entity integer
 ---@param component integer
 ---@return table|nil
-function ecs.get_ref(ref, entity, component)
+function ecs.get_ref(ref, component)
 end
 
 ---Get the value of a singleton component
@@ -570,30 +530,18 @@ function ecs.singleton_set(component, value)
 end
 
 ---Create a prefab
+---@overload fun()
+---@overload fun(name: string)
 ---@param name string
 ---@param signature string
 ---@return integer entity
 function ecs.prefab(name, signature)
 end
 
----Get child count for entity
+---Get child count, NOTE: creates a temporary iterator!
 ---@param entity integer
 ---@return integer
 function ecs.get_child_count(entity)
-end
-
----Create a scope iterator
----@overload fun(parent: integer)
----@param parent integer
----@param filter ecs_filter_t
----@return ecs_iter_t
-function ecs.scope_iter(parent, filter)
-end
-
----Progress the scope iterator
----@param it ecs_iter_t
----@return boolean
-function ecs.scope_next(it)
 end
 
 ---Set the current scope, returns previous scope
@@ -608,7 +556,7 @@ function ecs.get_scope()
 end
 
 ---Set name prefix for newly created entities
----@param prefix string
+---@param prefix string|nil
 ---@return string
 function ecs.set_name_prefix(prefix)
 end
@@ -617,10 +565,10 @@ end
 ---@overload fun(n: integer)
 ---@overload fun(n: integer, noreturn: boolean)
 ---@overload fun(type: integer, count: integer)
----@param type integer @optional
+---@param type integer
 ---@param n integer
 ---@param noreturn boolean @do not return the entity ID's
----@return integer[]|nil
+---@return integer[]
 function ecs.bulk_new(type, n, noreturn)
 end
 
@@ -632,12 +580,6 @@ ecs.bulk_new(Component, 10)
 --Does not return the entity ID's
 ecs.bulk_new(10, true)
 ecs.bulk_new(Component, 10, true)
-
----Delete entities matching a filter
----@overload fun()
----@param filter ecs_filter_t
-function ecs.bulk_delete(filter)
-end
 
 ---Get term from iterator
 ---@param it ecs_iter_t
@@ -689,15 +631,21 @@ end
 function ecs.term_next(it)
 end
 
+---Progress the iterator
+---@param it ecs_iter_t
+---@return boolean
+function ecs.iter_next(it)
+end
+
 ---Create a query
----@param desc ecs_filter_t
+---@param desc ecs_filter_t|string
 ---@return ecs_query_t
 function ecs.query(desc)
 end
 
 ---Create a subquery
 ---@param query ecs_query_t
----@param desc ecs_filter_t
+---@param desc ecs_filter_t|string
 ---@return ecs_query_t
 function ecs.subquery(query, desc)
 end
@@ -709,11 +657,9 @@ function ecs.query_iter(query)
 end
 
 ---Progress the query iterator
----@overload fun(it: ecs_iter_t)
 ---@param it ecs_iter_t
----@param filter ecs_filter_t @optional
 ---@return boolean
-function ecs.query_next(it, filter)
+function ecs.query_next(it)
 end
 
 ---Check whether the query data changed since last iteration
@@ -723,7 +669,7 @@ function ecs.query_changed(query)
 end
 
 ---Create generic for loop iterator for a query/iterator
----Jumping out of the loop will leave the last iteration's
+---NOTE: Jumping out of the loop will leave the last iteration's
 ---components unmodified.
 ---@overload fun(it: ecs_iter_t)
 ---@param query ecs_query_t
@@ -731,28 +677,20 @@ function ecs.each(query)
 end
 
 ---Create a system
+---@overload fun(callback: function, name: string, phase: integer)
 ---@param callback fun(it: ecs_iter_t)
 ---@param name string
 ---@param phase integer
----@param desc ecs_filter_t @optional
+---@param query string|ecs_filter_t @optional
 ---@return integer @entity
-function ecs.system(callback, name, phase, desc)
-end
-
----Create a trigger for a single component
----@param callback fun(it: ecs_iter_t)
----@param name string
----@param events integer|integer[]
----@param desc string|ecs_term_t @expression or term
----@return integer @entity
-function ecs.trigger(callback, name, events, desc)
+function ecs.system(callback, name, phase, query)
 end
 
 ---Create an observer
 ---@param callback fun(it: ecs_iter_t)
 ---@param name string
 ---@param events integer|integer[]
----@param filter ecs_filter_t
+---@param filter ecs_filter_t|string
 ---@return integer @entity
 function ecs.observer(callback, name, events, filter)
 end
@@ -787,9 +725,8 @@ end
 
 ---Create a snapshot iterator
 ---@param snapshot ecs_snapshot_t
----@param filter ecs_filter_t
 ---@return ecs_iter_t
-function ecs.snapshot_iter(snapshot, filter)
+function ecs.snapshot_iter(snapshot)
 end
 
 ---Progress snapshot iterator
@@ -833,10 +770,20 @@ end
 
 ---Enable or disable tracing
 ---@param level integer
+function ecs.log_set_level(level)
+end
+
+---Enable or disable tracing (DEPRECATED)
+---@param level integer
 function ecs.tracing_enable(level)
 end
 
 ---Enable or disable tracing with colors
+---@param enable boolean
+function ecs.log_enable_colors(enable)
+end
+
+---Enable or disable tracing with colors (DEPRECATED)
 ---@param enable boolean
 function ecs.tracing_color_enable(enable)
 end
@@ -861,6 +808,8 @@ function ecs.is_primitive(component)
 end
 
 ---Preallocate a table with array/record elements
+---@overload fun()
+---@overload fun(narr: integer)
 ---@param narr integer optional
 ---@param nrec integer optional
 ---@return table
@@ -878,6 +827,8 @@ function ecs.world_ptr()
 end
 
 ---Get the constants from an enum or bitmask component
+---@overload fun(type: integer)
+---@overload fun(type: integer, out: table)
 ---@param type integer
 ---@param out table @optional table to merge with
 ---@param prefix string @prefix to omit from names
@@ -980,6 +931,16 @@ end
 function ecs.progress_cb(cb)
 end
 
+---Measure frame time
+---@param enable boolean
+function ecs.measure_frame_time(enable)
+end
+
+---Measure system time
+---@param enable boolean
+function ecs.measure_system_time(enable)
+end
+
 ---Set target fps
 ---@param fps number
 function ecs.set_target_fps(fps)
@@ -996,10 +957,6 @@ end
 
 ---Signal that the application should quit
 function ecs.quit()
-end
-
----Deactivate systems that are not matched with tables
-function ecs.deactivate_systems()
 end
 
 ---Set number of worker threads
@@ -1071,36 +1028,58 @@ local EcsLuaGauge = {}
 ---@field value number[60]
 local EcsLuaCounter = {}
 
+---@class EcsLuaMetric
+---@field rate EcsLuaGauge
+---@field value number[60]
+local EcsLuaMetric = {}
+
 ---@class EcsLuaWorldStats
----@field dummy_ integer
+---@field first_ integer
 ---@field entity_count EcsLuaGauge
+---@field entity_not_alive_count EcsLuaGauge
+---@field id_count EcsLuaGauge
+---@field tag_id_count EcsLuaGauge
+---@field component_id_count EcsLuaGauge
+---@field pair_id_count EcsLuaGauge
+---@field wildcard_id_count EcsLuaGauge
 ---@field component_count EcsLuaGauge
----@field query_count EcsLuaGauge
----@field system_count EcsLuaGauge
+---@field id_create_count EcsLuaCounter
+---@field id_delete_count EcsLuaCounter
 ---@field table_count EcsLuaGauge
 ---@field empty_table_count EcsLuaGauge
----@field singleton_table_count EcsLuaGauge
----@field matched_entity_count EcsLuaGauge
----@field matched_table_count EcsLuaGauge
----@field new_count EcsLuaCounter
----@field bulk_new_count EcsLuaCounter
----@field delete_count EcsLuaCounter
----@field clear_count EcsLuaCounter
----@field add_count EcsLuaCounter
----@field remove_count EcsLuaCounter
----@field set_count EcsLuaCounter
----@field discard_count EcsLuaCounter
----@field world_time_total_raw EcsLuaCounter
----@field world_time_total EcsLuaCounter
----@field frame_time_total EcsLuaCounter
----@field system_time_total EcsLuaCounter
----@field merge_time_total EcsLuaCounter
----@field fps EcsLuaGauge
----@field delta_time EcsLuaGauge
----@field frame_count_total EcsLuaCounter
----@field merge_count_total EcsLuaCounter
----@field pipeline_build_count_total EcsLuaCounter
----@field systems_ran_frame EcsLuaCounter
+---@field tag_table_count EcsLuaGauge
+---@field trivial_table_count EcsLuaGauge
+---@field table_record_count EcsLuaGauge
+---@field table_storage_count EcsLuaGauge
+---@field table_create_count EcsLuaCounter
+---@field table_delete_count EcsLuaCounter
+---@field query_count EcsLuaMetric
+---@field observer_count EcsLuaMetric
+---@field system_count EcsLuaMetric
+---@field new_count EcsLuaMetric
+---@field bulk_new_count EcsLuaMetric
+---@field delete_count EcsLuaMetric
+---@field clear_count EcsLuaMetric
+---@field add_count EcsLuaMetric
+---@field remove_count EcsLuaMetric
+---@field set_count EcsLuaMetric
+---@field discard_count EcsLuaMetric
+---@field world_time_total_raw EcsLuaMetric
+---@field world_time_total EcsLuaMetric
+---@field frame_time_total EcsLuaMetric
+---@field system_time_total EcsLuaMetric
+---@field merge_time_total EcsLuaMetric
+---@field fps EcsLuaMetric
+---@field delta_time EcsLuaMetric
+---@field frame_count_total EcsLuaMetric
+---@field merge_count_total EcsLuaMetric
+---@field pipeline_build_count_total EcsLuaMetric
+---@field systems_ran_frame EcsLuaMetric
+---@field alloc_count EcsLuaCounter
+---@field realloc_count EcsLuaCounter
+---@field free_count EcsLuaCounter
+---@field outstanding_alloc_count EcsLuaCounter
+---@field last_ integer
 ---@field t integer
 local EcsLuaWorldStats = {}
 
@@ -1117,12 +1096,6 @@ end
 ---Dimension the world for a specified number of entities
 ---@param count integer entity
 function ecs.dim(count)
-end
-
----Dimension a type for a specified number of entities
----@param count integer entity
----@param type ecs_type_t
-function ecs.dim_type(count, type)
 end
 
 ---@alias ecs_emmyopt
@@ -1144,7 +1117,7 @@ end
 ---@field alias integer
 local EcsMetaType = {}
 
----@class ecs_type_op_t
+---@class ecs_meta_type_op_t
 ---@field type integer
 ---@field kind integer
 ---@field size integer
@@ -1152,72 +1125,85 @@ local EcsMetaType = {}
 ---@field count integer
 ---@field offset integer
 ---@field name string
-local ecs_type_op_t = {}
+local ecs_meta_type_op_t = {}
 
 ---@class EcsMetaTypeSerializer
----@field ops ecs_type_op_t[]
+---@field ops ecs_meta_type_op_t[]
 local EcsMetaTypeSerializer = {}
 
 local dynamic = 1
 
 --Builtin components
 ecs.Component = 1
-ecs.ComponentLifecycle = 2
-ecs.Type = 3
-ecs.Trigger = 6
-ecs.Query = 7
-ecs.System = 10
+ecs.Identifier = 2
 ecs.TickSource = 11
-ecs.PipelineQuery = 12
 ecs.Timer = 13
+ecs.MetaType = 15
+ecs.MetaTypeSerialized = 16
 ecs.RateFilter = 14
-ecs.Primitive = dynamic
-ecs.Enum = dynamic
-ecs.Bitmask = dynamic
-ecs.Member = dynamic
-ecs.Struct = dynamic
-ecs.Array = dynamic
-ecs.Vector = dynamic
-ecs.Map = dynamic
-ecs.MetaType = dynamic
-ecs.MetaTypeSerializer = dynamic
+ecs.Primitive = 17
+ecs.Enum = 18
+ecs.Bitmask = 19
+ecs.Member = 20
+ecs.Struct = 21
+ecs.Array = 22
+ecs.Vector = 23
 ecs.LuaGauge = dynamic
-ecs.LuaCounter = dynamic
+ecs.LuaMetric = dynamic
 ecs.LuaWorldStats = dynamic
 ecs.type_op_kind_t = dynamic
 ecs.type_op_t = dynamic
+
+--Builtin primitives
+ecs.bool = 336
+ecs.char = 337
+ecs.byte = 338
+ecs.u8 = 339
+ecs.u16 = 340
+ecs.u32 = 341
+ecs.u64 = 342
+ecs.uptr = 343
+ecs.i8 = 344
+ecs.i16 = 345
+ecs.i32 = 346
+ecs.i64 = 347
+ecs.iptr = 348
+ecs.f32 = 349
+ecs.f64 = 350
+ecs.string = 351
+ecs.entity = 352
 
 --Builtin entities
 ecs.Flecs = 257
 ecs.FlecsCore = 258
 ecs.World = 256
 ecs.Wildcard = 266
-ecs.This = 267
-ecs.Transitive = 268
-ecs.Final = 269
-ecs.Tag = 270
-ecs.Name = 271
-ecs.Symbol = 272
-ecs.ChildOf = 276
-ecs.IsA = 277
-ecs.Module = 259
-ecs.Prefab = 260
-ecs.Disabled = 261
-ecs.Hidden = 262
-ecs.OnAdd = 286
-ecs.OnRemove = 287
-ecs.OnSet = 288
-ecs.UnSet = 289
-ecs.OnDelete = 290
-ecs.OnDeleteObject = 299
+ecs.This = 268
+ecs.Transitive = 270
+ecs.Final = 273
+ecs.Tag = 275
+ecs.Name = 286
+ecs.Union = 276
+ecs.Symbol = 287
+ecs.ChildOf = 281
+ecs.Trigger = 6
+ecs.Query = 5
+ecs.System = 10
+ecs.IsA = 282
+ecs.Module = 260
+ecs.Prefab = 262
+ecs.Disabled = 263
+ecs.OnAdd = 289
+ecs.OnRemove = 290
+ecs.OnSet = 291
+ecs.UnSet = 292
+ecs.OnDelete = 293
+ecs.OnDeleteObject = 302
 ecs.Remove = 306
 ecs.Delete = 307
-ecs.Throw = 308
-ecs.OnDemand = 316
+ecs.Panic = 308
 ecs.Monitor = 317
-ecs.DisabledIntern = 318
-ecs.Inactive = 319
-ecs.Pipeline = 320
+ecs.Empty = 319
 ecs.PreFrame = 321
 ecs.OnLoad = 322
 ecs.PostLoad = 323
@@ -1236,7 +1222,6 @@ ecs.EnumType = 2
 ecs.StructType = 3
 ecs.ArrayType = 4
 ecs.VectorType = 5
-ecs.MapType = 6
 ecs.Bool = 1
 ecs.Char = 2
 ecs.Byte = 3
@@ -1254,26 +1239,24 @@ ecs.UPtr = 14
 ecs.IPtr = 15
 ecs.String = 16
 ecs.Entity = 17
-ecs.OpHeader = 0
-ecs.OpPrimitive = 1
-ecs.OpEnum = 2
-ecs.OpBitmask = 3
-ecs.OpPush = 4
-ecs.OpPop = 5
-ecs.OpArray = 6
-ecs.OpVector = 7
-ecs.OpMap = 8
+ecs.OpPrimitive = 7
+ecs.OpEnum = 5
+ecs.OpBitmask = 6
+ecs.OpPush = 2
+ecs.OpPop = 3
+ecs.OpArray = 0
+ecs.OpVector = 1
 ecs.DefaultSet = 0
 ecs.Self = 1
 ecs.SuperSet = 2
 ecs.SubSet = 4
 ecs.Cascade = 8
 ecs.All = 16
-ecs.Nothing = 32
+ecs.Nothing = 64
 ecs.InOutDefault = 0
-ecs.InOut = 1
-ecs.In = 2
-ecs.Out = 3
+ecs.InOut = 2
+ecs.In = 3
+ecs.Out = 4
 ecs.And = 0
 ecs.Or = 1
 ecs.Not = 2
@@ -1287,10 +1270,8 @@ ecs.AND = 0xF900000000000000
 ecs.OR = 0xF800000000000000
 ecs.XOR = 0xF700000000000000
 ecs.NOT = 0xF600000000000000
-ecs.CASE = 0xFC00000000000000
-ecs.SWITCH = 0xFB00000000000000
 ecs.PAIR = 0xFA00000000000000
-ecs.OWNED = 0xF500000000000000
+ecs.OVERRIDE = 0xF500000000000000
 ecs.DISABLED = 0xF400000000000000
 
 return ecs

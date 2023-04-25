@@ -6,6 +6,13 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+#undef ECS_META_IMPL
+#ifndef FLECS_LUA_TEST_IMPL
+    #define ECS_META_IMPL EXTERN // Ensure meta symbols are only defined once
+#endif
+
+extern ECS_COMPONENT_DECLARE(lua_test_vector);
+
 ECS_STRUCT(lua_test_comp,
 {
     float foo;
@@ -31,9 +38,11 @@ ECS_BITMASK(lua_test_bitmask,
     Three = 3
 });
 
-ECS_VECTOR(lua_test_vector,float);
+typedef ecs_vec_t lua_test_vector;
 
-ECS_MAP(lua_test_mapi32, int32_t, float);
+//ECS_VECTOR(lua_test_vector,float);
+
+//ECS_MAP(lua_test_mapi32, int32_t, float);
 
 ECS_STRUCT(lua_test_struct,
 {
@@ -62,18 +71,9 @@ ECS_STRUCT(lua_test_struct,
 
     lua_test_comp comp;
     lua_test_comp2 comp2;
+
+    //lua_test_comp sa[3];
 });
-
-ECS_COMPONENT_EXTERN(lua_test_comp);
-ECS_COMPONENT_EXTERN(lua_test_comp2);
-ECS_COMPONENT_EXTERN(lua_test_struct);
-
-typedef struct Test
-{
-    int dummy;
-}Test;
-
-#define TestImportHandles(handles)
 
 FLECS_LUA_API void TestImport(ecs_world_t *w);
 

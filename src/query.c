@@ -35,8 +35,18 @@ int query_new(lua_State *L)
 
     ecs_query_t *query = ecs_query_init(w, &desc);
 
+    if(!query)
+    {
+        lua_pushnil(L);
+        return 1;
+    }
+
     ecs_query_t **ptr = lua_newuserdata(L, sizeof(ecs_query_t*));
     *ptr = query;
+
+    /* Associate world with the object for sanity checks */
+    lua_pushvalue(L, lua_upvalueindex(1));
+    lua_setuservalue(L, -2);
 
     luaL_setmetatable(L, "ecs_query_t");
     register_collectible(L, w, -1);
@@ -69,9 +79,12 @@ int subquery_new(lua_State *L)
 
 int query_iter(lua_State *L)
 {ecs_lua_dbg("QUERY_iter");
+    ecs_world_t *w = ecs_lua_world(L);
     ecs_query_t *query = checkquery(L, 1);
 
-    ecs_iter_t it = ecs_query_iter(query);
+    ecs_lua_check_world(L, w, 1);
+
+    ecs_iter_t it = ecs_query_iter(w, query);
 
     /* will push with no columns because it->count = 0 */
     ecs_iter_to_lua(&it, L, true);
@@ -82,16 +95,7 @@ int query_iter(lua_State *L)
 int query_next(lua_State *L)
 {
     ecs_iter_t *it = ecs_lua_to_iter(L, 1);
-    int b;
-
-    if(lua_gettop(L) > 1)
-    {
-        ecs_filter_t filter;
-        checkfilter(L, it->world, &filter, 2);
-        b = ecs_query_next_w_filter(it, &filter);
-        ecs_filter_fini(&filter);
-    }
-    else b = ecs_query_next(it);
+    int b = ecs_query_next(it);
 
     if(b) ecs_lua_iter_update(L, 1, it);
 
@@ -104,7 +108,7 @@ int query_changed(lua_State *L)
 {
     ecs_query_t *query = checkquery(L, 1);
 
-    int b = ecs_query_changed(query);
+    int b = ecs_query_changed(query, NULL);
 
     lua_pushboolean(L, b);
 

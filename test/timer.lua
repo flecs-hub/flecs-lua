@@ -32,7 +32,7 @@ end
 local Position = ecs.struct("Position", "{float x; float y;}")
 ecs.new(nil, "Position")
 
-local system_a = ecs.system(SystemA, "SystemA", ecs.OnUpdate, Position)
+local system_a = ecs.system(SystemA, "SystemA", ecs.OnUpdate, "Position")
 
 local filter = ecs.set_rate_filter(system_a, 3, 0)
 assert(filter ~= 0)

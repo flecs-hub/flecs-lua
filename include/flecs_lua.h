@@ -15,15 +15,8 @@ typedef struct EcsLuaHost
     ecs_lua_ctx *ctx;
 }EcsLuaHost;
 
-typedef struct FlecsLua
-{
-    int dummy;
-}FlecsLua;
-
 FLECS_LUA_API
 void FlecsLuaImport(ecs_world_t *w);
-
-#define FlecsLuaImportHandles(handles)
 
 /* Get the default lua_State */
 FLECS_LUA_API

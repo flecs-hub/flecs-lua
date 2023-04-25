@@ -1,5 +1,5 @@
 project('flecs-lua', 'c',
-    version : '2.4.7',
+    version : '3.2.0',
     license : 'MIT',
     default_options : 'c_std=c99'
 )
@@ -16,8 +16,7 @@ endif
 
 flecs_lua_deps = [
     dependency('lua'),
-    dependency('flecs'),
-    dependency('flecs-meta')
+    dependency('flecs')
 ]
 
 flecs_lua_src = []

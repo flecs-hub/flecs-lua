@@ -35,7 +35,7 @@ int check_filter_desc(lua_State *L, const ecs_world_t *world, ecs_filter_desc_t 
             {
                 len = luaL_len(L, -2);
 
-                if(len > ECS_TERM_CACHE_SIZE) return luaL_argerror(L, arg, "too many terms");
+                if(len > ECS_TERM_DESC_CACHE_SIZE) return luaL_argerror(L, arg, "too many terms");
 
                 for(i=0; i < len; i++)
                 {
@@ -70,17 +70,17 @@ int check_filter_desc(lua_State *L, const ecs_world_t *world, ecs_filter_desc_t 
     return 0;
 }
 
-int checkfilter(lua_State *L, const ecs_world_t *world, ecs_filter_t *filter, int arg)
+ecs_filter_t *checkfilter(lua_State *L, const ecs_world_t *world, int arg)
 {
-    memset(filter, 0, sizeof(ecs_filter_t));
-
     ecs_filter_desc_t filter_desc = {0};
 
     check_filter_desc(L, world, &filter_desc, arg);
 
-    if(ecs_filter_init(world, filter, &filter_desc)) return luaL_argerror(L, arg, "invalid filter");
+    ecs_filter_t *filter = ecs_filter_init(world, &filter_desc);
 
-    return 0;
+    if(!filter) luaL_argerror(L, arg, "invalid filter");
+
+    return filter;
 }
 
 int assert_func(lua_State *L)
@@ -131,19 +131,13 @@ int is_primitive(lua_State *L)
 
     ecs_entity_t e = luaL_checkinteger(L, 1);
 
-    const EcsMetaTypeSerializer *ser = ecs_get(w, e, EcsMetaTypeSerializer);
+    luaL_argcheck(L, e != 0, 1, "expected non-zero entity");
 
-    if(!ser) luaL_argerror(L, 1, "not a component");
+    const EcsPrimitive *p = ecs_get(w, e, EcsPrimitive);
 
-    int32_t count = ecs_vector_count(ser->ops);
+    if(p == NULL) return 0;
 
-    if(count != 2) return 0;
-
-    ecs_type_op_t *op = ecs_vector_get(ser->ops, ecs_type_op_t, 1);
-
-    if(op->kind != EcsOpPrimitive) return 0;
-
-    lua_pushinteger(L, op->is.primitive);
+    lua_pushinteger(L, p->kind);
 
     return 1;
 }
@@ -163,30 +157,18 @@ int ecs_lua__readonly(lua_State *L)
     return luaL_error(L, "Attempt to modify read-only table");
 }
 
-static void ctor_initialize_0(
-    ecs_world_t *world,
-    ecs_entity_t component,
-    const ecs_entity_t *entities,
-    void *ptr,
-    size_t size,
-    int32_t count,
-    void *ctx)
-{
-    memset(ptr, 0, size * (size_t)count);
-}
-
 int zero_init_component(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
     ecs_entity_t component = luaL_checkinteger(L, 1);
 
-    EcsComponentLifecycle lf =
+    ecs_type_hooks_t hooks =
     {
-        .ctor = ctor_initialize_0
+        .ctor = ecs_default_ctor
     };
 
-    ecs_set_component_actions_w_id(w, component, &lf);
+    ecs_set_hooks_id(w, component, &hooks);
 
     return 0;
 }

@@ -7,14 +7,17 @@ int new_pipeline(lua_State *L)
     const char *name = luaL_checkstring(L, 2);
     const char *expr = luaL_checkstring(L, 2);
 
-    ecs_entity_t e = ecs_type_init(w, &(ecs_type_desc_t)
-    {
-        .entity.name = name,
-        .entity = { .name = name, .add = {EcsPipeline} },
-        .ids_expr = expr
-    });
+    ecs_pipeline_desc_t desc = {0};
+    ecs_entity_desc_t edesc = {0};
 
-    lua_pushinteger(L, e);
+    edesc.name = name;
+
+    desc.entity = ecs_entity_init(w, &edesc);
+    desc.query.filter.expr = expr;
+
+    ecs_entity_t pipeline_entity = ecs_pipeline_init(w, &desc);
+
+    lua_pushinteger(L, pipeline_entity);
 
     return 1;
 }
@@ -39,6 +42,28 @@ int get_pipeline(lua_State *L)
     lua_pushinteger(L, pipeline);
 
     return 1;
+}
+
+int measure_frame_time(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    int b = lua_toboolean(L, 1);
+
+    ecs_measure_frame_time(w, b);
+
+    return 0;
+}
+
+int measure_system_time(lua_State *L)
+{
+    ecs_world_t *w = ecs_lua_world(L);
+
+    int b = lua_toboolean(L, 1);
+
+    ecs_measure_system_time(w, b);
+
+    return 0;
 }
 
 int set_target_fps(lua_State *L)
@@ -105,15 +130,6 @@ int lquit(lua_State *L)
     return 0;
 }
 
-int deactivate_systems(lua_State *L)
-{
-    ecs_world_t *w = ecs_lua_world(L);
-
-    ecs_deactivate_systems(w);
-
-    return 0;
-}
-
 int set_threads(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
@@ -129,7 +145,7 @@ int get_threads(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
 
-    int32_t threads = ecs_get_threads(w);
+    int32_t threads = ecs_get_stage_count(w);
 
     lua_pushinteger(L, threads);
 

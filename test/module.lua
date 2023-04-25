@@ -21,6 +21,7 @@ assert(lua.Host == ecs.lookup_fullpath("flecs.lua.Host"))
 
 local m3 = ecs.import("lua.test")
 
+assert(m3)
 assert(m.fixed_id == m3.named)
 assert(m.name_only == m3.rand_id)
 assert(m.component == m3.MStruct)
@@ -83,14 +84,14 @@ scope = ecs.get_scope()
 assert(scope == m.id)
 
 local prev = ecs.set_name_prefix("tst")
-assert(prev == nil)
+u.asserteq(prev, nil)
 
 prev = ecs.set_name_prefix(nil)
-assert(prev == "tst")
+u.asserteq(prev, "tst")
 
-local it = ecs.scope_iter(m.id)
+local it = ecs.term_iter(ecs.pair(ecs.ChildOf, m.id))
 
-while ecs.scope_next(it) do
+while ecs.term_next(it) do
     print("it.count: " .. it.count)
     assert(it.count ~= 0)
 end

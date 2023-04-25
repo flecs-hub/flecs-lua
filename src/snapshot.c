@@ -31,15 +31,14 @@ int snapshot_take(lua_State *L)
     if(lua_gettop(L) > 0)
     {
         it = ecs_lua__checkiter(L, 1);
-        ecs_iter_next_action_t next_action = ecs_filter_next;
-        snapshot = ecs_snapshot_take_w_iter(it, next_action);
+        snapshot = ecs_snapshot_take_w_iter(it);
     }
     else snapshot = ecs_snapshot_take(w);
 
     ecs_snapshot_t **ptr = lua_newuserdata(L, sizeof(ecs_snapshot_t*));
     *ptr = snapshot;
 
-    /* Tie object to world */
+    /* Associate world with the object for sanity checks */
     lua_pushvalue(L, lua_upvalueindex(1));
     lua_setuservalue(L, -2);
 
@@ -70,18 +69,7 @@ int snapshot_iter(lua_State *L)
     ecs_world_t *w = ecs_lua_world(L);
     ecs_snapshot_t *snapshot = checksnapshot(L, 1);
 
-    ecs_filter_t filter;
-    ecs_filter_t *filter_ptr = NULL;
-
-    if(lua_gettop(L) > 1)
-    {
-        checkfilter(L, w, &filter, 2);
-        filter_ptr = &filter;
-    }
-
-    ecs_iter_t it = ecs_snapshot_iter(snapshot, filter_ptr);
-
-    if(filter_ptr) ecs_filter_fini(filter_ptr);
+    ecs_iter_t it = ecs_snapshot_iter(snapshot);
 
     ecs_iter_to_lua(&it, L, true);
 

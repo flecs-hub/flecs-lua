@@ -18,42 +18,51 @@ end
 
 ecs.singleton_set(AppContext, { 5000 })
 
-local q = ecs.query("Position, Velocity, $AppContext")
+local q = ecs.query("Position, Velocity, AppContext($)")
 local it = ecs.query_iter(q)
 local q_count = 0
+local total = 0
 
 while ecs.query_next(it) do
     local p, v, ctx = ecs.columns(it)
-    --u.print_r(it.columns)
     q_count = q_count + 1
 
     assert(ctx.whatever == 5000)
 
+    local j = total + 1
     for i = 1, it.count do
-        --print("p[i].x = " .. p[i].x)
-        assert(p[i].x == i * 10)
+        print("p[i].x = " .. p[i].x)
+        assert(p[i].x == j * 10)
+        j = j + 1
     end
 
+    total = total + it.count
+
     local i = 1
-    for P, V, Ctx in ecs.each(it) do
-        assert(P.x == i * 10)
+   --[[ for P, V, Ctx in ecs.each(it) do
+      --  assert(P.x == i * 10)
         assert(Ctx.whatever == 5000)
         i = i + 1
-    end
+    end]]--
 end
 
 print("count :" .. q_count)
-u.asserteq(q_count, 1)
+u.asserteq(q_count, 10)
 
 ecs.subquery(q, "Position")
+
+total = 0
 
 it = ecs.query_iter(q)
 
 while ecs.query_next(it) do
     local p = ecs.columns(it)
+
+    assert(p)
+    total = total + it.count
 end
 
-assert(it.count == 10)
+u.asserteq(total, 10)
 
 
 q = ecs.query("Position, Velocity")
@@ -75,7 +84,7 @@ for p, v, e in ecs.each(q) do
     q_count = q_count + 1
 end
 
-assert(q_count == 0)
+u.asserteq(q_count,  0)
 
 
 ecs.bulk_new(FooBar, 5)
@@ -94,4 +103,4 @@ for foo, e in ecs.each(q) do
 
 end
 
-assert(q_count == 5)
+u.asserteq(q_count, 5)

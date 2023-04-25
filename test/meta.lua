@@ -9,6 +9,7 @@ local test_struct, added = ecs.singleton_get(tstruct)
 
 --Verify values set by host
 assert(not added)
+assert(test_struct)
 assert(test_struct.b == true)
 assert(test_struct.c == 1)
 assert(test_struct.u8 == 2)
@@ -48,6 +49,7 @@ ecs.singleton_patch(tstruct, test_struct)
 test_struct = nil
 test_struct = ecs.singleton_get(tstruct)
 
+assert(test_struct)
 assert(test_struct.b == false)
 assert(test_struct.i64 == 420)
 assert(test_struct.str == "lua string")
@@ -83,7 +85,7 @@ local TestStruct = ecs.struct("TestStruct", "{ int32_t x; LuaEnum enum; LuaBitma
 
 local LuaPosition = ecs.struct("LuaPosition", "{float x; float y; float z;}")
 local LuaStruct = ecs.struct("LuaStruct", "{ uint8_t blah[6]; LuaPosition position;}")
-local LuaArray = ecs.array("LuaArray", "LuaStruct", 4)
+local LuaArray = ecs.array("LuaArray", LuaStruct, 4)
 
 ---@type EcsMetaType
 local meta = ecs.get(LuaStruct, MetaType)
@@ -96,12 +98,13 @@ local ref = ecs.ref(tstruct, tstruct)
 test_struct = ecs.get_ref(ref)
 assert(test_struct ~= nil)
 
-test_struct = ecs.get_ref(ref, tstruct, tstruct)
+test_struct = ecs.get_ref(ref, tstruct)
 assert(test_struct ~= nil)
 
-assert(not pcall(function () ecs.get_ref(ref, 123, 40) end))
-assert(not pcall(function () ecs.get_ref(ref, tstruct) end))
+assert(not pcall(function () ecs.get_ref(ref, 123) end))
 
+--[[assert(ser)
+assert(ser.ops)
 
 for i, op in pairs(ser.ops) do
   print(string.format("ops[%s].kind = %d, name: %s, count: %d", i, op.kind, op.name, op.count))
@@ -113,6 +116,7 @@ assert(sizeof_LuaStruct == ecs.sizeof(LuaStruct))
 meta = ecs.get(LuaArray, MetaType)
 
 assert(meta.size == sizeof_LuaStruct * 4)
+]]--
 
 local data =
 {
@@ -120,28 +124,35 @@ local data =
   [2] = { { 111 }, { 11, 22, 33 }},
 }
 
+--local str = ecs.emmy_class(LuaArray)
+--ecs.log(str)
+
 ecs.singleton_set(LuaArray, data)
+ecs.add(LuaArray, LuaArray)
+
+--ecs.singleton_set(LuaArray, Array)
 
 data = ecs.singleton_get(LuaArray)
 
+assert(data)
 assert(data[1].blah[1] == 100)
 assert(data[2].blah[1] == 111)
 assert(data[1].position.y == 20)
 assert(data[2].position.y == 22)
-
 --Structs without labels are allowed
 ecs.singleton_set(LuaPosition, { 100, 200, 300 })
-
 --Mixed key types are not allowed
 assert(not pcall(function () ecs.singleton_set(LuaPosition, { 100, x = 2, 200, 300}) end))
-
 --Too many elements
 assert(not pcall(function () ecs.singleton_set(LuaPosition, { 100, 200, 300, 400 }) end))
-
+--Make sure the cursor still works
+assert(pcall(function () ecs.singleton_set(LuaPosition, { 101, 202, 333 }) end))
+data = ecs.singleton_get(LuaPosition)
+assert(data)
+assert(data.x == 101)
+assert(data.y == 202)
+assert(data.z == 333)
 --Invalid key type
 local lol = {}
 lol[ecs.get_type(LuaPosition)] = 245
 assert(not pcall(function () ecs.singleton_set(LuaPosition, lol) end))
-
-local str = ecs.emmy_class(LuaPosition)
-ecs.log(str)

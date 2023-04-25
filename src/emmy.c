@@ -1,8 +1,8 @@
 #include "private.h"
 
-static const char *primitive_type_name(int primitive)
+static const char *primitive_type_name(enum ecs_meta_type_op_kind_t kind)
 {
-    switch(primitive)
+    switch(kind)
     {
         case EcsBool:
             return "boolean";
@@ -30,15 +30,23 @@ static const char *primitive_type_name(int primitive)
     }
 }
 
-static const char *array_type_name(const ecs_world_t *world, ecs_type_op_t *op)
+static const char *array_type_name(const ecs_world_t *world, ecs_meta_type_op_t *op)
 {
-    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_id(world, &op->is.collection, 0, 0);
+    return "array_type_name";
+    const EcsArray *a = ecs_get(world, op->type, EcsArray);
+    ecs_assert(a != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    ecs_entity_t type = a->type;
+
+    //return ecs_get_name(world, type);
+
+    const EcsMetaTypeSerialized *ser = ecs_get(world, type, EcsMetaTypeSerialized);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    ecs_type_op_t *ops = (ecs_type_op_t*)ecs_vector_first(ser->ops, ecs_type_op_t);
+    ecs_meta_type_op_t *ops = ecs_vec_first(&ser->ops);
 
 #ifndef NDEBUG
-    int32_t count = ecs_vector_count(ser->ops);
+    int32_t count = ecs_vec_count(&ser->ops);
     ecs_assert(count >= 2, ECS_INVALID_PARAMETER, NULL);
 #endif
 
@@ -46,7 +54,7 @@ static const char *array_type_name(const ecs_world_t *world, ecs_type_op_t *op)
 
     const char *name = NULL;
 
-    if(op->kind == EcsOpPrimitive) name = primitive_type_name(op->is.primitive);
+    if(op->kind == EcsOpPrimitive) name = primitive_type_name(op->kind);
     else if(op->type) name = ecs_get_name(world, op->type);
 
     return name;
@@ -54,7 +62,7 @@ static const char *array_type_name(const ecs_world_t *world, ecs_type_op_t *op)
 
 char *ecs_type_to_emmylua(const ecs_world_t *world, ecs_entity_t type, bool struct_as_table)
 {
-    const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
+    const EcsMetaTypeSerialized *ser = ecs_get(world, type, EcsMetaTypeSerialized);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
 
     ecs_strbuf_t buf = ECS_STRBUF_INIT;
@@ -71,22 +79,27 @@ char *ecs_type_to_emmylua(const ecs_world_t *world, ecs_entity_t type, bool stru
 
     ecs_strbuf_list_append(&buf, "---@class %s\n", class_name);
 
-    ecs_type_op_t *ops = (ecs_type_op_t*)ecs_vector_first(ser->ops, ecs_type_op_t);
-    int32_t count = ecs_vector_count(ser->ops);
+    ecs_meta_type_op_t *ops = (ecs_meta_type_op_t*)ecs_vec_first(&ser->ops);
+    int32_t count = ecs_vec_count(&ser->ops);
 
-    ecs_assert(ops[1].kind == EcsOpPush, ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(ops[0].kind == EcsOpPush, ECS_INVALID_PARAMETER, NULL);
 
     int i, depth = 1;
 
-    for(i=2; i < count; i++)
+    for(i=1; i < count; i++)
     {
-        ecs_type_op_t *op = &ops[i];
+        ecs_meta_type_op_t *op = &ops[i];
 
         lua_type_suffix = NULL;
 
+        if(op->count > 1)
+        {
+            snprintf(array_suffix, sizeof(array_suffix), "[%d]", op->count);
+            lua_type_suffix = array_suffix;
+        }
+
         switch(op->kind)
         {
-            case EcsOpHeader: continue;
             case EcsOpPush:
             {
                 depth++;
@@ -124,7 +137,7 @@ char *ecs_type_to_emmylua(const ecs_world_t *world, ecs_entity_t type, bool stru
             }
             case EcsOpPrimitive:
             {
-                lua_type = primitive_type_name(op->is.primitive);
+                lua_type = primitive_type_name(op->kind);
                 break;
             }
             case EcsOpEnum:
@@ -158,6 +171,75 @@ char *ecs_type_to_emmylua(const ecs_world_t *world, ecs_entity_t type, bool stru
     return ecs_strbuf_get(&buf);
 }
 
+static const char *kind_str(enum ecs_meta_type_op_kind_t kind)
+{
+    switch(kind)
+    {
+        case EcsOpArray: return "EcsOpArray";
+        case EcsOpVector: return "EcsOpVector";
+        case EcsOpPush: return "EcsOpPush";
+        case EcsOpPop: return "EcsOpPop";
+        case EcsOpScope: return "EcsOpScope";
+        case EcsOpEnum: return "EcsOpEnum";
+        case EcsOpBitmask: return "EcsOpBitmask";
+        case EcsOpPrimitive: return "EcsOpPrimitive";
+        case EcsOpBool: return "EcsOpBool";
+        case EcsOpChar: return "EcsOpChar";
+        case EcsOpByte: return "EcsOpByte";
+        case EcsOpU8: return "EcsOpU8";
+        case EcsOpU16: return "EcsOpU16";
+        case EcsOpU32: return "EcsOpU32";
+        case EcsOpU64: return "EcsOpU64";
+        case EcsOpI8: return "EcsOpI8";
+        case EcsOpI16: return "EcsOpI16";
+        case EcsOpI32: return "EcsOpI32";
+        case EcsOpI64: return "EcsOpI64";
+        case EcsOpF32: return "EcsOpF32";
+        case EcsOpF64: return "EcsOpF64";
+        case EcsOpUPtr: return "EcsOpUPtr";
+        case EcsOpIPtr: return "EcsOpIPtr";
+        case EcsOpString: return "EcsOpString";
+        case EcsOpEntity: return "EcsOpEntity";
+        default: return "UNKNOWN";
+    }
+}
+
+static char *str_type_ops(ecs_world_t *w, ecs_entity_t type, int recursive)
+{
+    const EcsMetaTypeSerialized *ser = ecs_get(w, type, EcsMetaTypeSerialized);
+
+    ecs_strbuf_t buf = ECS_STRBUF_INIT;
+
+    ecs_meta_type_op_t *ops = ecs_vec_first(&ser->ops);
+    int count = ecs_vec_count(&ser->ops);
+
+    int i, depth = 0;
+    for(i=0; i < count; i++)
+    {
+        ecs_meta_type_op_t *op = &ops[i];
+
+        ecs_strbuf_append(&buf, "kind: %s\n", kind_str(op->kind));
+        ecs_strbuf_append(&buf, "offset: %d\n", op->offset);
+        ecs_strbuf_append(&buf, "count: %d\n", op->count);
+        ecs_strbuf_append(&buf, "name: \"%s\"\n", op->name ? op->name : "(null)");
+        ecs_strbuf_append(&buf, "op_count: %d\n", op->op_count);
+        ecs_strbuf_append(&buf, "size: %d\n", op->size);
+
+        const char *name = op->type ? ecs_get_name(w, op->type) : "null";
+        ecs_strbuf_append(&buf, "type: %zu (\"%s\")\n", op->type, name ? name : "null");
+        //printf("\n");
+
+        if(op->kind == EcsOpPush)
+        {
+            depth++;
+            //if(recursive) print_type_ops(w, type, 1);
+        }
+        else if(op->kind == EcsOpPop) depth--;
+    }
+
+    return ecs_strbuf_get(&buf);
+}
+
 int emmy_class(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
@@ -173,7 +255,8 @@ int emmy_class(lua_State *L)
 
     if(lua_gettop(L) > 1) b = lua_toboolean(L, 2);
 
-    char *str = ecs_type_to_emmylua(w, type, b);
+    if(!ecs_get(w, type, EcsMetaTypeSerialized)) luaL_argerror(L, 1, "no metatype for component");
+    char *str = str_type_ops(w, type, 0);// ecs_type_to_emmylua(w, type, b);
 
     lua_pushstring(L, str);
 
