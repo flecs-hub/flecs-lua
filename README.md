@@ -100,6 +100,12 @@ end)
 return m
 ```
 
+### Debugging
+
+For debug builds (`#ifndef NDEBUG`) most API functions will retrieve the current file,
+source line and expose them through `ar.short_src` and `ar.currentline`.
+Set watches for these variables to track where API functions are called from in Lua.
+
 ### Lua state lifecycle
 
 * A default Lua state is created when the module is imported
