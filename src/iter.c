@@ -129,8 +129,6 @@ int filter_iter(lua_State *L)
 
     ecs_iter_t it = ecs_filter_iter(w, filter);
 
-    ecs_filter_fini(filter);
-
     ecs_iter_to_lua(&it, L, true);
 
     return 1;
