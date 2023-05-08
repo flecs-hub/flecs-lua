@@ -76,7 +76,7 @@ static inline lua_Integer checkentity(lua_State *L, ecs_world_t *world, int arg)
     #define ecs_lua__epilog(L)
     #define ecs_lua_world(L) ecs_lua_world_internal(L)
 #else
-    #define ecs_lua_dbg(fmt, ...) printf(fmt "\n", __VA_ARGS__)
+    #define ecs_lua_dbg(fmt, ...) printf(fmt "\n", ##__VA_ARGS__)
     #define ecs_lua_dbg_pad(depth) printf("%*s", depth*2, "")
 
     #define ecs_lua__prolog(L) int ecs_lua__stackguard = lua_gettop(L)
