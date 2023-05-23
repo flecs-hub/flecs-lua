@@ -902,7 +902,9 @@ int new_enum(lua_State *L)
 
     ecs_set_name(w, component, name);
 
-    int e = ecs_meta_from_desc(w, component, EcsEnumType, desc);
+    int err = ecs_meta_from_desc(w, component, EcsEnumType, desc);
+    
+    if(err) return luaL_argerror(L, 2, "invalid descriptor");
 
     init_scope(w, component);
 
@@ -924,7 +926,9 @@ int new_bitmask(lua_State *L)
 
     ecs_set_name(w, component, name);
 
-    int e = ecs_meta_from_desc(w, component, EcsBitmaskType, desc);
+    int err = ecs_meta_from_desc(w, component, EcsBitmaskType, desc);
+    
+    if(err) return luaL_argerror(L, 2, "invalid descriptor");
 
     init_scope(w, component);
 
@@ -975,9 +979,9 @@ int new_struct(lua_State *L)
 
     ecs_set_name(w, component, name);
 
-    int e = ecs_meta_from_desc(w, component, EcsStructType, desc);
+    int err = ecs_meta_from_desc(w, component, EcsStructType, desc);
 
-    if(e) return luaL_argerror(L, 2, "invalid descriptor");
+    if(err) return luaL_argerror(L, 2, "invalid descriptor");
 
     ecs_set(w, component, EcsMetaType, {.kind = EcsStructType});
 
