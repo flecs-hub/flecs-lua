@@ -343,14 +343,6 @@ int entity_owns(lua_State *L)
     return 1;
 }
 
-int has_role(lua_State *L)
-{
-    ecs_entity_t e = luaL_checkinteger(L, 1);
-    ecs_entity_t role = luaL_checkinteger(L, 2);
-
-    return 1;
-}
-
 int is_alive(lua_State *L)
 {
     ecs_world_t *w = ecs_lua_world(L);
