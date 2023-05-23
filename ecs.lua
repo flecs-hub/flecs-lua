@@ -1000,7 +1000,6 @@ end
 
 ---@class ecs_world_info_t
 ---@field last_component_id integer
----@field last_id integer
 ---@field min_id integer
 ---@field max_id integer
 ---@field delta_time_raw number
