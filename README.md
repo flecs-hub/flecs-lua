@@ -5,7 +5,7 @@ it can be used to extend an application or as a standalone module.
 
 ### Dependencies
 
-* Flecs v3.2.0 with most addons enabled - backward and forward compatibility is limited due to dependencies on semi-private API's
+* Flecs v3.2.3 with most addons enabled - backward and forward compatibility is limited due to dependencies on semi-private API's
 
 * Lua 5.3 or later (requires 64-bit integers)
 

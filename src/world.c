@@ -86,7 +86,6 @@ int world_info(lua_State *L)
     EcsLuaWorldInfo world_info =
     {
         .last_component_id = wi->last_component_id,
-        .last_id = wi->last_id,
         .min_id = wi->min_id,
         .max_id = wi->max_id,
         .delta_time_raw = wi->delta_time_raw,

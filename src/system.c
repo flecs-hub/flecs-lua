@@ -117,7 +117,7 @@ static int check_events(lua_State *L, ecs_world_t *w, ecs_entity_t *events, int 
     {
         int len = luaL_len(L, arg);
 
-        if(len > ECS_OBSERVER_DESC_EVENT_COUNT_MAX) return luaL_argerror(L, arg, "too many events");
+        if(len > FLECS_EVENT_DESC_MAX) return luaL_argerror(L, arg, "too many events");
 
         int i;
         for(i=1; i <= len; i++)

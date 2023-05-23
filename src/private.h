@@ -162,7 +162,6 @@ typedef struct EcsLuaIter
 ECS_STRUCT(EcsLuaWorldInfo,
 {
     ecs_entity_t last_component_id;
-    ecs_entity_t last_id;
     ecs_entity_t min_id;
     ecs_entity_t max_id;
 

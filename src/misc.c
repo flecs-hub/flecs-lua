@@ -35,7 +35,7 @@ int check_filter_desc(lua_State *L, const ecs_world_t *world, ecs_filter_desc_t 
             {
                 len = luaL_len(L, -2);
 
-                if(len > ECS_TERM_DESC_CACHE_SIZE) return luaL_argerror(L, arg, "too many terms");
+                if(len > FLECS_TERM_DESC_MAX) return luaL_argerror(L, arg, "too many terms");
 
                 for(i=0; i < len; i++)
                 {
