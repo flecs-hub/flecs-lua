@@ -737,11 +737,12 @@ end
 
 ---Create a module, export named entities
 ---to the optional export table
+---@overload fun(name: string, callback: function)
 ---@param name string
 ---@param export table @optional
----@param cb function @import callback
+---@param callback function @import callback
 ---@return integer @entity
-function ecs.module(name, export, cb)
+function ecs.module(name, export, callback)
 end
 
 ---EXPERIMENTAL: Import a loaded module's named entities
