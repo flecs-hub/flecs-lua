@@ -16,6 +16,19 @@
     #define ECS_META_IMPL EXTERN
 #endif
 
+//Compat stuff
+
+//Define macros introduced by flecs v3.2.2 for older versions
+#if !defined(FLECS_EVENT_DESC_MAX)
+    #define FLECS_EVENT_DESC_MAX ECS_OBSERVER_DESC_EVENT_COUNT_MAX
+#endif
+
+#if !defined(FLECS_TERM_DESC_MAX)
+    #define FLECS_TERM_DESC_MAX ECS_TERM_DESC_CACHE_SIZE
+#endif
+
+//Compat stuff end
+
 extern ECS_COMPONENT_DECLARE(EcsLuaHost);
 
 #define ECS_LUA_CONTEXT    (1)
