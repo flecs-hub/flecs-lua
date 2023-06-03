@@ -80,4 +80,17 @@ int luaopen_ecs(lua_State *L);
 }
 #endif
 
+#ifdef __cplusplus
+#ifndef FLECS_NO_CPP
+
+struct FlecsLua
+{
+    FlecsLua(flecs::world& world)
+    {
+        FlecsLuaImport(world);
+    }
+};
+#endif
+#endif
+
 #endif /* FLECS_LUA_H */
